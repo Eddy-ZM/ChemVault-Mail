@@ -140,7 +140,7 @@
         </el-button>
       </div>
     </el-dialog>
-    <a v-show="settingStore.settings.projectLink" class="github" href="https://github.com/Mu-Eddy/ChemVault-Mail">
+    <a v-show="settingStore.settings.projectLink && !isDesktopApp" class="github" href="https://github.com/Mu-Eddy/ChemVault-Mail">
       <Icon icon="mingcute:github-line" color="#1890ff" width="20" height="20" />
     </a>
   </div>
@@ -174,6 +174,8 @@ const bindLoading = ref(false)
 const oauthLoading = ref(false);
 const showBindForm = ref(false);
 const show = ref('login')
+const isDesktopApp =
+  navigator.userAgent.includes("ChemVaultMail");
 
 const bindForm = reactive({
   email: '',
