@@ -27,6 +27,7 @@ const requirePerms = [
 	'/account/list',
 	'/account/delete',
 	'/account/add',
+	'/account/setAvatar',
 	'/my/delete',
 	'/analysis/echarts',
 	'/role/add',
@@ -54,6 +55,7 @@ const requirePerms = [
 	'/user/add',
 	'/user/deleteAccount',
 	'/user/allAccount',
+	'/user/setAccountAvatar',
 	'/regKey/add',
 	'/regKey/list',
 	'/regKey/delete',
@@ -67,6 +69,7 @@ const premKey = {
 	'account:add': ['/account/add'],
 	'account:query': ['/account/list'],
 	'account:delete': ['/account/delete'],
+	'account:set-avatar': ['/account/setAvatar'],
 	'my:delete': ['/my/delete'],
 	'role:add': ['/role/add'],
 	'role:set': ['/role/set','/role/setDefault'],
@@ -79,6 +82,7 @@ const premKey = {
 	'user:set-status': ['/user/setStatus', '/user/restore'],
 	'user:set-type': ['/user/setType'],
 	'user:delete': ['/user/delete','/user/deleteAccount'],
+	'user:set-account-avatar': ['/user/setAccountAvatar'],
 	'all-email:query': ['/allEmail/list','/allEmail/latest'],
 	'all-email:delete': ['/allEmail/delete','/allEmail/batchDelete'],
 	'setting:query': ['/setting/query'],
@@ -165,7 +169,7 @@ app.use('*', async (c, next) => {
 	return await next();
 });
 
-function permKeyToPaths(permKeys) {
+export function permKeyToPaths(permKeys) {
 
 	const paths = [];
 

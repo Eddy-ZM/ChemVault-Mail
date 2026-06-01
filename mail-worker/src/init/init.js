@@ -30,8 +30,40 @@ const dbInit = {
 		await this.v2_9DB(c);
 		await this.v3_0DB(c);
 		await this.v3_1DB(c);
+		await this.v3_2DB(c);
+		await this.v3_3DB(c);
 		await settingService.refresh(c);
 		return c.text('success');
+	},
+
+	async v3_3DB(c) {
+		try {
+			await c.env.db.batch([
+				c.env.db.prepare(`
+					INSERT INTO perm (name, perm_key, pid, type, sort)
+					SELECT '邮箱头像修改', 'account:set-avatar', 21, 2, 3
+					WHERE NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'account:set-avatar')
+				`),
+				c.env.db.prepare(`
+					INSERT INTO perm (name, perm_key, pid, type, sort)
+					SELECT '用户邮箱头像修改', 'user:set-account-avatar', 6, 2, 8
+					WHERE NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'user:set-account-avatar')
+				`)
+			]);
+		} catch (e) {
+			console.warn(`跳过数据：${e.message}`);
+		}
+	},
+
+	async v3_2DB(c) {
+		try {
+			await c.env.db.batch([
+				c.env.db.prepare(`ALTER TABLE account ADD COLUMN avatar_type TEXT NOT NULL DEFAULT 'initial';`),
+				c.env.db.prepare(`ALTER TABLE account ADD COLUMN avatar TEXT NOT NULL DEFAULT '';`)
+			]);
+		} catch (e) {
+			console.warn(`跳过字段：${e.message}`);
+		}
 	},
 
 	async v3_1DB(c) {

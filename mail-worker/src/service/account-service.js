@@ -12,6 +12,7 @@ import turnstileService from './turnstile-service';
 import roleService from './role-service';
 import { t } from '../i18n/i18n';
 import verifyRecordService from './verify-record-service';
+import accountAvatarService from './account-avatar-service';
 
 const accountService = {
 
@@ -215,6 +216,40 @@ const accountService = {
 			throw new BizError(t('usernameLengthLimit'));
 		}
 		await orm(c).update(account).set({name}).where(and(eq(account.userId, userId),eq(account.accountId, accountId))).run();
+	},
+
+	async setAvatar(c, params, userId) {
+		const { accountId } = params;
+		const accountRow = await this.selectById(c, accountId);
+
+		if (!accountRow || accountRow.userId !== userId) {
+			throw new BizError(t('noUserAccount'));
+		}
+
+		const avatarData = await accountAvatarService.normalize(c, params);
+
+		await orm(c).update(account).set(avatarData).where(
+			and(eq(account.userId, userId), eq(account.accountId, accountId))
+		).run();
+
+		return avatarData;
+	},
+
+	async setManagedAvatar(c, params) {
+		const { accountId } = params;
+		const accountRow = await this.selectById(c, accountId);
+
+		if (!accountRow) {
+			throw new BizError(t('noUserAccount'));
+		}
+
+		const avatarData = await accountAvatarService.normalize(c, params);
+
+		await orm(c).update(account).set(avatarData).where(
+			eq(account.accountId, accountId)
+		).run();
+
+		return avatarData;
 	},
 
 	async allAccount(c, params) {

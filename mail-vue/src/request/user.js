@@ -38,6 +38,10 @@ export function userAllAccount(userId, num, size) {
     return http.get('/user/allAccount', {params:{userId,num,size}})
 }
 
+export function userSetAccountAvatar(accountId, avatarType, avatar) {
+    return http.put('/user/setAccountAvatar', {accountId, avatarType, avatar})
+}
+
 export function userDeleteAccount(accountId) {
     return http.delete('/user/deleteAccount', {params:{accountId}})
 }

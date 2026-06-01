@@ -12,6 +12,10 @@ export function accountSetName(accountId,name) {
     return http.put('/account/setName', {name,accountId})
 }
 
+export function accountSetAvatar(accountId, avatarType, avatar) {
+    return http.put('/account/setAvatar', {accountId, avatarType, avatar})
+}
+
 export function accountDelete(accountId) {
     return http.delete('/account/delete', {params: {accountId}})
 }

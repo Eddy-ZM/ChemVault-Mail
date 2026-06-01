@@ -49,9 +49,13 @@ app.get('/user/allAccount', async (c) => {
 	return c.json(result.ok(data));
 });
 
+app.put('/user/setAccountAvatar', async (c) => {
+	const data = await accountService.setManagedAvatar(c, await c.req.json());
+	return c.json(result.ok(data));
+});
+
 app.delete('/user/deleteAccount', async (c) => {
 	await accountService.physicsDelete(c, c.req.query());
 	return c.json(result.ok());
 });
-
 

@@ -191,7 +191,13 @@
       <el-table :data="accountList" style="height: 480px" v-loading="accountLoading" element-loading-background="transparent" :empty-text="accountLoading ? '' : null">
         <el-table-column property="email" :label="t('emailAccount')" >
           <template #default="props">
-            <div class="email-row">{{ props.row.email }}</div>
+            <div class="user-account-email">
+              <div class="account-avatar-mini">
+                <img v-if="resolveAccountAvatar(props.row).type === 'image'" :src="resolveAccountAvatar(props.row).src" alt=""/>
+                <span v-else>{{ resolveAccountAvatar(props.row).text }}</span>
+              </div>
+              <div class="email-row">{{ props.row.email }}</div>
+            </div>
           </template>
         </el-table-column>
         <el-table-column property="address" :label="t('tabStatus')"  :width="locale === 'en' ? 75 : 65" >
@@ -206,6 +212,9 @@
               <el-button type="primary" size="small">{{t('action')}}</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
+                  <el-dropdown-item v-if="props.row.isDel === 0 && hasPerm('user:set-account-avatar')" @click="openManagedAvatar(props.row)">
+                    {{ $t('setAvatar') }}
+                  </el-dropdown-item>
                   <el-dropdown-item @click="deleteAccount(props.row)">{{ $t('delete') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -223,6 +232,37 @@
             :total="accountParams.total"
             @current-change="accountCurChange"
         />
+      </div>
+    </el-dialog>
+    <el-dialog v-model="managedAvatarShow" :title="$t('setAvatar')">
+      <div class="avatar-dialog">
+        <div class="avatar-preview">
+          <img v-if="managedAvatarPreview.type === 'image'" :src="managedAvatarPreview.src" alt=""/>
+          <span v-else>{{ managedAvatarPreview.text }}</span>
+        </div>
+        <el-radio-group v-model="managedAvatarForm.avatarType" class="avatar-type">
+          <el-radio-button :label="AVATAR_TYPE.INITIAL">{{ $t('avatarInitial') }}</el-radio-button>
+          <el-radio-button :label="AVATAR_TYPE.LOGO">{{ $t('avatarLogo') }}</el-radio-button>
+          <el-radio-button :label="AVATAR_TYPE.CUSTOM">{{ $t('avatarCustom') }}</el-radio-button>
+        </el-radio-group>
+        <div class="custom-avatar" v-if="managedAvatarForm.avatarType === AVATAR_TYPE.CUSTOM">
+          <el-radio-group v-model="managedAvatarForm.customMode">
+            <el-radio-button label="upload">{{ $t('localUpload') }}</el-radio-button>
+            <el-radio-button label="url">{{ $t('imageLink') }}</el-radio-button>
+          </el-radio-group>
+          <el-button v-if="managedAvatarForm.customMode === 'upload'" @click="openManagedAvatarFile">
+            {{ $t('chooseImage') }}
+          </el-button>
+          <el-input
+              v-else
+              v-model="managedAvatarForm.avatarUrl"
+              :placeholder="$t('imageLink')"
+              autocomplete="off"
+          />
+        </div>
+        <el-button class="btn" type="primary" @click="saveManagedAvatar" :loading="managedAvatarLoading">
+          {{ $t('save') }}
+        </el-button>
       </div>
     </el-dialog>
     <el-dialog class="account-dialog" v-model="detailsShow" :title="t('userDetails')"  >
@@ -365,7 +405,7 @@
 </template>
 
 <script setup>
-import {defineOptions, h, reactive, ref, watch} from 'vue'
+import {computed, defineOptions, h, reactive, ref, watch} from 'vue'
 import {
   userList,
   userDelete,
@@ -376,7 +416,8 @@ import {
   userRestSendCount,
   userRestore,
   userDeleteAccount,
-  userAllAccount
+  userAllAccount,
+  userSetAccountAvatar
 } from '@/request/user.js'
 import {roleSelectUse} from "@/request/role.js";
 import {Icon} from "@iconify/vue";
@@ -384,9 +425,12 @@ import loading from "@/components/loading/index.vue";
 import {tzDayjs} from "@/utils/day.js";
 import {useSettingStore} from "@/store/setting.js";
 import {isEmail} from "@/utils/verify-utils.js";
+import {fileToBase64} from "@/utils/file-utils.js";
 import {useRoleStore} from "@/store/role.js";
 import {useUserStore} from "@/store/user.js";
 import {useI18n} from 'vue-i18n';
+import {hasPerm} from "@/perm/perm.js";
+import {AVATAR_TYPE, resolveAccountAvatar} from "@/utils/account-avatar.js";
 
 defineOptions({
   name: 'user'
@@ -473,6 +517,32 @@ const accountParams = reactive({
   num: 0,
   total: 0,
   userId: 0,
+})
+const managedAvatarShow = ref(false)
+const managedAvatarLoading = ref(false)
+const managedAvatarAccount = ref(null)
+const managedAvatarForm = reactive({
+  avatarType: AVATAR_TYPE.INITIAL,
+  customMode: 'upload',
+  avatarUrl: '',
+  avatarFile: null,
+  avatarPreview: ''
+})
+const managedAvatarPreview = computed(() => {
+  if (managedAvatarForm.avatarType === AVATAR_TYPE.LOGO) {
+    return {type: 'image', src: '/mail.png'};
+  }
+
+  if (managedAvatarForm.avatarType === AVATAR_TYPE.CUSTOM) {
+    if (managedAvatarForm.customMode === 'url' && managedAvatarForm.avatarUrl) {
+      return {type: 'image', src: managedAvatarForm.avatarUrl};
+    }
+    if (managedAvatarForm.avatarPreview) {
+      return {type: 'image', src: managedAvatarForm.avatarPreview};
+    }
+  }
+
+  return {type: 'initial', text: resolveAccountAvatar(managedAvatarAccount.value).text};
 })
 
 roleSelectUse().then(list => {
@@ -567,6 +637,93 @@ function deleteAccount(account) {
     })
   });
 }
+
+function openManagedAvatar(account) {
+  managedAvatarAccount.value = account
+  managedAvatarForm.avatarType = account.avatarType || AVATAR_TYPE.INITIAL
+  managedAvatarForm.customMode = account.avatar?.startsWith('http') ? 'url' : 'upload'
+  managedAvatarForm.avatarUrl = managedAvatarForm.customMode === 'url' ? account.avatar : ''
+  managedAvatarForm.avatarFile = null
+  managedAvatarForm.avatarPreview = account.avatarType === AVATAR_TYPE.CUSTOM ? resolveAccountAvatar(account).src || '' : ''
+  managedAvatarShow.value = true
+}
+
+function openManagedAvatarFile() {
+  const doc = document.createElement('input')
+  doc.setAttribute('type', 'file')
+  doc.setAttribute('accept', 'image/*')
+  doc.click()
+  doc.onchange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      ElMessage({
+        message: t('invalidAvatar'),
+        type: 'error',
+        plain: true,
+      })
+      return
+    }
+    managedAvatarForm.avatarFile = file
+    managedAvatarForm.avatarPreview = URL.createObjectURL(file)
+    managedAvatarForm.customMode = 'upload'
+  }
+}
+
+async function saveManagedAvatar() {
+  const account = managedAvatarAccount.value
+  if (!account) return
+
+  let avatar = ''
+
+  if (managedAvatarForm.avatarType === AVATAR_TYPE.CUSTOM) {
+    if (managedAvatarForm.customMode === 'url') {
+      avatar = managedAvatarForm.avatarUrl.trim()
+      if (!avatar) {
+        ElMessage({
+          message: t('emptyAvatarMsg'),
+          type: 'error',
+          plain: true,
+        })
+        return
+      }
+      if (!avatar.startsWith('http://') && !avatar.startsWith('https://')) {
+        ElMessage({
+          message: t('imageLinkErrorMsg'),
+          type: 'error',
+          plain: true,
+        })
+        return
+      }
+    } else if (managedAvatarForm.avatarFile) {
+      avatar = await fileToBase64(managedAvatarForm.avatarFile, true)
+    } else if (account.avatarType === AVATAR_TYPE.CUSTOM && account.avatar) {
+      avatar = account.avatar
+    } else {
+      ElMessage({
+        message: t('emptyAvatarMsg'),
+        type: 'error',
+        plain: true,
+      })
+      return
+    }
+  }
+
+  managedAvatarLoading.value = true
+  userSetAccountAvatar(account.accountId, managedAvatarForm.avatarType, avatar).then(data => {
+    account.avatarType = data.avatarType
+    account.avatar = data.avatar
+    managedAvatarShow.value = false
+    ElMessage({
+      message: t('saveSuccessMsg'),
+      type: "success",
+      plain: true
+    })
+  }).finally(() => {
+    managedAvatarLoading.value = false
+  })
+}
+
 function accountCurChange(e) {
   accountParams.num = e
   getAccountList()
@@ -1178,10 +1335,75 @@ function adjustWidth() {
 }
 
 
+.user-account-email {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.account-avatar-mini {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #5a8dee;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
 .email-row {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.avatar-dialog {
+  display: grid;
+  gap: 14px;
+
+  .avatar-preview {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #5a8dee;
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .avatar-type {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .custom-avatar {
+    display: grid;
+    gap: 12px;
+  }
 }
 
 .status-select {

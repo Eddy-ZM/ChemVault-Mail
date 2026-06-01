@@ -11,6 +11,11 @@ export const accountConst = {
 	allReceive: {
 		CLOSE: 0,
 		OPEN: 1
+	},
+	avatarType: {
+		INITIAL: 'initial',
+		LOGO: 'logo',
+		CUSTOM: 'custom'
 	}
 }
 
