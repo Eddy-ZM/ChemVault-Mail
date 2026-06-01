@@ -287,6 +287,31 @@ const accountService = {
 		return avatarData;
 	},
 
+	async setUserAvatar(c, params) {
+		await ensureAccountAvatarColumns(c);
+
+		const { userId } = params;
+		const userRow = await userService.selectByIdIncludeDel(c, userId);
+
+		if (!userRow) {
+			throw new BizError(t('notExistUser'));
+		}
+
+		const accountRow = await this.selectByEmailIncludeDel(c, userRow.email);
+
+		if (!accountRow) {
+			throw new BizError(t('noUserAccount'));
+		}
+
+		const avatarData = await accountAvatarService.normalize(c, params);
+
+		await orm(c).update(account).set(avatarData).where(
+			eq(account.accountId, accountRow.accountId)
+		).run();
+
+		return { accountId: accountRow.accountId, ...avatarData };
+	},
+
 	async allAccount(c, params) {
 		await ensureAccountAvatarColumns(c);
 

@@ -42,6 +42,10 @@ export function userSetAccountAvatar(accountId, avatarType, avatar) {
     return http.put('/user/setAccountAvatar', {accountId, avatarType, avatar})
 }
 
+export function userSetUserAvatar(userId, avatarType, avatar) {
+    return http.put('/user/setUserAvatar', {userId, avatarType, avatar})
+}
+
 export function userDeleteAccount(accountId) {
     return http.delete('/user/deleteAccount', {params:{accountId}})
 }

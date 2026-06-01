@@ -90,6 +90,9 @@
                   <el-dropdown-menu>
                     <el-dropdown-item @click="openSetPwd(props.row)" >{{ $t('chgPwd') }}</el-dropdown-item>
                     <el-dropdown-item @click="openSetType(props.row)" >{{ $t('perm') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="props.row.isDel !== 1 && hasPerm('user:set-account-avatar')" @click="openUserAvatar(props.row)">
+                      {{ $t('setAvatar') }}
+                    </el-dropdown-item>
                     <template v-if="props.row.type !== 0">
                       <el-dropdown-item v-if="props.row.isDel !== 1" @click="setStatus(props.row)">
                         {{ setStatusName(props.row) }}
@@ -374,6 +377,14 @@
               </div>
             </template>
           </el-dropdown-item>
+          <el-dropdown-item v-if="rightClickUser.isDel !== 1 && hasPerm('user:set-account-avatar')" @click="openUserAvatar(rightClickUser)" >
+            <template #default>
+              <div class="right-dropdown-item" >
+                <Icon icon="fluent:image-edit-16-regular" width="20" height="20" />
+                <span>{{ t('setAvatar') }}</span>
+              </div>
+            </template>
+          </el-dropdown-item>
           <el-dropdown-item @click="openAccountList(rightClickUser.userId)" >
             <template #default>
               <div class="right-dropdown-item" >
@@ -417,7 +428,8 @@ import {
   userRestore,
   userDeleteAccount,
   userAllAccount,
-  userSetAccountAvatar
+  userSetAccountAvatar,
+  userSetUserAvatar
 } from '@/request/user.js'
 import {roleSelectUse} from "@/request/role.js";
 import {Icon} from "@iconify/vue";
@@ -521,6 +533,7 @@ const accountParams = reactive({
 const managedAvatarShow = ref(false)
 const managedAvatarLoading = ref(false)
 const managedAvatarAccount = ref(null)
+const managedAvatarTarget = ref('account')
 const managedAvatarForm = reactive({
   avatarType: AVATAR_TYPE.INITIAL,
   customMode: 'upload',
@@ -639,12 +652,32 @@ function deleteAccount(account) {
 }
 
 function openManagedAvatar(account) {
+  managedAvatarTarget.value = 'account'
   managedAvatarAccount.value = account
   managedAvatarForm.avatarType = account.avatarType || AVATAR_TYPE.INITIAL
   managedAvatarForm.customMode = account.avatar?.startsWith('http') ? 'url' : 'upload'
   managedAvatarForm.avatarUrl = managedAvatarForm.customMode === 'url' ? account.avatar : ''
   managedAvatarForm.avatarFile = null
   managedAvatarForm.avatarPreview = account.avatarType === AVATAR_TYPE.CUSTOM ? resolveAccountAvatar(account).src || '' : ''
+  managedAvatarShow.value = true
+}
+
+function openUserAvatar(user) {
+  managedAvatarTarget.value = 'user'
+  managedAvatarAccount.value = {
+    userId: user.userId,
+    email: user.email,
+    name: user.email,
+    accountId: user.accountId,
+    avatarType: user.accountAvatarType || AVATAR_TYPE.INITIAL,
+    avatar: user.accountAvatar || '',
+    sourceUser: user
+  }
+  managedAvatarForm.avatarType = managedAvatarAccount.value.avatarType
+  managedAvatarForm.customMode = managedAvatarAccount.value.avatar?.startsWith('http') ? 'url' : 'upload'
+  managedAvatarForm.avatarUrl = managedAvatarForm.customMode === 'url' ? managedAvatarAccount.value.avatar : ''
+  managedAvatarForm.avatarFile = null
+  managedAvatarForm.avatarPreview = managedAvatarAccount.value.avatarType === AVATAR_TYPE.CUSTOM ? resolveAccountAvatar(managedAvatarAccount.value).src || '' : ''
   managedAvatarShow.value = true
 }
 
@@ -710,9 +743,19 @@ async function saveManagedAvatar() {
   }
 
   managedAvatarLoading.value = true
-  userSetAccountAvatar(account.accountId, managedAvatarForm.avatarType, avatar).then(data => {
+  const request = managedAvatarTarget.value === 'user'
+      ? userSetUserAvatar(account.userId, managedAvatarForm.avatarType, avatar)
+      : userSetAccountAvatar(account.accountId, managedAvatarForm.avatarType, avatar)
+
+  request.then(data => {
+    account.accountId = data.accountId || account.accountId
     account.avatarType = data.avatarType
     account.avatar = data.avatar
+    if (account.sourceUser) {
+      account.sourceUser.accountId = account.accountId
+      account.sourceUser.accountAvatarType = data.avatarType
+      account.sourceUser.accountAvatar = data.avatar
+    }
     managedAvatarShow.value = false
     ElMessage({
       message: t('saveSuccessMsg'),

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { normalize, update, set, where, updateRun, prepare, bind, first, alterRun } = vi.hoisted(() => ({
+const { normalize, update, set, where, updateRun, prepare, bind, first, alterRun, selectByIdIncludeDel } = vi.hoisted(() => ({
 	normalize: vi.fn(),
 	update: vi.fn(),
 	set: vi.fn(),
@@ -9,7 +9,8 @@ const { normalize, update, set, where, updateRun, prepare, bind, first, alterRun
 	prepare: vi.fn(),
 	bind: vi.fn(),
 	first: vi.fn(),
-	alterRun: vi.fn()
+	alterRun: vi.fn(),
+	selectByIdIncludeDel: vi.fn()
 }));
 
 vi.mock('../src/entity/orm.js', () => ({
@@ -21,6 +22,12 @@ vi.mock('../src/entity/orm.js', () => ({
 vi.mock('../src/service/account-avatar-service.js', () => ({
 	default: {
 		normalize
+	}
+}));
+
+vi.mock('../src/service/user-service.js', () => ({
+	default: {
+		selectByIdIncludeDel
 	}
 }));
 
@@ -40,6 +47,7 @@ describe('account service avatar updates', () => {
 			}
 			return { bind };
 		});
+		selectByIdIncludeDel.mockResolvedValue({ userId: 8, email: 'user@example.com' });
 		where.mockReturnValue({ run: updateRun });
 		set.mockReturnValue({ where });
 		update.mockReturnValue({ set });
@@ -120,6 +128,38 @@ describe('account service avatar updates', () => {
 
 		await expect(service.setManagedAvatar(c, {
 			accountId: 2,
+			avatarType: 'logo'
+		})).rejects.toMatchObject({ name: 'BizError' });
+
+		expect(normalize).not.toHaveBeenCalled();
+		expect(updateRun).not.toHaveBeenCalled();
+	});
+
+	it('normalizes and stores avatar settings for a managed user main account', async () => {
+		const params = { userId: 8, avatarType: 'logo', avatar: 'old' };
+		const service = {
+			...accountService,
+			selectByEmailIncludeDel: vi.fn().mockResolvedValue({ accountId: 3, userId: 8, email: 'user@example.com' })
+		};
+
+		const result = await service.setUserAvatar(c, params);
+
+		expect(selectByIdIncludeDel).toHaveBeenCalledWith(c, 8);
+		expect(service.selectByEmailIncludeDel).toHaveBeenCalledWith(c, 'user@example.com');
+		expect(normalize).toHaveBeenCalledWith(c, params);
+		expect(set).toHaveBeenCalledWith({ avatarType: 'logo', avatar: '' });
+		expect(updateRun).toHaveBeenCalledOnce();
+		expect(result).toEqual({ accountId: 3, avatarType: 'logo', avatar: '' });
+	});
+
+	it('rejects managed user avatar updates when the main account does not exist', async () => {
+		const service = {
+			...accountService,
+			selectByEmailIncludeDel: vi.fn().mockResolvedValue(null)
+		};
+
+		await expect(service.setUserAvatar(c, {
+			userId: 8,
 			avatarType: 'logo'
 		})).rejects.toMatchObject({ name: 'BizError' });
 

@@ -7,6 +7,9 @@ describe('avatar permission route mapping', () => {
 	});
 
 	it('maps managed avatar updates to user:set-account-avatar', () => {
-		expect(permKeyToPaths(['user:set-account-avatar'])).toContain('/user/setAccountAvatar');
+		expect(permKeyToPaths(['user:set-account-avatar'])).toEqual(expect.arrayContaining([
+			'/user/setAccountAvatar',
+			'/user/setUserAvatar'
+		]));
 	});
 });
