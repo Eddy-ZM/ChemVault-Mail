@@ -73,6 +73,58 @@ struct ChemVaultUser: Codable, Identifiable, Hashable {
     }
 }
 
+struct PagedListResponse<Value: Decodable>: Decodable {
+    var list: [Value]
+    var total: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case list
+        case total
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.list = try container.decodeIfPresent([Value].self, forKey: .list) ?? []
+        self.total = try container.decodeFlexibleIntIfPresent(forKey: .total)
+    }
+}
+
+struct AdminUserRow: Codable, Identifiable, Hashable {
+    var userId: Int
+    var email: String
+    var type: Int?
+    var status: Int?
+    var createTime: String?
+    var activeTime: String?
+    var username: String?
+    var name: String?
+    var avatar: String?
+    var receiveEmailCount: Int?
+    var sendEmailCount: Int?
+    var accountCount: Int?
+    var delReceiveEmailCount: Int?
+    var delSendEmailCount: Int?
+    var delAccountCount: Int?
+    var sendAction: JSONValue?
+
+    var id: Int { userId }
+
+    var displayName: String {
+        if let name, !name.isEmpty { return name }
+        if let username, !username.isEmpty { return username }
+        return email
+    }
+
+    var statusLabel: String {
+        switch status {
+        case 0: return "Active"
+        case 1: return "Disabled"
+        case 2: return "Pending"
+        default: return "Unknown"
+        }
+    }
+}
+
 struct ChemVaultRole: Codable, Identifiable, Hashable {
     var roleId: Int
     var name: String
@@ -120,6 +172,7 @@ struct ChemVaultEmail: Codable, Identifiable, Hashable {
     var isDel: Int?
     var starId: Int?
     var isStar: Int?
+    var userEmail: String?
     var attList: [ChemVaultAttachment]?
 
     var id: Int { emailId }
@@ -365,4 +418,3 @@ extension KeyedDecodingContainer {
         return nil
     }
 }
-

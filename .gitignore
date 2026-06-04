@@ -20,6 +20,8 @@ dist
 *.njsproj
 *.sln
 *.sw?
+*.xcuserstate
+**/xcuserdata/
 
 mail-vue/node_modules
 mail-vue/dist

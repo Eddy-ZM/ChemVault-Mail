@@ -65,6 +65,11 @@ end
 
 ios_target.build_configurations.each do |config|
   settings = config.build_settings
+  settings['INFOPLIST_KEY_UIApplicationSceneManifest_Generation'] = 'YES'
+  settings['INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents'] = 'YES'
+  settings['INFOPLIST_KEY_UILaunchScreen_Generation'] = 'YES'
+  settings['INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad'] = 'UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight'
+  settings['INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone'] = 'UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight'
   settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'science.chemvault.mail.apple'
   settings['TARGETED_DEVICE_FAMILY'] = '1,2'
   settings['SUPPORTED_PLATFORMS'] = 'iphoneos iphonesimulator'

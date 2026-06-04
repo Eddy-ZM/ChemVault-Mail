@@ -47,10 +47,16 @@ final class MailStore: ObservableObject {
 
     func deleteSelected(apiClient: APIClient) async {
         guard let selectedEmail else { return }
+        await delete(email: selectedEmail, apiClient: apiClient)
+    }
+
+    func delete(email: ChemVaultEmail, apiClient: APIClient) async {
         do {
-            try await apiClient.deleteEmails([selectedEmail.emailId])
-            emails.removeAll { $0.emailId == selectedEmail.emailId }
-            self.selectedEmail = emails.first
+            try await apiClient.deleteEmails([email.emailId])
+            emails.removeAll { $0.emailId == email.emailId }
+            if selectedEmail?.emailId == email.emailId {
+                selectedEmail = emails.first
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -58,11 +64,13 @@ final class MailStore: ObservableObject {
 
     func markSelectedRead(apiClient: APIClient) async {
         guard let selectedEmail else { return }
+        await markRead(email: selectedEmail, apiClient: apiClient)
+    }
+
+    func markRead(email: ChemVaultEmail, apiClient: APIClient) async {
         do {
-            try await apiClient.markRead(emailIds: [selectedEmail.emailId])
-            updateSelected { email in
-                email.unread = 1
-            }
+            try await apiClient.markRead(emailIds: [email.emailId])
+            update(emailId: email.emailId) { $0.unread = 1 }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -70,16 +78,20 @@ final class MailStore: ObservableObject {
 
     func toggleStar(apiClient: APIClient) async {
         guard let selectedEmail else { return }
+        await toggleStar(email: selectedEmail, apiClient: apiClient)
+    }
+
+    func toggleStar(email: ChemVaultEmail, apiClient: APIClient) async {
         do {
-            if selectedEmail.starred {
-                try await apiClient.cancelStar(emailId: selectedEmail.emailId)
-                updateSelected { email in
+            if email.starred {
+                try await apiClient.cancelStar(emailId: email.emailId)
+                update(emailId: email.emailId) { email in
                     email.isStar = 0
                     email.starId = nil
                 }
             } else {
-                try await apiClient.addStar(emailId: selectedEmail.emailId)
-                updateSelected { email in
+                try await apiClient.addStar(emailId: email.emailId)
+                update(emailId: email.emailId) { email in
                     email.isStar = 1
                 }
             }
@@ -88,12 +100,13 @@ final class MailStore: ObservableObject {
         }
     }
 
-    private func updateSelected(_ mutate: (inout ChemVaultEmail) -> Void) {
-        guard let selectedEmail, let index = emails.firstIndex(where: { $0.emailId == selectedEmail.emailId }) else {
+    private func update(emailId: Int, _ mutate: (inout ChemVaultEmail) -> Void) {
+        guard let index = emails.firstIndex(where: { $0.emailId == emailId }) else {
             return
         }
         mutate(&emails[index])
-        self.selectedEmail = emails[index]
+        if selectedEmail?.emailId == emailId {
+            selectedEmail = emails[index]
+        }
     }
 }
-

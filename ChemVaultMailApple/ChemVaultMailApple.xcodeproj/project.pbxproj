@@ -101,7 +101,7 @@
 		83CDB733472AD532CA4C32C6 /* HTMLMessageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTMLMessageView.swift; path = Features/Mail/HTMLMessageView.swift; sourceTree = "<group>"; };
 		88D0D10B114AE796C00025B6 /* ChemVaultModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChemVaultModels.swift; path = Models/ChemVaultModels.swift; sourceTree = "<group>"; };
 		8E584F6CD8CA01070BDAE722 /* APIError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIError.swift; path = Core/APIError.swift; sourceTree = "<group>"; };
-		929586AFA58D8A179E87B776 /* ChemVaultMailAppleMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChemVaultMailAppleMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		929586AFA58D8A179E87B776 /* ChemVaultMailAppleMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = ChemVaultMailAppleMac.app; path = "ChemVault Mail.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		933A451A38E542970D9D59F4 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		97BC02398106D22C67E88A63 /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = App/ContentView.swift; sourceTree = "<group>"; };
 		A3B650D81D005727A92F4068 /* AppRoute.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppRoute.swift; path = App/AppRoute.swift; sourceTree = "<group>"; };
@@ -113,7 +113,7 @@
 		F07FF7DB6EDCFC8A8391E69D /* ChemVaultMailAppleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChemVaultMailAppleApp.swift; path = App/ChemVaultMailAppleApp.swift; sourceTree = "<group>"; };
 		F568441B6D9137E63DFE7E92 /* AdminUsersView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AdminUsersView.swift; path = Features/Admin/AdminUsersView.swift; sourceTree = "<group>"; };
 		F788A323D89CA5278351E744 /* APIEnvelopeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = APIEnvelopeTests.swift; sourceTree = "<group>"; };
-		F93C0CA91FAB82FBA85643DB /* ChemVaultMailApple.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChemVaultMailApple.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F93C0CA91FAB82FBA85643DB /* ChemVault Mail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChemVault Mail.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD3938FF93C15A08B3D35267 /* AdminRolesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AdminRolesView.swift; path = Features/Admin/AdminRolesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -166,7 +166,7 @@
 		5F854498D150702F451DDF67 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F93C0CA91FAB82FBA85643DB /* ChemVaultMailApple.app */,
+				F93C0CA91FAB82FBA85643DB /* ChemVault Mail.app */,
 				929586AFA58D8A179E87B776 /* ChemVaultMailAppleMac.app */,
 				3A0F754F4EEA1E172A6F94C3 /* ChemVaultMailAppleTests.xctest */,
 			);
@@ -215,7 +215,6 @@
 				88D0D10B114AE796C00025B6 /* ChemVaultModels.swift */,
 				E10DDDACBB03949975FC99FC /* Info.plist */,
 			);
-			name = ChemVaultMailApple;
 			path = ChemVaultMailApple;
 			sourceTree = "<group>";
 		};
@@ -224,7 +223,6 @@
 			children = (
 				F788A323D89CA5278351E744 /* APIEnvelopeTests.swift */,
 			);
-			name = ChemVaultMailAppleTests;
 			path = ChemVaultMailAppleTests;
 			sourceTree = "<group>";
 		};
@@ -253,7 +251,7 @@
 			);
 			name = ChemVaultMailApple;
 			productName = ChemVaultMailApple;
-			productReference = F93C0CA91FAB82FBA85643DB /* ChemVaultMailApple.app */;
+			productReference = F93C0CA91FAB82FBA85643DB /* ChemVault Mail.app */;
 			productType = "com.apple.product-type.application";
 		};
 		92DA1C7336063330DA338400 /* ChemVaultMailAppleTests */ = {
@@ -299,6 +297,18 @@
 			attributes = {
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					75A630C6820275534C9D9E97 = {
+						DevelopmentTeam = 96L6379Q92;
+						ProvisioningStyle = Automatic;
+					};
+					92DA1C7336063330DA338400 = {
+						ProvisioningStyle = Automatic;
+					};
+					B42C8832165C679999667E2D = {
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = 4E1C4CAA070F265D017E4768 /* Build configuration list for PBXProject "ChemVaultMailApple" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -309,8 +319,6 @@
 				Base,
 			);
 			mainGroup = 59A015B1517D4F10B26B451E;
-			minimizedProjectReferenceProxies = 0;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 5F854498D150702F451DDF67 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -493,10 +501,16 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 96L6379Q92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "ChemVault Mail";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 0.1;
@@ -559,8 +573,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
@@ -637,10 +650,16 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 96L6379Q92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "ChemVault Mail";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 0.1;

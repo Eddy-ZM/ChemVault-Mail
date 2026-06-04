@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B42C8832165C679999667E2D"
-               BuildableName = "ChemVaultMailAppleMac.app"
+               BuildableName = "ChemVault Mail.app"
                BlueprintName = "ChemVaultMailAppleMac"
                ReferencedContainer = "container:ChemVaultMailApple.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B42C8832165C679999667E2D"
-            BuildableName = "ChemVaultMailAppleMac.app"
+            BuildableName = "ChemVault Mail.app"
             BlueprintName = "ChemVaultMailAppleMac"
             ReferencedContainer = "container:ChemVaultMailApple.xcodeproj">
          </BuildableReference>
@@ -54,7 +54,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B42C8832165C679999667E2D"
-            BuildableName = "ChemVaultMailAppleMac.app"
+            BuildableName = "ChemVault Mail.app"
             BlueprintName = "ChemVaultMailAppleMac"
             ReferencedContainer = "container:ChemVaultMailApple.xcodeproj">
          </BuildableReference>
@@ -71,7 +71,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B42C8832165C679999667E2D"
-            BuildableName = "ChemVaultMailAppleMac.app"
+            BuildableName = "ChemVault Mail.app"
             BlueprintName = "ChemVaultMailAppleMac"
             ReferencedContainer = "container:ChemVaultMailApple.xcodeproj">
          </BuildableReference>
