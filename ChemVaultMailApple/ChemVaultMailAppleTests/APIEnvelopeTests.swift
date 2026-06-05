@@ -64,9 +64,14 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertEqual(ChemVaultBrandAssets.logoImageName, "ChemVaultLogo")
         XCTAssertEqual(ChemVaultBrandAssets.loginCardMaxWidth, 430)
         XCTAssertEqual(ChemVaultBrandAssets.loginWatermarkOpacity, 0)
-        XCTAssertEqual(ChemVaultBrandAssets.compactBackgroundBreakpoint, 700)
-        XCTAssertEqual(ChemVaultBrandAssets.compactBackgroundBrandWidthMultiplier, 1.18)
-        XCTAssertEqual(ChemVaultBrandAssets.compactBackgroundBrandMaxHeight, 260)
+        XCTAssertEqual(ChemVaultBrandAssets.backgroundLockupText, "chemvault.science")
+        XCTAssertEqual(ChemVaultBrandAssets.backgroundLockupLogoSize, 48)
+        XCTAssertEqual(ChemVaultBrandAssets.backgroundLockupTopSpacing, 118)
+    }
+
+    func testLoginConfigurationSupportsDomainSelection() {
+        XCTAssertEqual(ChemVaultLoginConfiguration.defaultDomainSuffix, "@chemvault.science")
+        XCTAssertEqual(ChemVaultLoginConfiguration.domainSuffixes, ["@chemvault.science", "@mail.chemvault.science"])
     }
 
     func testBuildsAccountActionRequests() async throws {

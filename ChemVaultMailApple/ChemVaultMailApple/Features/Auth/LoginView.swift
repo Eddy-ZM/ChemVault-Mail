@@ -10,6 +10,8 @@ struct LoginView: View {
     @State private var showingEndpointSettings = false
     @State private var hasAppeared = false
     @State private var submitPulse = false
+    @State private var selectedDomainSuffix = ChemVaultLoginConfiguration.defaultDomainSuffix
+    @State private var isPasswordVisible = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusedField: Field?
 
@@ -133,34 +135,89 @@ struct LoginView: View {
                         focusedField = .password
                     }
 
+                if !email.isEmpty {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            email = ""
+                        }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(LoginStyle.mutedText.opacity(0.72))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Clear email")
+                    .transition(.opacity.combined(with: .scale))
+                }
+
                 if shouldShowDomainSuffix {
                     Rectangle()
                         .fill(LoginStyle.fieldBorder)
                         .frame(width: 1, height: 22)
 
-                    Text(defaultDomainSuffix)
-                        .font(.subheadline)
-                        .foregroundStyle(LoginStyle.secondaryText)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.78)
+                    Menu {
+                        ForEach(ChemVaultLoginConfiguration.domainSuffixes, id: \.self) { suffix in
+                            Button {
+                                selectedDomainSuffix = suffix
+                            } label: {
+                                if selectedDomainSuffix == suffix {
+                                    Label(suffix, systemImage: "checkmark")
+                                } else {
+                                    Text(suffix)
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 7) {
+                            Text(selectedDomainSuffix)
+                                .font(.subheadline)
+                                .foregroundStyle(LoginStyle.secondaryText)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.74)
 
-                    Image(systemName: "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(LoginStyle.mutedText)
+                            Image(systemName: "chevron.down")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(LoginStyle.mutedText)
+                        }
+                        .frame(maxWidth: 146, alignment: .trailing)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
+            .animation(.easeInOut(duration: 0.18), value: email.isEmpty)
         }
     }
 
     private var passwordField: some View {
         ChemVaultLoginField(label: "Password", systemImage: "lock.fill", isFocused: focusedField == .password) {
-            SecureField("Password", text: $password)
+            HStack(spacing: 10) {
+                Group {
+                    if isPasswordVisible {
+                        TextField("Password", text: $password)
+                    } else {
+                        SecureField("Password", text: $password)
+                    }
+                }
                 .focused($focusedField, equals: .password)
                 .textFieldStyle(.plain)
                 .font(.body)
                 .onSubmit {
                     submit()
                 }
+
+                Button {
+                    withAnimation(.easeInOut(duration: 0.18)) {
+                        isPasswordVisible.toggle()
+                    }
+                } label: {
+                    Image(systemName: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(isPasswordVisible ? ChemVaultLoadingConfiguration.primaryColor : LoginStyle.mutedText)
+                        .frame(width: 22)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
+            }
         }
     }
 
@@ -254,7 +311,7 @@ struct LoginView: View {
 
     private var loginEmail: String {
         guard !trimmedEmail.contains("@") else { return trimmedEmail }
-        return trimmedEmail + defaultDomainSuffix
+        return trimmedEmail + selectedDomainSuffix
     }
 
     private var shouldShowDomainSuffix: Bool {
@@ -269,14 +326,18 @@ struct LoginView: View {
         password.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private var defaultDomainSuffix: String {
-        "@chemvault.science"
-    }
-
     private enum Field {
         case email
         case password
     }
+}
+
+enum ChemVaultLoginConfiguration {
+    static let defaultDomainSuffix = "@chemvault.science"
+    static let domainSuffixes = [
+        "@chemvault.science",
+        "@mail.chemvault.science"
+    ]
 }
 
 private struct ChemVaultLoginField<Content: View>: View {

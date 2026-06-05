@@ -236,55 +236,69 @@ enum ChemVaultBrandAssets {
     static let logoImageName = "ChemVaultLogo"
     static let loginCardMaxWidth: CGFloat = 430
     static let loginWatermarkOpacity: Double = 0
-    static let compactBackgroundBreakpoint: CGFloat = 700
-    static let compactBackgroundBrandWidthMultiplier: CGFloat = 1.18
-    static let compactBackgroundBrandMaxHeight: CGFloat = 260
+    static let backgroundLockupText = "chemvault.science"
+    static let backgroundLockupLogoSize: CGFloat = 48
+    static let backgroundLockupTopSpacing: CGFloat = 118
 }
 
 struct ChemVaultBrandBackground: View {
     var body: some View {
         GeometryReader { proxy in
-            let isCompact = proxy.size.width < ChemVaultBrandAssets.compactBackgroundBreakpoint
-
             ZStack(alignment: .top) {
-                ChemVaultBundleImage(name: ChemVaultBrandAssets.backgroundImageName)
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: proxy.size.width, height: proxy.size.height, alignment: .leading)
-                    .clipped()
-
-                if isCompact {
-                    ChemVaultBundleImage(name: ChemVaultBrandAssets.backgroundImageName)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: proxy.size.width * ChemVaultBrandAssets.compactBackgroundBrandWidthMultiplier)
-                        .frame(maxHeight: ChemVaultBrandAssets.compactBackgroundBrandMaxHeight, alignment: .top)
-                        .clipped()
-                        .mask(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .black, location: 0),
-                                    .init(color: .black, location: 0.72),
-                                    .init(color: .clear, location: 1)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .opacity(0.84)
-                        .allowsHitTesting(false)
-                }
-
+                LoginStyleBackground()
                 LinearGradient(
                     colors: [
-                        .white.opacity(0.1),
-                        .white.opacity(isCompact ? 0.24 : 0.36),
+                        .white.opacity(0.04),
+                        .white.opacity(0.24),
                         .white.opacity(0.08)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
+
+                ChemVaultBackgroundLockup()
+                    .padding(.top, backgroundLockupTopPadding(for: proxy.size))
+                    .allowsHitTesting(false)
             }
         }
         .ignoresSafeArea()
+    }
+
+    private func backgroundLockupTopPadding(for size: CGSize) -> CGFloat {
+        min(max(size.height * 0.12, ChemVaultBrandAssets.backgroundLockupTopSpacing), 156)
+    }
+}
+
+private struct LoginStyleBackground: View {
+    var body: some View {
+        LinearGradient(
+            colors: [
+                Color(red: 241 / 255, green: 247 / 255, blue: 251 / 255),
+                .white,
+                Color(red: 230 / 255, green: 241 / 255, blue: 249 / 255)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}
+
+private struct ChemVaultBackgroundLockup: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            ChemVaultBundleImage(name: ChemVaultBrandAssets.logoImageName)
+                .scaledToFit()
+                .frame(
+                    width: ChemVaultBrandAssets.backgroundLockupLogoSize,
+                    height: ChemVaultBrandAssets.backgroundLockupLogoSize
+                )
+                .shadow(color: .black.opacity(0.08), radius: 9, x: 0, y: 4)
+
+            Text(ChemVaultBrandAssets.backgroundLockupText)
+                .font(.system(size: 20, weight: .regular))
+                .foregroundStyle(Color(red: 47 / 255, green: 78 / 255, blue: 104 / 255).opacity(0.72))
+        }
+        .accessibilityHidden(true)
     }
 }
 
