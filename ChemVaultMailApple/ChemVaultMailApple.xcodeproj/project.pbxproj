@@ -47,6 +47,9 @@
 		7EE6C94D81F2FEB83FB0BCDE /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F1CBC635ED655842CD9E47 /* AccountsView.swift */; };
 		7F3794F7130BEA825AD08E18 /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E720C848BBBDE5D58DA205E9 /* AnalyticsView.swift */; };
 		80C16D3145792CF5AC651C50 /* ChemVaultModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D0D10B114AE796C00025B6 /* ChemVaultModels.swift */; };
+		88985C192FD336FF00D76A05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88985C182FD336FF00D76A05 /* Assets.xcassets */; };
+		88985C1A2FD336FF00D76A05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88985C182FD336FF00D76A05 /* Assets.xcassets */; };
+		88985C1B2FD336FF00D76A05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88985C182FD336FF00D76A05 /* Assets.xcassets */; };
 		8D9021C9D007A6EFA636401A /* AdminRegistrationKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 736FE42078D44FF4F586F0CB /* AdminRegistrationKeysView.swift */; };
 		910D179DFA269318DA22F71C /* MailStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3864BEB9A994A059B8B835E /* MailStore.swift */; };
 		91818E2A8091BB77EA0140AF /* KeychainTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA10E797F54BFE6EB866A5B /* KeychainTokenStore.swift */; };
@@ -108,6 +111,7 @@
 		73A15EB0E8F58630F5588408 /* AdminAllMailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AdminAllMailView.swift; path = Features/Admin/AdminAllMailView.swift; sourceTree = "<group>"; };
 		8349A5F5FFBB8A54C080DF77 /* AppPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppPreferences.swift; path = Core/AppPreferences.swift; sourceTree = "<group>"; };
 		83CDB733472AD532CA4C32C6 /* HTMLMessageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTMLMessageView.swift; path = Features/Mail/HTMLMessageView.swift; sourceTree = "<group>"; };
+		88985C182FD336FF00D76A05 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		88D0D10B114AE796C00025B6 /* ChemVaultModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChemVaultModels.swift; path = Models/ChemVaultModels.swift; sourceTree = "<group>"; };
 		8E584F6CD8CA01070BDAE722 /* APIError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIError.swift; path = Core/APIError.swift; sourceTree = "<group>"; };
 		929586AFA58D8A179E87B776 /* ChemVaultMailAppleMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = ChemVaultMailAppleMac.app; path = "ChemVault Mail.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -205,6 +209,7 @@
 				8349A5F5FFBB8A54C080DF77 /* AppPreferences.swift */,
 				08CF02085A70ED9481D0AF75 /* AuthSession.swift */,
 				5CA10E797F54BFE6EB866A5B /* KeychainTokenStore.swift */,
+				88985C182FD336FF00D76A05 /* Assets.xcassets */,
 				44F1CBC635ED655842CD9E47 /* AccountsView.swift */,
 				73A15EB0E8F58630F5588408 /* AdminAllMailView.swift */,
 				A6B88BC8B4011E0C91520BDC /* AdminEndpointListView.swift */,
@@ -348,6 +353,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0213A902C22E4C32818E7597 /* ChemVaultLoginBackground.png in Resources */,
+				88985C192FD336FF00D76A05 /* Assets.xcassets in Resources */,
 				0213A903C22E4C32818E7597 /* ChemVaultLogo.png in Resources */,
 				0213A905C22E4C32818E7597 /* ChemVaultLogoDark.png in Resources */,
 			);
@@ -357,6 +363,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88985C1B2FD336FF00D76A05 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0213A900C22E4C32818E7597 /* ChemVaultLoginBackground.png in Resources */,
+				88985C1A2FD336FF00D76A05 /* Assets.xcassets in Resources */,
 				0213A901C22E4C32818E7597 /* ChemVaultLogo.png in Resources */,
 				0213A904C22E4C32818E7597 /* ChemVaultLogoDark.png in Resources */,
 			);

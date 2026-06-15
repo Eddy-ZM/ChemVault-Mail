@@ -362,6 +362,7 @@ struct ChemVaultSetting: Codable, Hashable {
     var regKey: Int?
     var background: String?
     var domainList: [String]?
+    var appleApiBaseURL: String?
     var noticeTitle: String?
     var noticeContent: String?
     var minEmailPrefix: Int?

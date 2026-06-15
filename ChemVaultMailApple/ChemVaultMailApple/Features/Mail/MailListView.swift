@@ -41,7 +41,7 @@ struct MailListView: View {
             if let selectedEmail = store.selectedEmail {
                 detailView(for: selectedEmail)
                     .id(selectedEmail.emailId)
-                    .transition(.opacity.combined(with: .scale(scale: 0.99)))
+                    .transition(ChemVaultRootTransition.routeContent)
             } else {
                 ChemVaultMailPlaceholder(mode: mode)
             }
@@ -123,8 +123,8 @@ struct MailListView: View {
         .refreshable {
             await store.load(mode: mode, apiClient: appEnvironment.apiClient)
         }
-        .animation(reduceMotion ? nil : ChemVaultMotion.rootContent, value: store.emails)
-        .animation(reduceMotion ? nil : ChemVaultMotion.fieldFocus, value: store.isLoading)
+        .animation(reduceMotion ? nil : ChemVaultMotion.routeTransition, value: store.emails)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: store.isLoading)
     }
 
     private var visibleUnreadCount: Int {
@@ -153,7 +153,7 @@ struct MailListView: View {
 
     private func selectableRow(for email: ChemVaultEmail) -> some View {
         Button {
-            withAnimation(reduceMotion ? nil : ChemVaultMotion.rootContent) {
+            withAnimation(reduceMotion ? nil : ChemVaultMotion.routeTransition) {
                 store.selectedEmail = email
             }
         } label: {
@@ -194,6 +194,7 @@ struct MailListView: View {
 
 struct MailRowView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let email: ChemVaultEmail
     var isSelected = false
 
@@ -260,9 +261,16 @@ struct MailRowView: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(isSelected ? ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(0.32) : ChemVaultWorkspaceTheme.panelStroke(for: colorScheme), lineWidth: 1)
         }
-        .shadow(color: isSelected ? ChemVaultWorkspaceTheme.panelShadow(for: colorScheme) : .clear, radius: 12, x: 0, y: 7)
-        .scaleEffect(isSelected ? 1.01 : 1)
-        .animation(ChemVaultMotion.fieldFocus, value: isSelected)
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .fill(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
+                .frame(width: 3)
+                .padding(.vertical, 12)
+                .opacity(isSelected ? 1 : 0)
+        }
+        .shadow(color: isSelected ? ChemVaultWorkspaceTheme.panelShadow(for: colorScheme) : .clear, radius: isSelected ? 18 : 0, x: 0, y: isSelected ? 10 : 0)
+        .chemVaultSurfaceDepth(isRaised: isSelected)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isSelected)
     }
 
     private var rowBackground: Color {

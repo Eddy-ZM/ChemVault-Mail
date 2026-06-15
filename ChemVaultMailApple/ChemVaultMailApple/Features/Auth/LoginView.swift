@@ -59,20 +59,22 @@ struct LoginView: View {
     private func loginCard(width: CGFloat) -> some View {
         VStack(spacing: 22) {
             loginHeader
+                .chemVaultEntrance(isVisible: hasAppeared, delay: 0.02, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
 
             VStack(spacing: 14) {
                 emailField
                 passwordField
             }
+            .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
 
             if let lastError = authSession.lastError {
                 errorBanner(lastError)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(.opacity.combined(with: .scale(scale: 0.98)).combined(with: .offset(y: -8)))
             }
 
             if isAuthenticating {
                 loginProgressStrip
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(.opacity.combined(with: .scale(scale: 0.98)).combined(with: .offset(y: -8)))
             }
 
             Button {
@@ -91,11 +93,13 @@ struct LoginView: View {
             }
             .buttonStyle(ChemVaultPrimaryButtonStyle())
             .disabled(isSubmitDisabled)
-            .scaleEffect(submitPulse ? 0.985 : 1)
-            .animation(ChemVaultMotion.quickPress, value: submitPulse)
+            .scaleEffect(submitPulse ? ChemVaultInteractionConfiguration.surfacePressScale : 1)
+            .animation(reduceMotion ? nil : ChemVaultMotion.surfacePress, value: submitPulse)
             .animation(ChemVaultMotion.fieldFocus, value: authSession.state)
+            .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 2, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
 
             loginActions
+                .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 3, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 28)
@@ -107,10 +111,11 @@ struct LoginView: View {
         }
         .shadow(color: ChemVaultTheme.loginShadow(for: colorScheme), radius: 28, x: 0, y: 18)
         .opacity(hasAppeared ? 1 : 0)
-        .offset(y: hasAppeared ? (isAuthenticating ? -5 : 0) : 18)
-        .scaleEffect(hasAppeared ? (isAuthenticating ? 0.988 : 1) : 0.985)
-        .animation(reduceMotion ? nil : ChemVaultMotion.entrance, value: hasAppeared)
-        .animation(reduceMotion ? nil : ChemVaultMotion.rootContent, value: isAuthenticating)
+        .offset(y: hasAppeared ? (isAuthenticating ? -4 : 0) : 22)
+        .scaleEffect(hasAppeared ? (isAuthenticating ? 0.992 : 1) : 0.97)
+        .blur(radius: hasAppeared ? 0 : 10)
+        .animation(reduceMotion ? nil : ChemVaultMotion.surfaceEntrance, value: hasAppeared)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isAuthenticating)
         .animation(ChemVaultMotion.fieldFocus, value: authSession.lastError)
         .overlay {
             ChemVaultLoginCardSweep(isActive: isAuthenticating)
@@ -388,6 +393,7 @@ enum ChemVaultLoginConfiguration {
 
 private struct ChemVaultLoginField<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var label: String
     var systemImage: String
     var isFocused: Bool
@@ -421,9 +427,21 @@ private struct ChemVaultLoginField<Content: View>: View {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .stroke(isFocused ? ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(0.55) : ChemVaultTheme.fieldBorder(for: colorScheme), lineWidth: 1)
             }
-            .shadow(color: ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(isFocused ? 0.16 : 0), radius: 10, x: 0, y: 5)
-            .scaleEffect(isFocused ? 1.01 : 1)
-            .animation(ChemVaultMotion.fieldFocus, value: isFocused)
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(isFocused ? 0.18 : 0), lineWidth: 4)
+                    .blur(radius: 7)
+                    .padding(-4)
+            }
+            .shadow(
+                color: ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(isFocused ? 0.18 : 0),
+                radius: isFocused ? ChemVaultInteractionConfiguration.focusedShadowRadius : 0,
+                x: 0,
+                y: isFocused ? 8 : 0
+            )
+            .scaleEffect(isFocused ? ChemVaultInteractionConfiguration.fieldFocusScale : 1)
+            .offset(y: isFocused ? -1 : 0)
+            .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isFocused)
         }
     }
 }
@@ -474,12 +492,27 @@ private struct ChemVaultPrimaryButtonStyle: ButtonStyle {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                .opacity(isEnabled ? (configuration.isPressed ? 0.82 : 1) : 0.54),
+                .opacity(isEnabled ? (configuration.isPressed ? 0.9 : 1) : 0.54),
                 in: RoundedRectangle(cornerRadius: 8, style: .continuous)
             )
-            .shadow(color: ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(configuration.isPressed ? 0.12 : 0.26), radius: 14, x: 0, y: 8)
-            .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .animation(ChemVaultMotion.quickPress, value: configuration.isPressed)
+            .overlay(alignment: .topLeading) {
+                LinearGradient(
+                    colors: [.white.opacity(configuration.isPressed ? 0.1 : 0.22), .clear],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .allowsHitTesting(false)
+            }
+            .shadow(
+                color: ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(configuration.isPressed ? 0.12 : 0.3),
+                radius: configuration.isPressed ? 9 : 18,
+                x: 0,
+                y: configuration.isPressed ? 5 : 11
+            )
+            .brightness(configuration.isPressed ? ChemVaultInteractionConfiguration.pressedBrightness : 0)
+            .scaleEffect(configuration.isPressed ? ChemVaultInteractionConfiguration.surfacePressScale : 1)
+            .animation(ChemVaultMotion.surfacePress, value: configuration.isPressed)
             .animation(ChemVaultMotion.fieldFocus, value: isEnabled)
     }
 }
@@ -491,8 +524,14 @@ private struct ChemVaultLinkButtonStyle: ButtonStyle {
         configuration.label
             .font(.footnote.weight(.semibold))
             .foregroundStyle(configuration.isPressed ? ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(0.65) : ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .animation(ChemVaultMotion.quickPress, value: configuration.isPressed)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 5)
+            .background(
+                ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(configuration.isPressed ? 0.12 : 0),
+                in: Capsule()
+            )
+            .scaleEffect(configuration.isPressed ? 0.965 : 1)
+            .animation(ChemVaultMotion.surfacePress, value: configuration.isPressed)
     }
 }
 
@@ -565,14 +604,22 @@ struct RegisterView: View {
 struct APIEndpointSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var preferences: AppPreferences
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Form {
             Section("API Server") {
-                TextField("Base URL", text: $preferences.baseURLString)
-                Button("Use Production") {
-                    preferences.resetBaseURL()
+                LabeledContent {
+                    Text(preferences.baseURLString)
+                        .multilineTextAlignment(.trailing)
+                        .textSelection(.enabled)
+                } label: {
+                    Label("Endpoint", systemImage: "network")
                 }
+
+                Label("Managed by administrators", systemImage: "lock.shield.fill")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
             }
 
             Section("Language") {

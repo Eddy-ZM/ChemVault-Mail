@@ -23,6 +23,7 @@ final class APIEnvelopeTests: XCTestCase {
     func testBuildsAuthorizedLocalizedRequest() throws {
         let defaults = UserDefaults(suiteName: "APIEnvelopeTests-\(UUID().uuidString)")!
         defaults.set("https://example.com/api", forKey: "chemvault.baseURLString")
+        defaults.set(true, forKey: "chemvault.baseURLIsManaged")
         defaults.set("zh", forKey: "chemvault.language")
         let preferences = AppPreferences(defaults: defaults)
         let client = APIClient(preferences: preferences)
@@ -50,6 +51,48 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertEqual(defaults.string(forKey: "chemvault.baseURLString"), "https://mail.chemvault.science/api")
     }
 
+    func testRejectsPreviouslyLocalCustomBaseURLWithoutManagedFlag() {
+        let defaults = UserDefaults(suiteName: "APIEnvelopeTests-\(UUID().uuidString)")!
+        defaults.set("https://example.com/api", forKey: "chemvault.baseURLString")
+
+        let preferences = AppPreferences(defaults: defaults)
+
+        XCTAssertEqual(preferences.baseURLString, AppPreferences.defaultBaseURL)
+        XCTAssertEqual(defaults.string(forKey: "chemvault.baseURLString"), AppPreferences.defaultBaseURL)
+        XCTAssertFalse(defaults.bool(forKey: "chemvault.baseURLIsManaged"))
+    }
+
+    func testAppliesGlobalAPIBaseURLFromSystemSetting() {
+        let defaults = UserDefaults(suiteName: "APIEnvelopeTests-\(UUID().uuidString)")!
+        defaults.set("https://example.com/api", forKey: "chemvault.baseURLString")
+        let preferences = AppPreferences(defaults: defaults)
+
+        preferences.applyGlobalBaseURLIfPresent(" https://mail.chemvault.science/api/ ")
+
+        XCTAssertEqual(preferences.baseURLString, "https://mail.chemvault.science/api")
+        XCTAssertEqual(defaults.string(forKey: "chemvault.baseURLString"), "https://mail.chemvault.science/api")
+        XCTAssertTrue(defaults.bool(forKey: "chemvault.baseURLIsManaged"))
+    }
+
+    func testIgnoresBlankGlobalAPIBaseURL() {
+        let defaults = UserDefaults(suiteName: "APIEnvelopeTests-\(UUID().uuidString)")!
+        defaults.set("https://example.com/api", forKey: "chemvault.baseURLString")
+        defaults.set(true, forKey: "chemvault.baseURLIsManaged")
+        let preferences = AppPreferences(defaults: defaults)
+
+        preferences.applyGlobalBaseURLIfPresent("   ")
+
+        XCTAssertEqual(preferences.baseURLString, "https://example.com/api")
+    }
+
+    func testDecodesGlobalAPIBaseURLFromSystemSettings() throws {
+        let json = Data(#"{"title":"ChemVault","appleApiBaseURL":"https://mail.chemvault.science/api"}"#.utf8)
+
+        let setting = try JSONDecoder.chemVault.decode(ChemVaultSetting.self, from: json)
+
+        XCTAssertEqual(setting.appleApiBaseURL, "https://mail.chemvault.science/api")
+    }
+
     func testChemVaultLoadingConfigurationMatchesNativeSweepLoader() {
         XCTAssertEqual(ChemVaultLoadingConfiguration.primaryHex, "#1890FF")
         XCTAssertEqual(ChemVaultLoadingConfiguration.sweepDuration, 1.55)
@@ -59,9 +102,18 @@ final class APIEnvelopeTests: XCTestCase {
     }
 
     func testChemVaultTransitionConfigurationIncludesAuthSuccessMoment() {
-        XCTAssertEqual(ChemVaultTransitionConfiguration.successPresentationMilliseconds, 980)
+        XCTAssertEqual(ChemVaultTransitionConfiguration.successPresentationMilliseconds, 1120)
         XCTAssertEqual(ChemVaultTransitionConfiguration.successTitle, "Authenticated")
         XCTAssertEqual(ChemVaultTransitionConfiguration.successSubtitle, "Opening secure mailbox")
+    }
+
+    func testChemVaultInteractionConfigurationDefinesPolishedMotionSystem() {
+        XCTAssertEqual(ChemVaultInteractionConfiguration.routeTransitionDuration, 0.46)
+        XCTAssertEqual(ChemVaultInteractionConfiguration.fieldFocusScale, 1.006)
+        XCTAssertEqual(ChemVaultInteractionConfiguration.surfacePressScale, 0.972)
+        XCTAssertEqual(ChemVaultInteractionConfiguration.selectedSurfaceScale, 1.006)
+        XCTAssertEqual(ChemVaultInteractionConfiguration.staggerStep, 0.055)
+        XCTAssertEqual(ChemVaultInteractionConfiguration.authBackdropBlurRadius, 16)
     }
 
     func testChemVaultBrandAssetsMatchNativeLoginDesign() {
@@ -185,9 +237,22 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertEqual(requests[3].jsonBody, #"{"type":1,"userId":8}"#)
     }
 
+    func testBuildsGlobalAPISettingRequest() async throws {
+        AccountRequestURLProtocol.reset()
+        let client = makeStubbedClient()
+
+        try await client.setGlobalAPIBaseURL("https://mail.chemvault.science/api")
+
+        let request = try XCTUnwrap(AccountRequestURLProtocol.requests.last)
+        XCTAssertEqual(request.method, "PUT")
+        XCTAssertEqual(request.path, "/api/setting/set")
+        XCTAssertEqual(request.jsonBody, #"{"appleApiBaseURL":"https:\/\/mail.chemvault.science\/api"}"#)
+    }
+
     private func makeStubbedClient() -> APIClient {
         let defaults = UserDefaults(suiteName: "APIEnvelopeTests-\(UUID().uuidString)")!
         defaults.set("https://example.com/api", forKey: "chemvault.baseURLString")
+        defaults.set(true, forKey: "chemvault.baseURLIsManaged")
         let preferences = AppPreferences(defaults: defaults)
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [AccountRequestURLProtocol.self]

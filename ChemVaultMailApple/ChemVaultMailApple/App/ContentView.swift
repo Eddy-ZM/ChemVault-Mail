@@ -7,6 +7,7 @@ import UIKit
 
 struct ContentView: View {
     @EnvironmentObject private var authSession: AuthSession
+    @EnvironmentObject private var appEnvironment: AppEnvironment
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var launchLoadingComplete = false
     @State private var bootstrapStarted = false
@@ -28,10 +29,11 @@ struct ContentView: View {
                     }
                 }
             }
-            .scaleEffect(isShowingAuthSuccessTransition ? 0.985 : 1)
-            .blur(radius: isShowingAuthSuccessTransition ? 10 : 0)
-            .animation(reduceMotion ? nil : ChemVaultMotion.rootContent, value: authSession.state)
-            .animation(reduceMotion ? nil : ChemVaultMotion.screenTransition, value: isShowingAuthSuccessTransition)
+            .scaleEffect(isShowingAuthSuccessTransition ? ChemVaultInteractionConfiguration.authContentScale : 1)
+            .blur(radius: isShowingAuthSuccessTransition ? ChemVaultInteractionConfiguration.authBackdropBlurRadius : 0)
+            .opacity(isShowingAuthSuccessTransition ? 0.58 : 1)
+            .animation(reduceMotion ? nil : ChemVaultMotion.routeTransition, value: authSession.state)
+            .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isShowingAuthSuccessTransition)
 
             if isShowingAuthSuccessTransition {
                 ChemVaultAuthSuccessTransitionView()
@@ -65,8 +67,9 @@ struct ContentView: View {
         async let bootstrap: Void = authSession.bootstrap()
         try? await Task.sleep(nanoseconds: UInt64(ChemVaultLoadingConfiguration.minimumPresentationMilliseconds) * 1_000_000)
         await bootstrap
+        await syncPublicConnectionSettings()
 
-        withAnimation(ChemVaultMotion.screenTransition) {
+        withAnimation(ChemVaultMotion.routeTransition) {
             launchLoadingComplete = true
         }
     }
@@ -80,6 +83,7 @@ struct ContentView: View {
         }
 
         showAuthenticationSuccessTransition()
+        Task { await syncPublicConnectionSettings() }
     }
 
     private func showAuthenticationSuccessTransition() {
@@ -93,17 +97,25 @@ struct ContentView: View {
 
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(ChemVaultTransitionConfiguration.successPresentationMilliseconds) * 1_000_000)
-            withAnimation(reduceMotion ? nil : ChemVaultMotion.screenTransition) {
+            withAnimation(reduceMotion ? nil : ChemVaultMotion.routeTransition) {
                 isShowingAuthSuccessTransition = false
             }
         }
     }
+
+    @MainActor
+    private func syncPublicConnectionSettings() async {
+        guard let settings: ChemVaultSetting = try? await appEnvironment.apiClient.get("/setting/websiteConfig") else { return }
+        appEnvironment.preferences.applyGlobalBaseURLIfPresent(settings.appleApiBaseURL)
+    }
 }
 
 #Preview {
+    let environment = AppEnvironment()
     ContentView()
-        .environmentObject(AppEnvironment().authSession)
-        .environmentObject(AppEnvironment())
+        .environmentObject(environment)
+        .environmentObject(environment.preferences)
+        .environmentObject(environment.authSession)
 }
 
 enum ChemVaultLoadingConfiguration {
@@ -121,9 +133,21 @@ enum ChemVaultLoadingConfiguration {
 }
 
 enum ChemVaultTransitionConfiguration {
-    static let successPresentationMilliseconds = 980
+    static let successPresentationMilliseconds = 1120
     static let successTitle = "Authenticated"
     static let successSubtitle = "Opening secure mailbox"
+}
+
+enum ChemVaultInteractionConfiguration {
+    static let routeTransitionDuration = 0.46
+    static let fieldFocusScale: CGFloat = 1.006
+    static let surfacePressScale: CGFloat = 0.972
+    static let selectedSurfaceScale: CGFloat = 1.006
+    static let authContentScale: CGFloat = 0.968
+    static let authBackdropBlurRadius: CGFloat = 16
+    static let staggerStep = 0.055
+    static let pressedBrightness = -0.025
+    static let focusedShadowRadius: CGFloat = 16
 }
 
 enum ChemVaultMotion {
@@ -132,20 +156,61 @@ enum ChemVaultMotion {
     static let quickPress = Animation.spring(response: 0.22, dampingFraction: 0.78)
     static let fieldFocus = Animation.smooth(duration: 0.2)
     static let rootContent = Animation.spring(response: 0.54, dampingFraction: 0.9)
-    static let authSuccess = Animation.spring(response: 0.68, dampingFraction: 0.86)
+    static let routeTransition = Animation.spring(
+        response: ChemVaultInteractionConfiguration.routeTransitionDuration,
+        dampingFraction: 0.91,
+        blendDuration: 0.08
+    )
+    static let depthShift = Animation.spring(response: 0.52, dampingFraction: 0.92, blendDuration: 0.06)
+    static let surfaceEntrance = Animation.spring(response: 0.58, dampingFraction: 0.9, blendDuration: 0.08)
+    static let surfacePress = Animation.interactiveSpring(response: 0.2, dampingFraction: 0.86, blendDuration: 0.04)
+    static let authSuccess = Animation.spring(response: 0.74, dampingFraction: 0.9, blendDuration: 0.08)
 }
 
 enum ChemVaultRootTransition {
     static var login: AnyTransition {
-        .opacity.combined(with: .scale(scale: 0.985))
+        .asymmetric(
+            insertion: .opacity.combined(with: .scale(scale: 1.018)).combined(with: .offset(y: 18)),
+            removal: .opacity.combined(with: .scale(scale: 0.974)).combined(with: .offset(y: -10))
+        )
     }
 
     static var app: AnyTransition {
-        .opacity.combined(with: .scale(scale: 1.012))
+        .asymmetric(
+            insertion: .opacity.combined(with: .scale(scale: 1.012)).combined(with: .offset(y: 12)),
+            removal: .opacity.combined(with: .scale(scale: 0.982)).combined(with: .offset(y: -8))
+        )
     }
 
     static var successOverlay: AnyTransition {
-        .opacity.combined(with: .scale(scale: 0.94))
+        .opacity.combined(with: .scale(scale: 0.92)).combined(with: .offset(y: 8))
+    }
+
+    static var routeContent: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.combined(with: .scale(scale: 1.008)).combined(with: .offset(y: 10)),
+            removal: .opacity.combined(with: .scale(scale: 0.992)).combined(with: .offset(y: -8))
+        )
+    }
+}
+
+extension View {
+    func chemVaultEntrance(isVisible: Bool, delay: Double = 0, animation: Animation? = ChemVaultMotion.surfaceEntrance) -> some View {
+        opacity(isVisible ? 1 : 0)
+            .offset(y: isVisible ? 0 : 14)
+            .blur(radius: isVisible ? 0 : 6)
+            .animation(animation?.delay(delay), value: isVisible)
+    }
+
+    func chemVaultSurfaceDepth(
+        isRaised: Bool,
+        scale: CGFloat = ChemVaultInteractionConfiguration.selectedSurfaceScale,
+        yOffset: CGFloat = -1
+    ) -> some View {
+        self
+            .scaleEffect(isRaised ? scale : 1)
+            .offset(y: isRaised ? yOffset : 0)
+            .animation(ChemVaultMotion.depthShift, value: isRaised)
     }
 }
 
@@ -162,37 +227,49 @@ struct ChemVaultAuthSuccessTransitionView: View {
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea()
 
-            VStack(spacing: 18) {
+            VStack(spacing: 20) {
                 ZStack {
-                    ChemVaultSuccessPulse(size: 168, isActive: isActive)
+                    ChemVaultSuccessSignal(size: 176, isActive: isActive)
 
                     ChemVaultLogoBadge(size: 82, shadowRadius: 18)
-                        .scaleEffect(isActive ? 1 : 0.82)
+                        .scaleEffect(isActive ? 1 : 0.86)
+                        .shadow(color: ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(isActive ? 0.22 : 0), radius: 22, x: 0, y: 14)
                 }
                 .frame(width: 190, height: 190)
 
-                VStack(spacing: 6) {
+                VStack(spacing: 7) {
                     Label(ChemVaultTransitionConfiguration.successTitle, systemImage: "checkmark.seal.fill")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(ChemVaultTheme.brandText(for: colorScheme))
-                        .symbolEffect(.bounce, value: isActive)
+                        .symbolRenderingMode(.hierarchical)
+                        .contentTransition(.opacity)
 
                     Text(ChemVaultTransitionConfiguration.successSubtitle)
                         .font(.subheadline)
                         .foregroundStyle(ChemVaultTheme.secondaryText(for: colorScheme))
                 }
                 .opacity(isActive ? 1 : 0)
-                .offset(y: isActive ? 0 : 10)
+                .offset(y: isActive ? 0 : 12)
+                .blur(radius: isActive ? 0 : 5)
             }
-            .padding(28)
+            .padding(.horizontal, 30)
+            .padding(.vertical, 28)
             .background(ChemVaultTheme.loginCardBackground(for: colorScheme), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .stroke(ChemVaultTheme.loginCardStroke(for: colorScheme), lineWidth: 1)
             }
-            .shadow(color: ChemVaultTheme.loginShadow(for: colorScheme), radius: 34, x: 0, y: 22)
+            .overlay(alignment: .top) {
+                Capsule()
+                    .fill(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(colorScheme == .dark ? 0.58 : 0.45))
+                    .frame(width: isActive ? 92 : 22, height: 3)
+                    .padding(.top, 1)
+                    .opacity(isActive ? 1 : 0)
+            }
+            .shadow(color: ChemVaultTheme.loginShadow(for: colorScheme), radius: isActive ? 42 : 16, x: 0, y: 24)
             .padding(.horizontal, 32)
-            .scaleEffect(isActive ? 1 : 0.96)
+            .scaleEffect(isActive ? 1 : 0.95)
+            .blur(radius: isActive ? 0 : 8)
         }
         .onAppear {
             if reduceMotion {
@@ -208,7 +285,7 @@ struct ChemVaultAuthSuccessTransitionView: View {
     }
 }
 
-private struct ChemVaultSuccessPulse: View {
+private struct ChemVaultSuccessSignal: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     var size: CGFloat
@@ -224,27 +301,39 @@ private struct ChemVaultSuccessPulse: View {
     private func pulseFrame(date: Date) -> some View {
         let accent = ChemVaultLoadingConfiguration.primaryColor(for: colorScheme)
         let time = reduceMotion ? 0 : date.timeIntervalSinceReferenceDate
-        let orbit = (time.truncatingRemainder(dividingBy: 3.2) / 3.2) * 360
-        let breath = reduceMotion ? 1 : 1 + sin(time / 1.6 * 2 * .pi) * 0.035
+        let orbit = (time.truncatingRemainder(dividingBy: 4.2) / 4.2) * 360
+        let breath = reduceMotion ? 1 : 1 + sin(time / 2.4 * 2 * .pi) * 0.024
 
         return ZStack {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
-                    .stroke(accent.opacity(0.08 + Double(index) * 0.045), lineWidth: 1.2)
-                    .scaleEffect(isActive ? 1 + CGFloat(index) * 0.18 : 0.48)
-                    .opacity(isActive ? 1 - Double(index) * 0.2 : 0)
+                    .stroke(accent.opacity(0.055 + Double(index) * 0.038), lineWidth: 1)
+                    .scaleEffect(isActive ? 1 + CGFloat(index) * 0.14 : 0.5)
+                    .opacity(isActive ? 0.92 - Double(index) * 0.22 : 0)
             }
 
             Circle()
-                .trim(from: 0.04, to: 0.34)
-                .stroke(accent.opacity(colorScheme == .dark ? 0.84 : 0.66), style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
+                .trim(from: 0.03, to: 0.24)
+                .stroke(accent.opacity(colorScheme == .dark ? 0.8 : 0.62), style: StrokeStyle(lineWidth: 2.2, lineCap: .round))
                 .rotationEffect(.degrees(orbit))
                 .scaleEffect(breath)
 
             Circle()
-                .trim(from: 0.58, to: 0.8)
-                .stroke(accent.opacity(0.32), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-                .rotationEffect(.degrees(-orbit * 0.72))
+                .trim(from: 0.56, to: 0.74)
+                .stroke(accent.opacity(0.26), style: StrokeStyle(lineWidth: 1.4, lineCap: .round))
+                .rotationEffect(.degrees(-orbit * 0.58))
+
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [.clear, accent.opacity(0.34), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: size * 0.72, height: 1)
+                .rotationEffect(.degrees(orbit * 0.32))
+                .opacity(isActive ? 1 : 0)
         }
     }
 }

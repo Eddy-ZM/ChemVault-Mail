@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject private var preferences: AppPreferences
     @EnvironmentObject private var appEnvironment: AppEnvironment
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var newPassword = ""
     @State private var errorMessage: String?
     @State private var statusMessage: String?
@@ -30,15 +31,28 @@ struct SettingsView: View {
             }
 
             Section("Connection") {
-                TextField("API Base URL", text: $preferences.baseURLString)
+                LabeledContent {
+                    Text(preferences.baseURLString)
+                        .multilineTextAlignment(.trailing)
+                        .textSelection(.enabled)
+                } label: {
+                    Label("API Server", systemImage: "network")
+                }
                 Picker("Language", selection: $preferences.language) {
                     Text("English").tag("en")
                     Text("Chinese").tag("zh")
                 }
                 Button {
-                    preferences.resetBaseURL()
+                    syncConnectionSettings()
                 } label: {
-                    Label("Use Production API", systemImage: "network")
+                    Label("Sync Managed Settings", systemImage: "arrow.triangle.2.circlepath")
+                }
+                if canManageSystemSettings {
+                    NavigationLink {
+                        SystemSettingsView()
+                    } label: {
+                        Label("Manage Global API", systemImage: "server.rack")
+                    }
                 }
             }
 
@@ -57,6 +71,7 @@ struct SettingsView: View {
                     Label(statusMessage, systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                 }
+                .transition(.opacity.combined(with: .scale(scale: 0.98)).combined(with: .offset(y: -8)))
             }
 
             if let errorMessage {
@@ -64,6 +79,7 @@ struct SettingsView: View {
                     Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(ChemVaultTheme.errorText(for: colorScheme))
                 }
+                .transition(.opacity.combined(with: .scale(scale: 0.98)).combined(with: .offset(y: -8)))
             }
 
             Section {
@@ -78,6 +94,9 @@ struct SettingsView: View {
         .background(ChemVaultWorkspaceBackground())
         .tint(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
         .navigationTitle("Settings")
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: statusMessage)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: errorMessage)
+        .animation(reduceMotion ? nil : ChemVaultMotion.fieldFocus, value: newPassword)
     }
 
     private func resetPassword() {
@@ -86,6 +105,23 @@ struct SettingsView: View {
                 let _: EmptyResponse = try await appEnvironment.apiClient.put("/my/resetPassword", body: PasswordResetRequest(password: newPassword))
                 newPassword = ""
                 statusMessage = "Password updated."
+                errorMessage = nil
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private var canManageSystemSettings: Bool {
+        authSession.currentUser?.hasPermission("setting:query") ?? false
+    }
+
+    private func syncConnectionSettings() {
+        Task {
+            do {
+                let settings: ChemVaultSetting = try await appEnvironment.apiClient.get("/setting/websiteConfig")
+                preferences.applyGlobalBaseURLIfPresent(settings.appleApiBaseURL)
+                statusMessage = "Connection settings synced."
                 errorMessage = nil
             } catch {
                 errorMessage = error.localizedDescription

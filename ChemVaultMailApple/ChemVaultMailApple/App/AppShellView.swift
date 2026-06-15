@@ -26,7 +26,7 @@ struct AppShellView: View {
             #endif
         }
         .tint(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
-        .animation(reduceMotion ? nil : ChemVaultMotion.rootContent, value: selection)
+        .animation(reduceMotion ? nil : ChemVaultMotion.routeTransition, value: selection)
     }
 
     private var splitLayout: some View {
@@ -35,7 +35,7 @@ struct AppShellView: View {
         } detail: {
             routeContent(selection)
                 .id(selection)
-                .transition(.opacity.combined(with: .scale(scale: 0.992)))
+                .transition(ChemVaultRootTransition.routeContent)
         }
         .scrollContentBackground(.hidden)
     }
@@ -116,7 +116,6 @@ struct PermissionDeniedView: View {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 52, weight: .semibold))
                     .foregroundStyle(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
-                    .symbolEffect(.pulse)
 
                 VStack(spacing: 6) {
                     Text("No Access")
@@ -136,6 +135,7 @@ struct PermissionDeniedView: View {
             }
             .shadow(color: ChemVaultWorkspaceTheme.panelShadow(for: colorScheme), radius: 22, x: 0, y: 14)
             .padding()
+            .chemVaultEntrance(isVisible: true)
         }
         .navigationTitle(route.title)
     }

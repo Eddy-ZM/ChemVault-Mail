@@ -18,7 +18,10 @@ final class AppPreferences: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let storedBaseURL = defaults.string(forKey: Keys.baseURLString)
-        let resolvedBaseURL = Self.resolveStoredBaseURL(storedBaseURL)
+        let resolvedBaseURL = Self.resolveStoredBaseURL(
+            storedBaseURL,
+            isManaged: defaults.bool(forKey: Keys.baseURLIsManaged)
+        )
         self.baseURLString = resolvedBaseURL
         if storedBaseURL != resolvedBaseURL {
             defaults.set(resolvedBaseURL, forKey: Keys.baseURLString)
@@ -30,21 +33,45 @@ final class AppPreferences: ObservableObject {
         URL(string: baseURLString.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
-    func resetBaseURL() {
-        baseURLString = Self.defaultBaseURL
+    func applyGlobalBaseURLIfPresent(_ value: String?) {
+        guard let normalized = Self.normalizedBaseURL(value) else { return }
+        defaults.set(true, forKey: Keys.baseURLIsManaged)
+        if normalized != baseURLString {
+            baseURLString = normalized
+        }
     }
 
-    private static func resolveStoredBaseURL(_ value: String?) -> String {
-        guard let value else { return defaultBaseURL }
+    func setAdminManagedBaseURL(_ value: String) {
+        guard let normalized = Self.normalizedBaseURL(value) else { return }
+        defaults.set(true, forKey: Keys.baseURLIsManaged)
+        baseURLString = normalized
+    }
+
+    static func normalizedBaseURL(_ value: String?) -> String? {
+        guard let value else { return nil }
         let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines).trimmingTrailingSlashes()
+        guard !normalized.isEmpty else { return nil }
         if normalized == "https://mail.chemvault.science" {
             return defaultBaseURL
         }
-        return value
+        guard let components = URLComponents(string: normalized),
+              let scheme = components.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              components.host?.isEmpty == false else {
+            return nil
+        }
+        return normalized
+    }
+
+    private static func resolveStoredBaseURL(_ value: String?, isManaged: Bool) -> String {
+        guard let normalized = normalizedBaseURL(value) else { return defaultBaseURL }
+        guard isManaged || normalized == defaultBaseURL else { return defaultBaseURL }
+        return normalized
     }
 
     private enum Keys {
         static let baseURLString = "chemvault.baseURLString"
+        static let baseURLIsManaged = "chemvault.baseURLIsManaged"
         static let language = "chemvault.language"
     }
 }

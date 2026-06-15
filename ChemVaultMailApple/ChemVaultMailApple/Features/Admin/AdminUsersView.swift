@@ -46,9 +46,9 @@ struct AdminUsersView: View {
                     .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: users)
-        .animation(.easeInOut(duration: 0.2), value: statusMessage)
-        .animation(.easeInOut(duration: 0.2), value: errorMessage)
+        .animation(ChemVaultMotion.routeTransition, value: users)
+        .animation(ChemVaultMotion.depthShift, value: statusMessage)
+        .animation(ChemVaultMotion.depthShift, value: errorMessage)
         .navigationTitle("Users")
         .toolbar {
             Button {
@@ -146,12 +146,12 @@ struct AdminUsersView: View {
     private var messageContent: some View {
         if let statusMessage {
             AdminNoticeBanner(message: statusMessage, tone: .success)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity.combined(with: .scale(scale: 0.98)).combined(with: .offset(y: -8)))
         }
 
         if let errorMessage {
             AdminNoticeBanner(message: errorMessage, tone: .danger)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity.combined(with: .scale(scale: 0.98)).combined(with: .offset(y: -8)))
         }
     }
 
@@ -195,7 +195,7 @@ struct AdminUsersView: View {
             deleteUser: { confirm(.delete, user: user) },
             restoreUser: { confirm(.restore, user: user) }
         )
-        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+        .transition(ChemVaultRootTransition.routeContent)
     }
 
     private func load() async {
@@ -209,7 +209,7 @@ struct AdminUsersView: View {
             let fetchedRoles: [ChemVaultRole] = try await appEnvironment.apiClient.get("/role/list")
             let setting: ChemVaultSetting = try await appEnvironment.apiClient.get("/setting/websiteConfig")
 
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(ChemVaultMotion.routeTransition) {
                 users = response.list
                 total = response.total ?? response.list.count
                 roles = fetchedRoles
@@ -1073,10 +1073,13 @@ private struct AdminPillButtonStyle: ButtonStyle {
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
             .background(
-                tint == AdminStyle.primary ? tint.opacity(configuration.isPressed ? 0.82 : 1) : tint.opacity(configuration.isPressed ? 0.18 : 0.1),
+                tint == AdminStyle.primary ? tint.opacity(configuration.isPressed ? 0.9 : 1) : tint.opacity(configuration.isPressed ? 0.18 : 0.1),
                 in: Capsule()
             )
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .shadow(color: tint.opacity(configuration.isPressed ? 0.06 : 0.16), radius: configuration.isPressed ? 3 : 8, x: 0, y: configuration.isPressed ? 1 : 4)
+            .brightness(configuration.isPressed ? ChemVaultInteractionConfiguration.pressedBrightness : 0)
+            .scaleEffect(configuration.isPressed ? ChemVaultInteractionConfiguration.surfacePressScale : 1)
+            .animation(ChemVaultMotion.surfacePress, value: configuration.isPressed)
     }
 }
 

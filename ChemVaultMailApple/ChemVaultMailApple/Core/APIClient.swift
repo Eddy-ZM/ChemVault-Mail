@@ -59,6 +59,10 @@ final class APIClient {
         try await get("/my/loginUserInfo")
     }
 
+    func setGlobalAPIBaseURL(_ baseURL: String) async throws {
+        let _: EmptyResponse = try await put("/setting/set", body: GlobalAPIBaseURLRequest(appleApiBaseURL: baseURL))
+    }
+
     func setAdminUserStatus(userId: Int, status: Int) async throws {
         let _: EmptyResponse = try await put("/user/setStatus", body: AdminUserStatusRequest(userId: userId, status: status))
     }
@@ -250,6 +254,10 @@ private struct AnyEncodable: Encodable {
     func encode(to encoder: Encoder) throws {
         try encodeClosure(encoder)
     }
+}
+
+private struct GlobalAPIBaseURLRequest: Encodable {
+    var appleApiBaseURL: String
 }
 
 extension JSONDecoder {

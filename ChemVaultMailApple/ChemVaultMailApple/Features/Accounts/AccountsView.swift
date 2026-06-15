@@ -4,6 +4,7 @@ struct AccountsView: View {
     @EnvironmentObject private var appEnvironment: AppEnvironment
     @EnvironmentObject private var authSession: AuthSession
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var accounts: [ChemVaultAccount] = []
     @State private var newEmail = ""
     @State private var isLoading = false
@@ -115,6 +116,10 @@ struct AccountsView: View {
                 try await saveAvatar(draft.account, avatarType: avatarType, avatar: avatar)
             }
         }
+        .animation(reduceMotion ? nil : ChemVaultMotion.routeTransition, value: accounts)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isMutating)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: statusMessage)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: errorMessage)
         .task { await load() }
     }
 
@@ -308,6 +313,8 @@ private struct AccountMetric: View {
 }
 
 private struct AccountRowView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var account: ChemVaultAccount
     var isPrimary: Bool
     var isBusy: Bool
@@ -386,7 +393,17 @@ private struct AccountRowView: View {
             }
             .disabled(isBusy)
         }
-        .padding(.vertical, 4)
+        .padding(12)
+        .background(ChemVaultWorkspaceTheme.panelBackground(for: colorScheme), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(isPrimary ? ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(0.28) : ChemVaultWorkspaceTheme.panelStroke(for: colorScheme), lineWidth: 1)
+        }
+        .shadow(color: isPrimary ? ChemVaultWorkspaceTheme.panelShadow(for: colorScheme) : .clear, radius: isPrimary ? 14 : 0, x: 0, y: isPrimary ? 8 : 0)
+        .chemVaultSurfaceDepth(isRaised: isPrimary, scale: 1.003, yOffset: -0.5)
+        .opacity(isBusy ? 0.72 : 1)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isPrimary)
+        .animation(reduceMotion ? nil : ChemVaultMotion.fieldFocus, value: isBusy)
     }
 }
 

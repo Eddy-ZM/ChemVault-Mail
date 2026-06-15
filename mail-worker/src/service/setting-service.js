@@ -10,6 +10,26 @@ import {t} from '../i18n/i18n'
 import verifyRecordService from './verify-record-service';
 import userContext from '../security/user-context';
 
+function normalizeAppleApiBaseURL(value) {
+	if (value === null || value === undefined) return '';
+
+	const normalized = String(value).trim().replace(/\/+$/, '');
+	if (!normalized) return '';
+
+	try {
+		const url = new URL(normalized);
+		if (!['http:', 'https:'].includes(url.protocol) || !url.hostname || url.search || url.hash) {
+			throw new Error('invalid protocol or host');
+		}
+		if (!url.pathname || url.pathname === '/') {
+			return `${url.origin}/api`;
+		}
+		return normalized;
+	} catch {
+		throw new BizError('Invalid Apple API base URL.');
+	}
+}
+
 const settingService = {
 
 	async refresh(c) {
@@ -144,6 +164,10 @@ const settingService = {
 			params.loginDarkenFactor = Number.isNaN(factor) ? 0 : Math.min(1, Math.max(0, factor));
 		}
 
+		if (params.appleApiBaseURL !== undefined) {
+			params.appleApiBaseURL = normalizeAppleApiBaseURL(params.appleApiBaseURL);
+		}
+
 		params.resendTokens = JSON.stringify(resendTokens);
 		await orm(c).update(setting).set({ ...params }).returning().get();
 		await this.refresh(c);
@@ -238,7 +262,8 @@ const settingService = {
 			linuxdoCallbackUrl: settingRow.linuxdoCallbackUrl,
 			linuxdoSwitch: settingRow.linuxdoSwitch,
 			minEmailPrefix: settingRow.minEmailPrefix,
-			projectLink: settingRow.projectLink
+			projectLink: settingRow.projectLink,
+			appleApiBaseURL: settingRow.appleApiBaseURL
 		};
 	},
 

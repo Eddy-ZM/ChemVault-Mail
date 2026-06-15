@@ -19,7 +19,7 @@ struct SidebarView: View {
                 Section(group.title) {
                     ForEach(group.routes) { route in
                         Button {
-                            withAnimation(reduceMotion ? nil : ChemVaultMotion.rootContent) {
+                            withAnimation(reduceMotion ? nil : ChemVaultMotion.routeTransition) {
                                 selection = route
                             }
                         } label: {
@@ -37,6 +37,7 @@ struct SidebarView: View {
                                 .fill(selection == route ? ChemVaultWorkspaceTheme.selectedBackground(for: colorScheme) : Color.clear)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
+                                .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: selection)
                         )
                     }
                 }
@@ -176,6 +177,7 @@ private struct ChemVaultSidebarFooter: View {
 
 private struct SidebarRouteRow: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let route: AppRoute
     let isSelected: Bool
     let isAvailable: Bool
@@ -186,10 +188,17 @@ private struct SidebarRouteRow: View {
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
                     .fill(isSelected ? ChemVaultLoadingConfiguration.primaryColor(for: colorScheme) : ChemVaultTheme.fieldBackground(for: colorScheme))
                     .frame(width: 30, height: 30)
+                    .shadow(
+                        color: ChemVaultLoadingConfiguration.primaryColor(for: colorScheme).opacity(isSelected ? 0.22 : 0),
+                        radius: isSelected ? 10 : 0,
+                        x: 0,
+                        y: isSelected ? 5 : 0
+                    )
 
                 Image(systemName: route.systemImage)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(isSelected ? .white : ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
+                    .scaleEffect(isSelected ? 1.05 : 1)
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -207,11 +216,14 @@ private struct SidebarRouteRow: View {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
+                    .transition(.opacity.combined(with: .offset(x: -5, y: 0)))
             }
         }
         .foregroundStyle(isSelected ? ChemVaultTheme.brandText(for: colorScheme) : Color.primary)
         .padding(.horizontal, 8)
         .padding(.vertical, 7)
         .contentShape(Rectangle())
+        .chemVaultSurfaceDepth(isRaised: isSelected, scale: 1.004, yOffset: -0.5)
+        .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isSelected)
     }
 }
