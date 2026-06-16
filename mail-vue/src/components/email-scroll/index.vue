@@ -65,13 +65,16 @@
                         :key="keyCount"
         >
           <template #default="{ data: item, index }" >
-            <div :class="'email-row ' + props.type"
+            <div :class="['email-row', props.type, 'premium-row', { 'silky-row-enter': !item.expand }]"
                  :data-checked="item.checked"
                  @click="jumpDetails(item)"
                  v-if="!item.expand"
                  :key="item.emailId"
                  @contextmenu="handleContextmenu($event, item)"
-                 :style="item.rightChecked ? 'background: #FDF6EC' : ''"
+                 :style="[
+                   item.rightChecked ? { background: 'var(--premium-selected-background)' } : null,
+                   { '--row-index': index % 12 }
+                 ]"
             >
               <el-checkbox :class=" props.type === 'all-email' ? 'all-email-checkbox' : 'checkbox'"
                            v-model="item.checked" @click.stop></el-checkbox>
@@ -1017,7 +1020,11 @@ function loadData() {
   cursor: pointer;
   align-items: center;
   position: relative;
-  transition: background 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+      transform var(--motion-duration-base) var(--motion-smooth),
+      background-color var(--motion-duration-base) var(--motion-smooth),
+      box-shadow var(--motion-duration-base) var(--motion-smooth),
+      border-color var(--motion-duration-base) var(--motion-smooth);
   height: 48px;
   @media (max-width: 1366px) {
     height: 83px;
@@ -1260,14 +1267,44 @@ function loadData() {
     }
   }
 
-  &:hover {
-    background-color: var(--email-hover-background);
-    z-index: 0;
+  &.premium-row {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    box-shadow: var(--header-actions-border);
+    transform: translate3d(0, 0, 0);
+    will-change: transform, box-shadow, background-color;
   }
 
-  /*&[data-checked="true"] {
-    background-color: #c2dbff;
-  }*/
+  &.premium-row[data-checked="true"] {
+    background-color: var(--premium-selected-background);
+    border-color: var(--premium-surface-border);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &.premium-row:hover {
+      background-color: var(--premium-surface);
+      border-color: var(--premium-surface-border);
+      box-shadow: var(--premium-shadow);
+      transform: translate3d(2px, 0, 0);
+      z-index: 1;
+    }
+  }
+}
+
+:deep(.silky-row-enter) {
+  animation: silky-row-enter var(--motion-duration-slow) var(--motion-smooth) backwards;
+  animation-delay: calc(min(var(--row-index), 8) * 18ms);
+}
+
+@keyframes silky-row-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 

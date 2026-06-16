@@ -197,6 +197,7 @@ struct MailRowView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let email: ChemVaultEmail
     var isSelected = false
+    @State private var isHovering = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -268,15 +269,33 @@ struct MailRowView: View {
                 .padding(.vertical, 12)
                 .opacity(isSelected ? 1 : 0)
         }
-        .shadow(color: isSelected ? ChemVaultWorkspaceTheme.panelShadow(for: colorScheme) : .clear, radius: isSelected ? 18 : 0, x: 0, y: isSelected ? 10 : 0)
+        .shadow(
+            color: isElevated ? ChemVaultWorkspaceTheme.panelShadow(for: colorScheme).opacity(isSelected ? 1 : 0.72) : .clear,
+            radius: isElevated ? (isSelected ? 18 : 14) : 0,
+            x: 0,
+            y: isElevated ? (isSelected ? 10 : 7) : 0
+        )
         .chemVaultSurfaceDepth(isRaised: isSelected)
+        .chemVaultMagneticHover(isActive: isElevated, isEnabled: !reduceMotion)
+        .onHover { hovering in
+            guard !reduceMotion else {
+                isHovering = false
+                return
+            }
+            isHovering = hovering
+        }
         .animation(reduceMotion ? nil : ChemVaultMotion.depthShift, value: isSelected)
+        .animation(reduceMotion ? nil : ChemVaultMotion.hoverSettle, value: isHovering)
     }
 
     private var rowBackground: Color {
         isSelected
             ? ChemVaultWorkspaceTheme.selectedBackground(for: colorScheme)
             : ChemVaultWorkspaceTheme.panelBackground(for: colorScheme)
+    }
+
+    private var isElevated: Bool {
+        isSelected || isHovering
     }
 }
 

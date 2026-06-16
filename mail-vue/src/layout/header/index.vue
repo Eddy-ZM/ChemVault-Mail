@@ -6,7 +6,7 @@
     </div>
     <el-tooltip v-if="hasPerm('email:send')" effect="dark" :content="$t('composeEmail')">
       <div
-          class="writer-box"
+          class="writer-box magnetic-action"
           role="button"
           tabindex="0"
           :aria-label="$t('composeEmail')"
@@ -22,7 +22,7 @@
     <div class="toolbar">
       <el-tooltip effect="dark" :content="uiStore.dark ? $t('toggleLightMode') : $t('toggleDarkMode')">
         <div
-            :class="[uiStore.dark ? 'sun-icon' : 'dark-icon', 'icon-item']"
+            :class="[uiStore.dark ? 'sun-icon' : 'dark-icon', 'icon-item', 'magnetic-action']"
             role="button"
             tabindex="0"
             :aria-label="uiStore.dark ? $t('toggleLightMode') : $t('toggleDarkMode')"
@@ -36,7 +36,7 @@
       </el-tooltip>
       <el-tooltip effect="dark" :content="$t('openNotice')">
         <div
-            class="notice icon-item"
+            class="notice icon-item magnetic-action"
             role="button"
             tabindex="0"
             :aria-label="$t('openNotice')"
@@ -49,7 +49,7 @@
       </el-tooltip>
       <el-dropdown ref="userinfoRef" @visible-change="e => userInfoShow = e" :teleported="false" popper-class="detail-dropdown">
         <div
-            class="avatar"
+            class="avatar magnetic-action"
             role="button"
             tabindex="0"
             :aria-label="$t('userMenu')"
@@ -417,7 +417,11 @@ function formatName(email) {
     border-radius: 50%;
     color: #ffffff;
     background: linear-gradient(135deg, #1890ff, #3a80dd);
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 24px rgba(24, 144, 255, 0.26);
+    transition:
+        transform var(--motion-duration-base) var(--motion-smooth),
+        box-shadow var(--motion-duration-base) var(--motion-smooth),
+        filter var(--motion-duration-base) var(--motion-smooth);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -427,6 +431,30 @@ function formatName(email) {
       font-size: 14px;
       font-weight: bold;;
     }
+  }
+}
+
+.magnetic-action {
+  transition:
+      transform var(--motion-duration-base) var(--motion-smooth),
+      box-shadow var(--motion-duration-base) var(--motion-smooth),
+      background-color var(--motion-duration-base) var(--motion-smooth),
+      border-color var(--motion-duration-base) var(--motion-smooth);
+  will-change: transform;
+}
+
+.magnetic-action:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .magnetic-action:hover {
+    transform: translate3d(0, -1px, 0);
+  }
+
+  .writer-box:hover .writer {
+    box-shadow: 0 14px 34px rgba(24, 144, 255, 0.34);
+    filter: saturate(1.08);
   }
 }
 
@@ -463,10 +491,14 @@ function formatName(email) {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
   }
 
   .icon-item:hover {
-    background: var(--base-fill);
+    background: var(--premium-surface);
+    border-color: var(--premium-surface-border);
+    box-shadow: var(--premium-shadow);
   }
 
   .notice {
@@ -486,9 +518,10 @@ function formatName(email) {
     display: flex;
     align-items: center;
     cursor: pointer;
+    border-radius: 8px;
 
     .avatar-text {
-      background: var(--el-bg-color);
+      background: var(--premium-surface);
       color: var(--el-text-color-primary);
       height: 30px;
       width: 30px;
@@ -496,7 +529,17 @@ function formatName(email) {
       justify-content: center;
       align-items: center;
       border-radius: 8px;
-      border: 1px solid var(--dark-border);
+      border: 1px solid var(--premium-surface-border);
+      box-shadow: var(--premium-inset);
+      transition:
+          border-color var(--motion-duration-base) var(--motion-smooth),
+          box-shadow var(--motion-duration-base) var(--motion-smooth),
+          background-color var(--motion-duration-base) var(--motion-smooth);
+    }
+
+    &:hover .avatar-text {
+      box-shadow: var(--premium-shadow);
+      border-color: var(--el-color-primary-light-7);
     }
 
     .setting-icon {

@@ -143,6 +143,8 @@ enum ChemVaultInteractionConfiguration {
     static let fieldFocusScale: CGFloat = 1.006
     static let surfacePressScale: CGFloat = 0.972
     static let selectedSurfaceScale: CGFloat = 1.006
+    static let hoverLiftScale: CGFloat = 1.012
+    static let hoverYOffset: CGFloat = -1.5
     static let authContentScale: CGFloat = 0.968
     static let authBackdropBlurRadius: CGFloat = 16
     static let staggerStep = 0.055
@@ -162,6 +164,7 @@ enum ChemVaultMotion {
         blendDuration: 0.08
     )
     static let depthShift = Animation.spring(response: 0.52, dampingFraction: 0.92, blendDuration: 0.06)
+    static let hoverSettle = Animation.spring(response: 0.28, dampingFraction: 0.82, blendDuration: 0.04)
     static let surfaceEntrance = Animation.spring(response: 0.58, dampingFraction: 0.9, blendDuration: 0.08)
     static let surfacePress = Animation.interactiveSpring(response: 0.2, dampingFraction: 0.86, blendDuration: 0.04)
     static let authSuccess = Animation.spring(response: 0.74, dampingFraction: 0.9, blendDuration: 0.08)
@@ -211,6 +214,13 @@ extension View {
             .scaleEffect(isRaised ? scale : 1)
             .offset(y: isRaised ? yOffset : 0)
             .animation(ChemVaultMotion.depthShift, value: isRaised)
+    }
+
+    func chemVaultMagneticHover(isActive: Bool, isEnabled: Bool = true) -> some View {
+        self
+            .scaleEffect(isEnabled && isActive ? ChemVaultInteractionConfiguration.hoverLiftScale : 1)
+            .offset(y: isEnabled && isActive ? ChemVaultInteractionConfiguration.hoverYOffset : 0)
+            .animation(isEnabled ? ChemVaultMotion.hoverSettle : nil, value: isActive)
     }
 }
 

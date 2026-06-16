@@ -1,5 +1,5 @@
 <template>
-  <el-container class="layout">
+  <el-container class="layout premium-shell">
     <el-aside
         class="aside"
         :class="uiStore.asideShow ? 'aside-show' : 'el-aside-hide'">
@@ -56,14 +56,20 @@ onBeforeUnmount(() => {
   height: 100%;
   z-index: 100;
   transform: translateX(-100%);
-  transition: all 100ms ease;
+  transition:
+      transform var(--motion-duration-base) var(--motion-smooth),
+      opacity var(--motion-duration-base) var(--motion-smooth),
+      box-shadow var(--motion-duration-base) var(--motion-smooth);
 }
 
 .aside-show {
   -webkit-box-shadow: var(--aside-right-border);
   box-shadow: var(--aside-right-border);
   transform: translateX(0);
-  transition: all 100ms ease;
+  transition:
+      transform var(--motion-duration-base) var(--motion-smooth),
+      opacity var(--motion-duration-base) var(--motion-smooth),
+      box-shadow var(--motion-duration-base) var(--motion-smooth);
   z-index: 101;
   @media (max-width: 1025px) {
     position: fixed;
@@ -77,7 +83,10 @@ onBeforeUnmount(() => {
 
 .el-aside {
   width: auto;
-  transition: all 100ms ease;
+  transition:
+      transform var(--motion-duration-base) var(--motion-smooth),
+      opacity var(--motion-duration-base) var(--motion-smooth),
+      box-shadow var(--motion-duration-base) var(--motion-smooth);
 }
 
 .layout {
@@ -89,9 +98,18 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
+.premium-shell {
+  background:
+      radial-gradient(circle at 18% 0%, rgba(24, 144, 255, 0.09), transparent 34%),
+      radial-gradient(circle at 100% 12%, rgba(58, 128, 221, 0.08), transparent 28%),
+      var(--el-bg-color);
+}
+
 .main-container {
   min-height: 100%;
-  background: var(--el-bg-color);
+  background:
+      linear-gradient(180deg, rgba(24, 144, 255, 0.035), transparent 28%),
+      var(--el-bg-color);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -101,9 +119,15 @@ onBeforeUnmount(() => {
 }
 
 .el-header {
-  background: var(--el-bg-color);
+  background: var(--premium-surface);
   border-bottom: solid 1px var(--el-border-color);
+  box-shadow: var(--premium-inset);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   padding: 0 0 0 0;
+  transition:
+      background-color var(--motion-duration-base) var(--motion-smooth),
+      box-shadow var(--motion-duration-base) var(--motion-smooth);
 }
 
 .overlay-show {
@@ -114,7 +138,9 @@ onBeforeUnmount(() => {
   height: 100vh;
   background: rgba(0, 0, 0, 0.4);
   z-index: 99;
-  transition: all 0.3s;
+  transition:
+      opacity var(--motion-duration-base) var(--motion-smooth),
+      background-color var(--motion-duration-base) var(--motion-smooth);
 }
 
 .overlay-hide {

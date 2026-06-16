@@ -138,10 +138,21 @@ button, input, select, textarea {
     --secondary-text-color: #909399;
     --message-block-color: rgba(0, 0, 0, 0);
     --loading-hide-transition: all 200ms;
+    --motion-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --motion-duration-fast: 160ms;
+    --motion-duration-base: 260ms;
+    --motion-duration-slow: 420ms;
+    --premium-shadow: 0 10px 30px rgba(24, 87, 140, 0.08);
+    --premium-shadow-hover: 0 16px 42px rgba(24, 87, 140, 0.16);
+    --premium-inset: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    --premium-selected-background: rgba(24, 144, 255, 0.09);
+    --premium-surface: rgba(255, 255, 255, 0.72);
+    --premium-surface-border: rgba(190, 210, 230, 0.58);
     --vt-x: 50%;
     --vt-y: 50%;
     --vt-duration: 520ms;
-    --vt-easing: ease-out;
+    --vt-easing: var(--motion-smooth);
 }
 
 .dark {
@@ -166,6 +177,12 @@ button, input, select, textarea {
     --base-border-color: #4C4D4F;
     --secondary-text-color: #A3A6AD;
     --message-block-color: rgba(30, 30, 30, 0.2);
+    --premium-shadow: 0 12px 34px rgba(0, 0, 0, 0.26);
+    --premium-shadow-hover: 0 18px 48px rgba(0, 0, 0, 0.34);
+    --premium-inset: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --premium-selected-background: rgba(102, 177, 255, 0.13);
+    --premium-surface: rgba(24, 24, 24, 0.74);
+    --premium-surface-border: rgba(255, 255, 255, 0.08);
     --el-border-color: #414243 !important;
 }
 
@@ -201,6 +218,40 @@ html[data-theme-to="dark"]::view-transition-new(root) {
 html[data-theme-to="light"]::view-transition-old(root) {
     clip-path: circle(var(--vt-end-radius, 0px) at var(--vt-x) var(--vt-y));
     animation: vt-radial-out var(--vt-duration) var(--vt-easing) forwards;
+}
+
+.premium-interactive {
+    transition:
+        transform var(--motion-duration-base) var(--motion-smooth),
+        box-shadow var(--motion-duration-base) var(--motion-smooth),
+        background-color var(--motion-duration-base) var(--motion-smooth),
+        border-color var(--motion-duration-base) var(--motion-smooth),
+        color var(--motion-duration-base) var(--motion-smooth);
+    will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .premium-interactive:hover {
+        transform: translate3d(0, -1px, 0);
+        box-shadow: var(--premium-shadow-hover);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+    }
+
+    html[data-theme-to="dark"]::view-transition-new(root),
+    html[data-theme-to="light"]::view-transition-old(root) {
+        animation: none !important;
+        clip-path: none !important;
+    }
 }
 
 @keyframes vt-radial-in {
