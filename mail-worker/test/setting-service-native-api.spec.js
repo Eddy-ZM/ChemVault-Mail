@@ -73,4 +73,22 @@ describe('native app API setting', () => {
 			appleApiBaseURL: 'https://custom.example.com/api'
 		}));
 	});
+
+	it('normalizes the Cloudflare Access external role id before saving', async () => {
+		get.mockResolvedValue({});
+		returning.mockReturnValue({ get });
+		set.mockReturnValue({ returning });
+		update.mockReturnValue({ set });
+		settingService.query = async () => ({ resendTokens: {} });
+		settingService.refresh = async () => {};
+
+		await settingService.set({}, {
+			cloudflareAccessExternalRoleId: '12',
+			resendTokens: {}
+		});
+
+		expect(set).toHaveBeenCalledWith(expect.objectContaining({
+			cloudflareAccessExternalRoleId: 12
+		}));
+	});
 });

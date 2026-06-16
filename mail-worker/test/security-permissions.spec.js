@@ -12,4 +12,12 @@ describe('avatar permission route mapping', () => {
 			'/user/setUserAvatar'
 		]));
 	});
+
+	it('maps all-mail read permission to the read-state endpoint used while viewing mail', () => {
+		expect(permKeyToPaths(['all-email:query'])).toContain('/email/read');
+	});
+
+	it('maps role updates to the Cloudflare Access role selection endpoint', () => {
+		expect(permKeyToPaths(['role:set'])).toContain('/role/setCloudflareAccess');
+	});
 });

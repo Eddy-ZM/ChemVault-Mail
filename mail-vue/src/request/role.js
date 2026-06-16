@@ -24,6 +24,9 @@ export function roleSetDef(roleId) {
     return http.put('/role/setDefault',{roleId})
 }
 
+export function roleSetCloudflareAccess(roleId) {
+    return http.put('/role/setCloudflareAccess',{roleId})
+}
 
 export function roleSelectUse() {
     return http.get('/role/selectUse')

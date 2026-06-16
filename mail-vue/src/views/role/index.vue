@@ -20,6 +20,11 @@
             <div class="role-name">
               <span>{{ props.row.name }}</span>
               <span v-if="props.row.isDefault"><el-tag class="def-tag">{{ $t('default') }}</el-tag></span>
+              <span v-if="isCloudflareAccessRole(props.row)">
+                <el-tooltip effect="dark" :content="$t('cloudflareAccessRoleDesc')">
+                  <el-tag class="cf-access-tag" type="info">{{ $t('cloudflareAccess') }}</el-tag>
+                </el-tooltip>
+              </span>
             </div>
           </template>
         </el-table-column>
@@ -39,6 +44,9 @@
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openRoleSet(props.row)">{{ $t('change') }}</el-dropdown-item>
                   <el-dropdown-item @click="setDef(props.row)">{{ $t('default') }}</el-dropdown-item>
+                  <el-dropdown-item @click="setCloudflareAccessRole(props.row)">
+                    {{ isCloudflareAccessRole(props.row) ? $t('clearCloudflareAccessRole') : $t('setCloudflareAccessRole') }}
+                  </el-dropdown-item>
                   <el-dropdown-item @click="delRole(props.row)">{{ $t('delete') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -145,7 +153,7 @@
 <script setup>
 import {Icon} from "@iconify/vue";
 import {defineOptions, nextTick, reactive, ref} from "vue";
-import {roleAdd, roleDelete, rolePermTree, roleRoleList, roleSet, roleSetDef} from "@/request/role.js";
+import {roleAdd, roleDelete, rolePermTree, roleRoleList, roleSet, roleSetCloudflareAccess, roleSetDef} from "@/request/role.js";
 import loading from '@/components/loading/index.vue';
 import {useRoleStore} from "@/store/role.js";
 import {useUserStore} from "@/store/user.js";
@@ -157,10 +165,11 @@ defineOptions({
   name: 'role'
 })
 
-const {domainList} = useSettingStore();
 const {t, locale} = useI18n();
 const userStore = useUserStore();
 const roleStore = useRoleStore();
+const settingStore = useSettingStore();
+const {domainList} = settingStore;
 const roleFormShow = ref(false)
 const treeList = reactive([])
 const roles = ref([])
@@ -248,6 +257,22 @@ function setDef(role) {
       plain: true
     })
     getRoleList()
+  })
+}
+
+function isCloudflareAccessRole(role) {
+  return Number(settingStore.settings.cloudflareAccessExternalRoleId) === Number(role.roleId);
+}
+
+function setCloudflareAccessRole(role) {
+  const nextRoleId = isCloudflareAccessRole(role) ? 0 : role.roleId;
+  roleSetCloudflareAccess(nextRoleId).then(() => {
+    settingStore.settings.cloudflareAccessExternalRoleId = nextRoleId;
+    ElMessage({
+      message: t('saveSuccessMsg'),
+      type: "success",
+      plain: true
+    })
   })
 }
 
@@ -435,6 +460,11 @@ window.onresize = () => {
 
 .def-tag {
   margin-left: 10px;
+  height: 20px;
+}
+
+.cf-access-tag {
+  margin-left: 8px;
   height: 20px;
 }
 

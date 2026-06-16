@@ -11,6 +11,11 @@ import verifyRecordService from './verify-record-service';
 import userContext from '../security/user-context';
 import { normalizeExternalAccessPermKeys } from '../security/cloudflare-access';
 
+function normalizeExternalAccessRoleId(value) {
+	const roleId = Number(value);
+	return Number.isInteger(roleId) && roleId > 0 ? roleId : 0;
+}
+
 function normalizeAppleApiBaseURL(value) {
 	if (value === null || value === undefined) return '';
 
@@ -97,6 +102,7 @@ const settingService = {
 
 		setting.emailPrefixFilter = setting.emailPrefixFilter.split(",").filter(Boolean);
 		setting.cloudflareAccessExternalPerms = normalizeExternalAccessPermKeys(setting.cloudflareAccessExternalPerms);
+		setting.cloudflareAccessExternalRoleId = normalizeExternalAccessRoleId(setting.cloudflareAccessExternalRoleId);
 
 		c.set?.('setting', setting);
 		return setting;
@@ -163,6 +169,10 @@ const settingService = {
 
 		if (params.cloudflareAccessExternalPerms !== undefined) {
 			params.cloudflareAccessExternalPerms = normalizeExternalAccessPermKeys(params.cloudflareAccessExternalPerms) + '';
+		}
+
+		if (params.cloudflareAccessExternalRoleId !== undefined) {
+			params.cloudflareAccessExternalRoleId = normalizeExternalAccessRoleId(params.cloudflareAccessExternalRoleId);
 		}
 
 		if (params.loginDarkenFactor !== undefined) {

@@ -7,7 +7,36 @@ export const ACCESS_JWT_HEADER = 'Cf-Access-Jwt-Assertion';
 export const ACCESS_EMAIL_HEADER = 'Cf-Access-Authenticated-User-Email';
 export const EXTERNAL_ACCESS_USER_ID = 0;
 export const EXTERNAL_ACCESS_PERM_KEYS = ['all-email:query'];
-export const READ_ONLY_EXTERNAL_ACCESS_PERM_KEYS = ['all-email:query'];
+export const EXTERNAL_ACCESS_ALLOWED_PERM_KEYS = [
+	'email:delete',
+	'email:send',
+	'account:add',
+	'account:query',
+	'account:delete',
+	'account:set-avatar',
+	'my:delete',
+	'role:add',
+	'role:set',
+	'role:query',
+	'role:delete',
+	'user:query',
+	'user:add',
+	'user:reset-send',
+	'user:set-pwd',
+	'user:set-status',
+	'user:set-type',
+	'user:delete',
+	'user:set-account-avatar',
+	'all-email:query',
+	'all-email:delete',
+	'setting:query',
+	'setting:set',
+	'analysis:query',
+	'reg-key:add',
+	'reg-key:query',
+	'reg-key:delete'
+];
+const EXTERNAL_ACCESS_WRITE_PERM_KEYS = EXTERNAL_ACCESS_ALLOWED_PERM_KEYS.filter(key => !key.endsWith(':query'));
 
 const EXTERNAL_ROLE = {
 	name: 'external-viewer',
@@ -110,19 +139,20 @@ export function isInternalAccessEmail(email, domains = [], adminEmail = '') {
 	return normalizeDomains(domains).includes(domain);
 }
 
-export function normalizeExternalAccessPermKeys(value) {
+export function normalizeExternalAccessPermKeys(value, fallbackPermKeys = EXTERNAL_ACCESS_PERM_KEYS) {
 	const values = Array.isArray(value) ? value : String(value || '').split(',');
 	const keys = values
 		.map(item => String(item).trim())
-		.filter(item => READ_ONLY_EXTERNAL_ACCESS_PERM_KEYS.includes(item));
+		.filter(item => EXTERNAL_ACCESS_ALLOWED_PERM_KEYS.includes(item));
 	const uniqueKeys = [...new Set(keys)];
-	return uniqueKeys.length > 0 ? uniqueKeys : [...EXTERNAL_ACCESS_PERM_KEYS];
+	return uniqueKeys.length > 0 ? uniqueKeys : [...fallbackPermKeys];
 }
 
 export function createExternalAccessUser(email, permKeys = EXTERNAL_ACCESS_PERM_KEYS) {
 	const normalizedEmail = normalizeAccessEmail(email);
 	const name = normalizedEmail?.split('@')[0] || 'external';
-	const externalPermKeys = normalizeExternalAccessPermKeys(permKeys);
+	const fallbackPermKeys = Array.isArray(permKeys) ? [] : EXTERNAL_ACCESS_PERM_KEYS;
+	const externalPermKeys = normalizeExternalAccessPermKeys(permKeys, fallbackPermKeys);
 
 	return {
 		userId: EXTERNAL_ACCESS_USER_ID,
@@ -132,7 +162,7 @@ export function createExternalAccessUser(email, permKeys = EXTERNAL_ACCESS_PERM_
 		type: 'external',
 		authType: ACCESS_AUTH_TYPE.CLOUDFLARE_ACCESS,
 		externalAccess: true,
-		readOnly: true,
+		readOnly: !externalPermKeys.some(key => EXTERNAL_ACCESS_WRITE_PERM_KEYS.includes(key)),
 		account: {
 			accountId: 0,
 			userId: EXTERNAL_ACCESS_USER_ID,
@@ -142,15 +172,6 @@ export function createExternalAccessUser(email, permKeys = EXTERNAL_ACCESS_PERM_
 		role: { ...EXTERNAL_ROLE },
 		permKeys: externalPermKeys
 	};
-}
-
-export function isExternalWriteBlocked(path, method) {
-	if (path.startsWith('/logout')) {
-		return false;
-	}
-
-	const normalizedMethod = String(method || '').toUpperCase();
-	return !['GET', 'HEAD', 'OPTIONS'].includes(normalizedMethod);
 }
 
 function normalizeDomains(domains) {

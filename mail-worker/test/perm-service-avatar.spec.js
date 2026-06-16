@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { prepare, bind, run, select } = vi.hoisted(() => ({
+const { prepare, bind, run, all, select } = vi.hoisted(() => ({
 	prepare: vi.fn(),
 	bind: vi.fn(),
 	run: vi.fn(),
+	all: vi.fn(),
 	select: vi.fn()
 }));
 
@@ -40,7 +41,8 @@ describe('perm service avatar permissions', () => {
 	beforeEach(async () => {
 		vi.clearAllMocks();
 		run.mockResolvedValue();
-		bind.mockReturnValue({ run });
+		all.mockResolvedValue({ results: [] });
+		bind.mockReturnValue({ run, all });
 		prepare.mockReturnValue({ bind });
 		select
 			.mockReturnValueOnce(query([{ permId: 21, name: '邮箱侧栏' }]))
@@ -59,5 +61,23 @@ describe('perm service avatar permissions', () => {
 		expect(bind).toHaveBeenCalledWith('用户邮箱头像修改', 'user:set-account-avatar', 6, 2, 8, 'user:set-account-avatar');
 		expect(run).toHaveBeenCalledTimes(2);
 		expect(tree[0].children.map(item => item.permKey)).toContain('account:set-avatar');
+	});
+
+	it('returns button permission keys for a configured role', async () => {
+		all.mockResolvedValue({
+			results: [
+				{ perm_key: 'all-email:query' },
+				{ perm_key: 'all-email:delete' },
+				{ perm_key: 'email:send' },
+				{ perm_key: '' },
+				{ perm_key: null }
+			]
+		});
+
+		const keys = await permService.rolePermKeys(c, 12);
+
+		expect(prepare).toHaveBeenCalledWith(expect.stringContaining('FROM role_perm'));
+		expect(bind).toHaveBeenCalledWith(12);
+		expect(keys).toEqual(['all-email:query', 'all-email:delete', 'email:send']);
 	});
 });

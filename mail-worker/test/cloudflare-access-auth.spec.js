@@ -5,7 +5,6 @@ import {
 	accessEmailFromHeaders,
 	accessEmailFromJwt,
 	createExternalAccessUser,
-	isExternalWriteBlocked,
 	isInternalAccessEmail,
 	normalizeExternalAccessPermKeys,
 	normalizeAccessEmail
@@ -103,30 +102,30 @@ describe('Cloudflare Access auth helpers', () => {
 		expect(isInternalAccessEmail('guest@outside.test', ['example.com'], 'admin@example.net')).toBe(false);
 	});
 
-	it('creates a read-only external Access user without edit permissions', () => {
-		const user = createExternalAccessUser('Guest@Outside.test');
+	it('creates an external Access user with the configured role permission keys', () => {
+		const user = createExternalAccessUser('Guest@Outside.test', ['all-email:query', 'all-email:delete', 'email:send']);
 
 		expect(user.email).toBe('guest@outside.test');
 		expect(user.externalAccess).toBe(true);
+		expect(user.readOnly).toBe(false);
+		expect(user.permKeys).toEqual(['all-email:query', 'all-email:delete', 'email:send']);
+	});
+
+	it('keeps a configured empty external Access role as no permissions', () => {
+		const user = createExternalAccessUser('Guest@Outside.test', []);
+
 		expect(user.readOnly).toBe(true);
-		expect(user.permKeys).toEqual(EXTERNAL_ACCESS_PERM_KEYS);
-		expect(user.permKeys).toContain('all-email:query');
-		expect(user.permKeys).not.toContain('email:send');
-		expect(user.permKeys).not.toContain('all-email:delete');
+		expect(user.permKeys).toEqual([]);
 	});
 
-	it('normalizes configurable external Access permissions to read-only permissions only', () => {
-		expect(normalizeExternalAccessPermKeys('all-email:query,email:send,all-email:delete,unknown')).toEqual(['all-email:query']);
-		expect(normalizeExternalAccessPermKeys(['all-email:query', 'email:send'])).toEqual(['all-email:query']);
+	it('normalizes configurable external Access permissions without dropping write permissions', () => {
+		expect(normalizeExternalAccessPermKeys('all-email:query,email:send,all-email:delete,unknown')).toEqual([
+			'all-email:query',
+			'email:send',
+			'all-email:delete'
+		]);
+		expect(normalizeExternalAccessPermKeys(['all-email:query', 'email:send'])).toEqual(['all-email:query', 'email:send']);
 		expect(normalizeExternalAccessPermKeys('')).toEqual(EXTERNAL_ACCESS_PERM_KEYS);
-	});
-
-	it('blocks mutations for external Access users while allowing read requests', () => {
-		expect(isExternalWriteBlocked('/allEmail/list', 'GET')).toBe(false);
-		expect(isExternalWriteBlocked('/allEmail/latest', 'GET')).toBe(false);
-		expect(isExternalWriteBlocked('/email/read', 'PUT')).toBe(true);
-		expect(isExternalWriteBlocked('/allEmail/delete', 'DELETE')).toBe(true);
-		expect(isExternalWriteBlocked('/star/add', 'POST')).toBe(true);
 	});
 
 	it('normalizes invalid or empty email input to null', () => {

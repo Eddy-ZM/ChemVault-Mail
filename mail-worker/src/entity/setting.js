@@ -54,6 +54,7 @@ export const setting = sqliteTable('setting', {
 	aiCode: integer('ai_code').default(1).notNull(),
 	aiCodeFilter: text('ai_code_filter').default('').notNull(),
 	cloudflareAccessExternalPerms: text('cloudflare_access_external_perms').default('all-email:query').notNull(),
+	cloudflareAccessExternalRoleId: integer('cloudflare_access_external_role_id').default(0).notNull(),
 	appleApiBaseURL: text('apple_api_base_url').default('').notNull()
 });
 export default setting

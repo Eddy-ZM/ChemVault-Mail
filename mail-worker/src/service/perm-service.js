@@ -48,6 +48,22 @@ const permService = {
 			.where(and(eq(user.userId,userId),eq(perm.type,permConst.type.BUTTON)))
 			.all();
 		return userPerms.map(perm => perm.permKey);
+	},
+
+	async rolePermKeys(c, roleId) {
+		const normalizedRoleId = Number(roleId);
+		if (!Number.isInteger(normalizedRoleId) || normalizedRoleId <= 0) {
+			return [];
+		}
+
+		const { results = [] } = await c.env.db.prepare(`
+			SELECT p.perm_key
+			FROM role_perm rp
+			LEFT JOIN perm p ON rp.perm_id = p.perm_id
+			WHERE rp.role_id = ? AND p.type = ${permConst.type.BUTTON}
+		`).bind(normalizedRoleId).all();
+
+		return results.map(row => row.perm_key).filter(Boolean);
 	}
 }
 

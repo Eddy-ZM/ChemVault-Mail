@@ -13,7 +13,6 @@ import {
 	ACCESS_AUTH_TYPE,
 	accessEmailFromHeaders,
 	createExternalAccessUser,
-	isExternalWriteBlocked,
 	isInternalAccessEmail,
 	normalizeExternalAccessPermKeys
 } from './cloudflare-access';
@@ -34,6 +33,7 @@ const exclude = [
 const requirePerms = [
 	'/email/send',
 	'/email/delete',
+	'/email/read',
 	'/account/list',
 	'/account/delete',
 	'/account/add',
@@ -46,6 +46,7 @@ const requirePerms = [
 	'/role/tree',
 	'/role/set',
 	'/role/setDefault',
+	'/role/setCloudflareAccess',
 	'/allEmail/list',
 	'/allEmail/delete',
 	'/allEmail/batchDelete',
@@ -83,7 +84,7 @@ const premKey = {
 	'account:set-avatar': ['/account/setAvatar'],
 	'my:delete': ['/my/delete'],
 	'role:add': ['/role/add'],
-	'role:set': ['/role/set','/role/setDefault'],
+	'role:set': ['/role/set','/role/setDefault', '/role/setCloudflareAccess'],
 	'role:query': ['/role/list', '/role/tree'],
 	'role:delete': ['/role/delete'],
 	'user:query': ['/user/list','/user/allAccount'],
@@ -94,7 +95,7 @@ const premKey = {
 	'user:set-type': ['/user/setType'],
 	'user:delete': ['/user/delete','/user/deleteAccount'],
 	'user:set-account-avatar': ['/user/setAccountAvatar', '/user/setUserAvatar'],
-	'all-email:query': ['/allEmail/list','/allEmail/latest'],
+	'all-email:query': ['/allEmail/list','/allEmail/latest', '/email/read'],
 	'all-email:delete': ['/allEmail/delete','/allEmail/batchDelete'],
 	'setting:query': ['/setting/query'],
 	'setting:set': ['/setting/set', '/setting/setBackground','/setting/deleteBackground','/setting/setBlacklist'],
@@ -133,13 +134,13 @@ app.use('*', async (c, next) => {
 		throw new BizError(t('authExpired'), 401);
 	}
 
-	if (auth.user.externalAccess && isExternalWriteBlocked(path, c.req.method)) {
-		throw new BizError(t('unauthorized'), 403);
-	}
-
 	const permIndex = requirePerms.findIndex(item => {
 		return path.startsWith(item);
 	});
+
+	if (auth.user.externalAccess && isWriteMethod(c.req.method) && permIndex === -1) {
+		throw new BizError(t('unauthorized'), 403);
+	}
 
 	if (permIndex > -1) {
 
@@ -240,12 +241,23 @@ async function resolveCloudflareAccessAuth(c, accessEmail = null) {
 	}
 
 	const settings = await settingService.query(c);
-	const permKeys = normalizeExternalAccessPermKeys(settings.cloudflareAccessExternalPerms);
+	const hasExternalRole = Number(settings.cloudflareAccessExternalRoleId) > 0;
+	const rolePermKeys = hasExternalRole
+		? await permService.rolePermKeys(c, settings.cloudflareAccessExternalRoleId)
+		: [];
+	const permKeys = hasExternalRole
+		? rolePermKeys
+		: normalizeExternalAccessPermKeys(settings.cloudflareAccessExternalPerms);
 
 	return {
 		authType: ACCESS_AUTH_TYPE.CLOUDFLARE_ACCESS,
 		user: createExternalAccessUser(accessEmail, permKeys)
 	};
+}
+
+function isWriteMethod(method) {
+	const normalizedMethod = String(method || '').toUpperCase();
+	return !['GET', 'HEAD', 'OPTIONS'].includes(normalizedMethod);
 }
 
 export function permKeyToPaths(permKeys) {
