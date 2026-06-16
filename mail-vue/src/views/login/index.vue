@@ -1,22 +1,22 @@
 <template>
   <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''" v-loading="oauthLoading" element-loading-text="登录中...">
-    <div id="background-wrap" v-if="!settingStore.settings.background">
-      <div class="x1 cloud"></div>
-      <div class="x2 cloud"></div>
-      <div class="x3 cloud"></div>
-      <div class="x4 cloud"></div>
-      <div class="x5 cloud"></div>
+    <div id="background-wrap" v-if="!settingStore.settings.background" aria-hidden="true">
+      <div class="login-backdrop login-backdrop-primary"></div>
+      <div class="login-backdrop login-backdrop-secondary"></div>
+      <div class="login-grid"></div>
     </div>
     <div v-else :style="background"></div>
     <div class="form-wrapper">
       <div class="container">
-        <span class="form-title">{{ settingStore.settings.title }}</span>
-        <span class="form-desc" v-if="show === 'login'">{{ $t('loginTitle') }}</span>
-        <span class="form-desc" v-else>{{ $t('regTitle') }}</span>
-        <div class="trust-strip">
-          <span><Icon icon="mingcute:check-circle-fill" width="14" height="14" aria-hidden="true"/>{{ $t('loginTrustDomain') }}</span>
-          <span><Icon icon="mingcute:check-circle-fill" width="14" height="14" aria-hidden="true"/>{{ $t('loginTrustEdge') }}</span>
-          <span><Icon icon="mingcute:check-circle-fill" width="14" height="14" aria-hidden="true"/>{{ $t('loginTrustEcosystem') }}</span>
+        <div class="identity-block">
+          <div class="brand-mark" aria-hidden="true">
+            <Icon icon="mdi:email-lock-outline" width="24" height="24"/>
+          </div>
+          <div class="identity-copy">
+            <span class="form-title">{{ settingStore.settings.title }}</span>
+            <span class="form-desc" v-if="show === 'login'">{{ $t('loginTitle') }}</span>
+            <span class="form-desc" v-else>{{ $t('regTitle') }}</span>
+          </div>
         </div>
         <div v-show="show === 'login'">
           <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="form.email"
@@ -609,79 +609,99 @@ function submitRegister() {
 
 .form-wrapper {
   position: fixed;
-  right: 0;
-  height: 100%;
+  inset: 0;
   z-index: 10;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
   align-items: center;
-  justify-content: center;
+  justify-items: end;
+  padding: clamp(24px, 5vw, 64px);
+  pointer-events: none;
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
   @media (max-width: 767px) {
-    width: 100%;
+    padding: 18px;
   }
 }
 
 .container {
   background: v-bind(loginOpacity);
-  padding-left: 40px;
-  padding-right: 40px;
+  padding: 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 450px;
-  height: 100%;
-  border-left: 1px solid var(--login-border);
-  box-shadow: var(--el-box-shadow-light);
+  width: min(430px, 100%);
+  min-height: auto;
+  border: 1px solid var(--premium-surface-border);
+  border-radius: 8px;
+  box-shadow: var(--premium-shadow-hover);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  pointer-events: auto;
   @media (max-width: 1024px) {
-    padding: 20px 18px;
-    width: 384px;
-    margin-left: 18px;
+    width: min(430px, 100%);
   }
   @media (max-width: 767px) {
-    border: 1px solid var(--login-border);
-    padding: 20px 18px;
-    border-radius: 6px;
-    height: fit-content;
-    width: 100%;
-    margin-right: 18px;
-    margin-left: 18px;
+    padding: 24px 18px;
   }
 
   .btn {
-    height: 36px;
+    height: 40px;
     width: 100%;
     border-radius: 6px;
+    font-weight: 600;
+    transition:
+        transform var(--motion-duration-base) var(--motion-smooth),
+        box-shadow var(--motion-duration-base) var(--motion-smooth),
+        border-color var(--motion-duration-base) var(--motion-smooth);
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn.el-button--primary {
+    box-shadow: 0 10px 24px rgba(24, 144, 255, 0.24);
   }
 
   .form-desc {
-    margin-top: 5px;
-    margin-bottom: 18px;
+    margin-top: 4px;
     color: var(--form-desc-color);
+    line-height: 1.55;
   }
 
   .form-title {
     font-weight: bold;
-    font-size: 22px !important;
+    font-size: 24px !important;
+    line-height: 1.2;
   }
 
-  .trust-strip {
+  .identity-block {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 18px;
-    color: var(--regular-text-color);
-    font-size: 12px;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
 
-    span {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      line-height: 18px;
-    }
+  .brand-mark {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1890ff, #1064c0);
+    box-shadow: 0 12px 28px rgba(24, 144, 255, 0.24);
+  }
 
-    svg {
-      flex-shrink: 0;
-      color: var(--el-color-primary);
-    }
+  .identity-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .switch {
@@ -696,21 +716,31 @@ function submitRegister() {
 
   :deep(.el-input__wrapper) {
     border-radius: 6px;
-    background: var(--el-bg-color);
+    background: var(--premium-surface);
+    border: 1px solid var(--premium-surface-border);
+    box-shadow: var(--premium-inset);
+    transition:
+        border-color var(--motion-duration-base) var(--motion-smooth),
+        box-shadow var(--motion-duration-base) var(--motion-smooth),
+        background-color var(--motion-duration-base) var(--motion-smooth);
+  }
+
+  :deep(.el-input__wrapper.is-focus) {
+    border-color: var(--el-color-primary-light-5);
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.12);
   }
 
   .email-input :deep(.el-input__wrapper) {
     border-radius: 6px 0 0 6px;
-    background: var(--el-bg-color);
   }
 
   .el-input {
-    height: 38px;
+    height: 42px;
     width: 100%;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 
     :deep(.el-input__inner) {
-      height: 36px;
+      height: 40px;
     }
   }
 }
@@ -760,7 +790,8 @@ function submitRegister() {
   padding: 0 !important;
   padding-left: 8px !important;
   padding-right: 4px !important;
-  background: var(--el-bg-color);
+  background: var(--premium-surface);
+  border-color: var(--premium-surface-border);
   border-radius: 0 8px 8px 0;
 }
 
@@ -791,7 +822,11 @@ function submitRegister() {
 
 
 #login-box {
-  background: linear-gradient(to bottom, #2980b9, #6dd5fa, #fff);
+  position: relative;
+  background:
+      linear-gradient(135deg, rgba(24, 144, 255, 0.14) 0%, rgba(255, 255, 255, 0) 40%),
+      linear-gradient(315deg, rgba(16, 100, 192, 0.1) 0%, rgba(255, 255, 255, 0) 44%),
+      linear-gradient(180deg, #f6faff 0%, #eef5fb 50%, #ffffff 100%);
   font: 100% Arial, sans-serif;
   height: 100%;
   margin: 0;
@@ -801,78 +836,71 @@ function submitRegister() {
   grid-template-columns: 1fr;
 }
 
+:global(.dark) #login-box {
+  background:
+      linear-gradient(135deg, rgba(24, 144, 255, 0.16) 0%, rgba(20, 20, 20, 0) 42%),
+      linear-gradient(315deg, rgba(102, 177, 255, 0.08) 0%, rgba(20, 20, 20, 0) 48%),
+      linear-gradient(180deg, #101214 0%, #151719 52%, #101112 100%);
+}
+
 
 #background-wrap {
+  position: fixed;
+  inset: 0;
   height: 100%;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-@keyframes animateCloud {
-  0% {
-    margin-left: -500px;
-  }
-
-  100% {
-    margin-left: 100%;
-  }
-}
-
-.x1 {
-  animation: animateCloud 30s linear infinite;
-  transform: scale(0.65);
-}
-
-.x2 {
-  animation: animateCloud 15s linear infinite;
-  transform: scale(0.3);
-}
-
-.x3 {
-  animation: animateCloud 25s linear infinite;
-  transform: scale(0.5);
-}
-
-.x4 {
-  animation: animateCloud 13s linear infinite;
-  transform: scale(0.4);
-}
-
-.x5 {
-  animation: animateCloud 20s linear infinite;
-  transform: scale(0.55);
-}
-
-.cloud {
-  background: linear-gradient(to bottom, #fff 5%, #f1f1f1 100%);
-  border-radius: 100px;
-  box-shadow: 0 8px 5px rgba(0, 0, 0, 0.1);
-  height: 120px;
-  width: 350px;
-  position: relative;
-}
-
-.cloud:after,
-.cloud:before {
-  content: "";
+.login-grid {
   position: absolute;
-  background: #fff;
-  z-index: -1;
+  inset: 0;
+  background-image:
+      linear-gradient(rgba(20, 75, 120, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20, 75, 120, 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.72), transparent 70%);
 }
 
-.cloud:after {
-  border-radius: 100px;
-  height: 100px;
-  left: 50px;
-  top: -50px;
-  width: 100px;
+:global(.dark) .login-grid {
+  background-image:
+      linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
 }
 
-.cloud:before {
-  border-radius: 200px;
-  height: 180px;
-  width: 180px;
-  right: 50px;
-  top: -90px;
+.login-backdrop {
+  position: absolute;
+  border: 1px solid rgba(24, 144, 255, 0.12);
+  border-radius: 8px;
+  background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.08)),
+      linear-gradient(180deg, rgba(24, 144, 255, 0.08), rgba(24, 144, 255, 0));
+  box-shadow: 0 28px 80px rgba(25, 62, 104, 0.1);
+}
+
+:global(.dark) .login-backdrop {
+  border-color: rgba(255, 255, 255, 0.06);
+  background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015)),
+      linear-gradient(180deg, rgba(102, 177, 255, 0.08), rgba(102, 177, 255, 0));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.login-backdrop-primary {
+  width: 420px;
+  height: 240px;
+  left: clamp(24px, 10vw, 140px);
+  top: 13%;
+  transform: rotate(-8deg);
+}
+
+.login-backdrop-secondary {
+  width: 300px;
+  height: 190px;
+  left: clamp(30px, 20vw, 280px);
+  bottom: 14%;
+  transform: rotate(6deg);
 }
 
 </style>
