@@ -7,6 +7,7 @@ export const ACCESS_JWT_HEADER = 'Cf-Access-Jwt-Assertion';
 export const ACCESS_EMAIL_HEADER = 'Cf-Access-Authenticated-User-Email';
 export const EXTERNAL_ACCESS_USER_ID = 0;
 export const EXTERNAL_ACCESS_PERM_KEYS = ['all-email:query'];
+export const READ_ONLY_EXTERNAL_ACCESS_PERM_KEYS = ['all-email:query'];
 
 const EXTERNAL_ROLE = {
 	name: 'external-viewer',
@@ -109,9 +110,19 @@ export function isInternalAccessEmail(email, domains = [], adminEmail = '') {
 	return normalizeDomains(domains).includes(domain);
 }
 
-export function createExternalAccessUser(email) {
+export function normalizeExternalAccessPermKeys(value) {
+	const values = Array.isArray(value) ? value : String(value || '').split(',');
+	const keys = values
+		.map(item => String(item).trim())
+		.filter(item => READ_ONLY_EXTERNAL_ACCESS_PERM_KEYS.includes(item));
+	const uniqueKeys = [...new Set(keys)];
+	return uniqueKeys.length > 0 ? uniqueKeys : [...EXTERNAL_ACCESS_PERM_KEYS];
+}
+
+export function createExternalAccessUser(email, permKeys = EXTERNAL_ACCESS_PERM_KEYS) {
 	const normalizedEmail = normalizeAccessEmail(email);
 	const name = normalizedEmail?.split('@')[0] || 'external';
+	const externalPermKeys = normalizeExternalAccessPermKeys(permKeys);
 
 	return {
 		userId: EXTERNAL_ACCESS_USER_ID,
@@ -129,7 +140,7 @@ export function createExternalAccessUser(email) {
 			name
 		},
 		role: { ...EXTERNAL_ROLE },
-		permKeys: [...EXTERNAL_ACCESS_PERM_KEYS]
+		permKeys: externalPermKeys
 	};
 }
 

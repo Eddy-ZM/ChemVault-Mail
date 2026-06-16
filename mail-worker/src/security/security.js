@@ -5,16 +5,17 @@ import KvConst from '../const/kv-const';
 import dayjs from 'dayjs';
 import userService from '../service/user-service';
 import permService from '../service/perm-service';
+import settingService from '../service/setting-service';
 import { t } from '../i18n/i18n'
 import app from '../hono/hono';
 import { userConst } from '../const/entity-const';
 import {
 	ACCESS_AUTH_TYPE,
-	EXTERNAL_ACCESS_PERM_KEYS,
 	accessEmailFromHeaders,
 	createExternalAccessUser,
 	isExternalWriteBlocked,
-	isInternalAccessEmail
+	isInternalAccessEmail,
+	normalizeExternalAccessPermKeys
 } from './cloudflare-access';
 
 const exclude = [
@@ -142,7 +143,7 @@ app.use('*', async (c, next) => {
 
 	if (permIndex > -1) {
 
-		const permKeys = auth.user.externalAccess ? EXTERNAL_ACCESS_PERM_KEYS : await permService.userPermKeys(c, auth.user.userId);
+		const permKeys = auth.user.externalAccess ? auth.user.permKeys : await permService.userPermKeys(c, auth.user.userId);
 
 		const userPaths = permKeyToPaths(permKeys);
 
@@ -238,9 +239,12 @@ async function resolveCloudflareAccessAuth(c, accessEmail = null) {
 		};
 	}
 
+	const settings = await settingService.query(c);
+	const permKeys = normalizeExternalAccessPermKeys(settings.cloudflareAccessExternalPerms);
+
 	return {
 		authType: ACCESS_AUTH_TYPE.CLOUDFLARE_ACCESS,
-		user: createExternalAccessUser(accessEmail)
+		user: createExternalAccessUser(accessEmail, permKeys)
 	};
 }
 

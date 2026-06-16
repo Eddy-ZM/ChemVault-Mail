@@ -9,6 +9,7 @@ import BizError from '../error/biz-error';
 import {t} from '../i18n/i18n'
 import verifyRecordService from './verify-record-service';
 import userContext from '../security/user-context';
+import { normalizeExternalAccessPermKeys } from '../security/cloudflare-access';
 
 function normalizeAppleApiBaseURL(value) {
 	if (value === null || value === undefined) return '';
@@ -95,6 +96,7 @@ const settingService = {
 		setting.linuxdoSwitch = linuxdoSwitch;
 
 		setting.emailPrefixFilter = setting.emailPrefixFilter.split(",").filter(Boolean);
+		setting.cloudflareAccessExternalPerms = normalizeExternalAccessPermKeys(setting.cloudflareAccessExternalPerms);
 
 		c.set?.('setting', setting);
 		return setting;
@@ -157,6 +159,10 @@ const settingService = {
 
 		if (Array.isArray(params.aiCodeFilter)) {
 			params.aiCodeFilter = params.aiCodeFilter + '';
+		}
+
+		if (params.cloudflareAccessExternalPerms !== undefined) {
+			params.cloudflareAccessExternalPerms = normalizeExternalAccessPermKeys(params.cloudflareAccessExternalPerms) + '';
 		}
 
 		if (params.loginDarkenFactor !== undefined) {

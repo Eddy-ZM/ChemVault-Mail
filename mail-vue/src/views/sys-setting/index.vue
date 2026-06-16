@@ -71,6 +71,19 @@
                   </el-button>
                 </div>
               </div>
+              <div class="setting-item">
+                <div>
+                  <span>{{ $t('cloudflareAccess') }}</span>
+                  <el-tooltip effect="dark" :content="$t('cloudflareAccessExternalPermsDesc')">
+                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  </el-tooltip>
+                </div>
+                <div class="forward">
+                  <el-button class="opt-button" size="small" type="primary" @click="openCloudflareAccessPerms">
+                    <Icon icon="fluent:settings-48-regular" width="18" height="18"/>
+                  </el-button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -744,6 +757,25 @@
         </div>
         <el-button type="primary" style="width: 100%;" :loading="settingLoading" @click="saveEmailPrefix">{{ $t('save') }}</el-button>
       </el-dialog>
+      <el-dialog v-model="cloudflareAccessPermsShow" class="forward-dialog" @closed="resetCloudflareAccessPerms">
+        <template #header>
+          <div class="forward-head">
+            <span class="forward-set-title">{{ $t('cloudflareAccessExternalPerms') }}</span>
+            <el-tooltip effect="dark" :content="$t('cloudflareAccessExternalPermsDesc')">
+              <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            </el-tooltip>
+          </div>
+        </template>
+        <el-checkbox-group v-model="cloudflareAccessExternalPerms" class="access-perms">
+          <el-checkbox
+              v-for="item in cloudflareAccessPermOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+          />
+        </el-checkbox-group>
+        <el-button type="primary" style="width: 100%;" :loading="settingLoading" @click="saveCloudflareAccessPerms">{{ $t('save') }}</el-button>
+      </el-dialog>
       <el-dialog v-model="blackFormShow" class="forward-dialog" @closed="resetBlackList">
         <template #header>
           <div class="forward-head">
@@ -829,6 +861,7 @@ const noticePopupShow = ref(false)
 const thirdEmailShow = ref(false)
 const forwardRulesShow = ref(false)
 const emailPrefixShow = ref(false)
+const cloudflareAccessPermsShow = ref(false)
 const showResendList = ref(false)
 const settingStore = useSettingStore();
 const uiStore = useUiStore();
@@ -841,6 +874,7 @@ const loginOpacity = ref(0)
 const loginDarkenFactor = ref(0)
 const minEmailPrefix = ref(0)
 const emailPrefixFilter = ref([])
+const cloudflareAccessExternalPerms = ref([])
 const backgroundUrl = ref('')
 let backgroundFile = {}
 const showSetBackground = ref(false)
@@ -901,6 +935,10 @@ const authRefreshOptions = computed(() => [
   {label: '20s', value: 20},
 ])
 
+const cloudflareAccessPermOptions = computed(() => [
+  {label: t('allMailReadPermission'), value: 'all-email:query'}
+])
+
 const tgChatId = ref([])
 const customDomain = ref('')
 const tgBotStatus = ref(0)
@@ -941,6 +979,7 @@ function getSettings() {
     resetNoticeForm()
     resetAddS3Form()
     resetEmailPrefix()
+    resetCloudflareAccessPerms()
     resetBlackList()
     resetAiCodeFilter()
     nextTick(() => {
@@ -1097,6 +1136,11 @@ function openEmailPrefix() {
   emailPrefixShow.value = true
 }
 
+function openCloudflareAccessPerms() {
+  resetCloudflareAccessPerms()
+  cloudflareAccessPermsShow.value = true
+}
+
 function openForwardRules() {
   ruleType.value = setting.value.ruleType
   ruleEmail.value = []
@@ -1234,6 +1278,12 @@ function resetEmailPrefix() {
   emailPrefixFilter.value = setting.value.emailPrefixFilter
 }
 
+function resetCloudflareAccessPerms() {
+  cloudflareAccessExternalPerms.value = Array.isArray(setting.value.cloudflareAccessExternalPerms)
+      ? [...setting.value.cloudflareAccessExternalPerms]
+      : []
+}
+
 function resetBlackList() {
   blackListForm.value.blackFrom = setting.value.blackFrom ? setting.value.blackFrom.split(',') : []
   blackListForm.value.blackContent = setting.value.blackContent ? setting.value.blackContent.split(',') : []
@@ -1249,6 +1299,10 @@ function saveEmailPrefix() {
   form.minEmailPrefix = minEmailPrefix.value
   form.emailPrefixFilter = emailPrefixFilter.value
   editSetting(form, true)
+}
+
+function saveCloudflareAccessPerms() {
+  editSetting({cloudflareAccessExternalPerms: cloudflareAccessExternalPerms.value + ''})
 }
 
 function saveAiCodeFilter() {
@@ -1495,6 +1549,7 @@ function editSetting(settingForm, refreshStatus = true) {
     noticePopupShow.value = false
     addS3Show.value = false
     emailPrefixShow.value = false
+    cloudflareAccessPermsShow.value = false
     aiCodeFilterShow.value = false
   }).catch((e) => {
     loginOpacity.value = setting.value.loginOpacity
@@ -1536,6 +1591,12 @@ function editSetting(settingForm, refreshStatus = true) {
     pointer-events: none;
     opacity: 0;
   }
+}
+
+.access-perms {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .scroll {

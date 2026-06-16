@@ -7,6 +7,7 @@ import {
 	createExternalAccessUser,
 	isExternalWriteBlocked,
 	isInternalAccessEmail,
+	normalizeExternalAccessPermKeys,
 	normalizeAccessEmail
 } from '../src/security/cloudflare-access.js';
 
@@ -112,6 +113,12 @@ describe('Cloudflare Access auth helpers', () => {
 		expect(user.permKeys).toContain('all-email:query');
 		expect(user.permKeys).not.toContain('email:send');
 		expect(user.permKeys).not.toContain('all-email:delete');
+	});
+
+	it('normalizes configurable external Access permissions to read-only permissions only', () => {
+		expect(normalizeExternalAccessPermKeys('all-email:query,email:send,all-email:delete,unknown')).toEqual(['all-email:query']);
+		expect(normalizeExternalAccessPermKeys(['all-email:query', 'email:send'])).toEqual(['all-email:query']);
+		expect(normalizeExternalAccessPermKeys('')).toEqual(EXTERNAL_ACCESS_PERM_KEYS);
 	});
 
 	it('blocks mutations for external Access users while allowing read requests', () => {
