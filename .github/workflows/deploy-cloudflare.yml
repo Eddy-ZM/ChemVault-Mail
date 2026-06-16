@@ -32,6 +32,8 @@ jobs:
       LINUXDO_CLIENT_SECRET: ${{ secrets.LINUXDO_CLIENT_SECRET || vars.LINUXDO_CLIENT_SECRET }}
       LINUXDO_CALLBACK_URL: ${{ secrets.LINUXDO_CALLBACK_URL || vars.LINUXDO_CALLBACK_URL }}
       LINUXDO_SWITCH: ${{ secrets.LINUXDO_SWITCH || vars.LINUXDO_SWITCH }}
+      CLOUDFLARE_ACCESS_TEAM_DOMAIN: ${{ secrets.CLOUDFLARE_ACCESS_TEAM_DOMAIN || vars.CLOUDFLARE_ACCESS_TEAM_DOMAIN }}
+      CLOUDFLARE_ACCESS_AUD: ${{ secrets.CLOUDFLARE_ACCESS_AUD || vars.CLOUDFLARE_ACCESS_AUD }}
 
 
     outputs:
@@ -110,6 +112,10 @@ jobs:
           if [ -z "$LINUXDO_CLIENT_ID" ] || [ -z "$LINUXDO_CLIENT_SECRET" ]; then
             sed -i '/^linuxdo_client_id = /,/^linuxdo_switch = /d' "$CONFIG_FILE"
           fi
+
+          if [ -z "$CLOUDFLARE_ACCESS_TEAM_DOMAIN" ] || [ -z "$CLOUDFLARE_ACCESS_AUD" ]; then
+            sed -i '/^cloudflare_access_team_domain = /,/^cloudflare_access_aud = /d' "$CONFIG_FILE"
+          fi
           
           if [ -z "$CUSTOM_DOMAIN" ]; then
             sed -i '/\[\[routes\]\]/,/^$/d' "$CONFIG_FILE"
@@ -136,6 +142,8 @@ jobs:
           sed -i "s|\${LINUXDO_CLIENT_SECRET}|${LINUXDO_CLIENT_SECRET}|g" "$CONFIG_FILE"
           sed -i "s|\${LINUXDO_CALLBACK_URL}|${LINUXDO_CALLBACK_URL}|g" "$CONFIG_FILE"
           sed -i "s|\${LINUXDO_SWITCH}|${LINUXDO_SWITCH}|g" "$CONFIG_FILE"
+          sed -i "s|\${CLOUDFLARE_ACCESS_TEAM_DOMAIN}|${CLOUDFLARE_ACCESS_TEAM_DOMAIN}|g" "$CONFIG_FILE"
+          sed -i "s|\${CLOUDFLARE_ACCESS_AUD}|${CLOUDFLARE_ACCESS_AUD}|g" "$CONFIG_FILE"
           
           echo "✅ Environment setup completed."
 

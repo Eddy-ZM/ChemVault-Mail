@@ -3,6 +3,7 @@ import NProgress from 'nprogress';
 import {useUiStore} from "@/store/ui.js";
 import {useSettingStore} from "@/store/setting.js";
 import {cvtR2Url} from "@/utils/convert.js";
+import {useUserStore} from "@/store/user.js";
 
 const routes = [
     {
@@ -99,17 +100,20 @@ router.beforeEach((to, from, next) => {
     }
 
     const token = localStorage.getItem('token')
+    const userStore = useUserStore();
+    const hasAccessSession = userStore.user?.authType === 'cloudflare-access';
+    const hasSession = token || hasAccessSession;
 
-    if (!token && to.name !== 'login') {
+    if (!hasSession && to.name !== 'login') {
         return next({name: 'login'})
     }
 
-    if (!token && to.name === 'login') {
+    if (!hasSession && to.name === 'login') {
         loadBackground(next)
         return
     }
 
-    if (token && to.name === 'login') {
+    if (hasSession && to.name === 'login') {
         return next(from.path)
     }
 

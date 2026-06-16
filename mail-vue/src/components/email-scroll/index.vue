@@ -249,7 +249,7 @@
               </div>
             </template>
           </el-dropdown-item>
-          <el-dropdown-item @click="rightDelete(rightClickEmail.emailId)">
+          <el-dropdown-item v-if="canDelete" @click="rightDelete(rightClickEmail.emailId)">
             <template #default>
               <div class="right-dropdown-item">
                 <Icon icon="uiw:delete" width="16" height="20" style="margin-left: 1px;margin-right: 3px" />
@@ -363,6 +363,10 @@ const position = ref(
       y: 0,
     })
 )
+
+const canDelete = computed(() => {
+  return props.type === 'all-email' ? hasPerm('all-email:delete') : hasPerm('email:delete')
+})
 
 const triggerRef = ref({
   getBoundingClientRect() {

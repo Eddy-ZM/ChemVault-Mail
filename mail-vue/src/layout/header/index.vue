@@ -47,7 +47,7 @@
           <Icon icon="streamline-plump:announcement-megaphone"/>
         </div>
       </el-tooltip>
-      <el-dropdown ref="userinfoRef" @visible-change="e => userInfoShow = e" :teleported="false" popper-class="detail-dropdown">
+      <el-dropdown ref="userinfoRef" @visible-change="e => userInfoShow = e" :teleported="true" popper-class="detail-dropdown user-detail-popper">
         <div
             class="avatar magnetic-action"
             role="button"
@@ -77,25 +77,25 @@
               <el-tag>{{ userStore.user.role.name }}</el-tag>
             </div>
             <div class="action-info">
-              <div>
-                <span style="margin-right: 10px">{{ $t('sendCount') }}</span>
-                <span style="margin-right: 10px">{{ $t('accountCount') }}</span>
+              <div class="quota-row">
+                <span class="quota-label">{{ $t('sendCount') }}</span>
+                <span class="quota-value">
+                  <span v-if="sendCount" class="quota-count">{{ sendCount }}</span>
+                  <el-tag size="small">{{ sendType }}</el-tag>
+                </span>
               </div>
-              <div>
-                <div>
-                  <span v-if="sendCount" style="margin-right: 5px">{{ sendCount }}</span>
-                  <el-tag v-if="!hasPerm('email:send')">{{ sendType }}</el-tag>
-                  <el-tag v-else>{{ sendType }}</el-tag>
-                </div>
-                <div>
-                  <el-tag v-if="settingStore.settings.manyEmail || settingStore.settings.addEmail">
+              <div class="quota-row">
+                <span class="quota-label">{{ $t('accountCount') }}</span>
+                <span class="quota-value">
+                  <el-tag v-if="settingStore.settings.manyEmail || settingStore.settings.addEmail" size="small">
                     {{ $t('disabled') }}
                   </el-tag>
-                  <span v-else-if="accountCount && hasPerm('account:add')"
-                        style="margin-right: 5px">{{ $t('totalUserAccount', {msg: accountCount}) }}</span>
-                  <el-tag v-else-if="!accountCount && hasPerm('account:add')">{{ $t('unlimited') }}</el-tag>
-                  <el-tag v-else-if="!hasPerm('account:add')">{{ $t('unauthorized') }}</el-tag>
-                </div>
+                  <span v-else-if="accountCount && hasPerm('account:add')" class="quota-count">
+                    {{ $t('totalUserAccount', {msg: accountCount}) }}
+                  </span>
+                  <el-tag v-else-if="!accountCount && hasPerm('account:add')" size="small">{{ $t('unlimited') }}</el-tag>
+                  <el-tag v-else-if="!hasPerm('account:add')" size="small">{{ $t('unauthorized') }}</el-tag>
+                </span>
               </div>
             </div>
             <div class="logout">
@@ -277,6 +277,12 @@ function changeAside() {
 }
 
 function clickLogout() {
+  if (userStore.user.authType === 'cloudflare-access') {
+    localStorage.removeItem("token")
+    window.location.href = '/cdn-cgi/access/logout'
+    return
+  }
+
   logoutLoading.value = true
   logout().then(() => {
     localStorage.removeItem("token")
@@ -295,6 +301,23 @@ function formatName(email) {
 .detail-dropdown {
   color: var(--el-text-color-primary) !important;
 }
+
+.detail-dropdown.user-detail-popper {
+  z-index: 3000 !important;
+}
+
+.detail-dropdown.user-detail-popper.el-popper {
+  overflow: hidden;
+  border: 1px solid var(--premium-surface-border);
+  border-radius: 10px;
+  background: var(--el-bg-color-overlay);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18);
+}
+
+.detail-dropdown.user-detail-popper .el-popper__arrow::before {
+  border-color: var(--premium-surface-border);
+  background: var(--el-bg-color-overlay);
+}
 </style>
 <style lang="scss" scoped>
 
@@ -303,18 +326,24 @@ function formatName(email) {
 }
 
 .user-details {
-  width: 250px;
+  box-sizing: border-box;
+  width: min(320px, calc(100vw - 24px));
+  padding: 18px;
   font-size: 14px;
-  display: grid;
-  grid-template-columns: 1fr;
-  justify-items: center;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--el-bg-color-overlay);
 
   .user-name {
     font-weight: bold;
-    margin-top: 10px;
-    padding-left: 20px;
-    padding-right: 20px;
-    width: 250px;
+    font-size: 15px;
+    line-height: 20px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -322,37 +351,67 @@ function formatName(email) {
   }
 
   .detail-user-type {
-    margin-top: 10px;
+    max-width: 100%;
+  }
+
+  .detail-user-type :deep(.el-tag) {
+    max-width: 100%;
   }
 
   .action-info {
+    box-sizing: border-box;
     width: 100%;
     display: grid;
-    grid-template-columns: auto auto;
-    margin-top: 10px;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 10px;
+    border: 1px solid var(--premium-surface-border);
+    border-radius: 8px;
+    background: var(--premium-surface);
+  }
 
-    > div:first-child {
-      display: grid;
-      align-items: center;
-      gap: 10px;
-    }
+  .quota-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    min-height: 24px;
+  }
 
-    > div:last-child {
-      display: grid;
-      gap: 10px;
-      text-align: center;
+  .quota-label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    text-overflow: ellipsis;
+    color: var(--regular-text-color);
+  }
 
-      > div {
-        display: flex;
-        align-items: center;
-      }
-    }
+  .quota-value {
+    min-width: 0;
+    max-width: 170px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    text-align: right;
+  }
+
+  .quota-count {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 600;
   }
 
   .detail-email {
-    padding-left: 20px;
-    padding-right: 20px;
-    width: 250px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 0 8px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -362,21 +421,20 @@ function formatName(email) {
   }
 
   .logout {
-    margin-top: 20px;
+    margin-top: 6px;
     width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
+    padding: 0;
 
     .el-button {
       border-radius: 6px;
-      height: 28px;
+      height: 36px;
       width: 100%;
+      font-weight: 600;
     }
   }
 
   .details-avatar {
-    margin-top: 20px;
+    margin-bottom: 4px;
     height: 40px;
     width: 40px;
     background: var(--el-bg-color);

@@ -47,6 +47,10 @@ const jwtUtils = {
 	},
 
 	async verifyToken(c, token) {
+		if (typeof token !== 'string') {
+			return null;
+		}
+
 		try {
 			const [headerB64, payloadB64, signatureB64] = token.split('.');
 

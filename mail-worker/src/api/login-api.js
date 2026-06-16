@@ -14,7 +14,10 @@ app.post('/register', async (c) => {
 });
 
 app.delete('/logout', async (c) => {
+	if (userContext.getUser(c).authType === 'cloudflare-access') {
+		return c.json(result.ok());
+	}
+
 	await loginService.logout(c, userContext.getUserId(c));
 	return c.json(result.ok());
 });
-

@@ -25,33 +25,29 @@ export async function init() {
 
     let setting = null;
 
-    if (token) {
-        const userPromise = loginUserInfo().catch(e => {
+    const userPromise = loginUserInfo({ noMsg: true }).catch(e => {
+        if (token) {
             console.error(e);
-            return null;
-        });
-
-        const [s, user] = await Promise.all([websiteConfig(), userPromise]);
-        setting = s;
-        settingStore.settings = setting;
-        settingStore.domainList = setting.domainList;
-        document.title = setting.title;
-
-        if (user) {
-            accountStore.currentAccountId = user.account.accountId;
-            accountStore.currentAccount = user.account;
-            userStore.user = user;
-
-            const routers = permsToRouter(user.permKeys);
-            routers.forEach(routerData => {
-                router.addRoute('layout', routerData);
-            });
         }
+        return null;
+    });
 
-    } else {
-        setting = await websiteConfig();
-        settingStore.settings = setting;
-        settingStore.domainList = setting.domainList;
-        document.title = setting.title;
+    const [s, user] = await Promise.all([websiteConfig(), userPromise]);
+    setting = s;
+    settingStore.settings = setting;
+    settingStore.domainList = setting.domainList;
+    document.title = setting.title;
+
+    if (user) {
+        accountStore.currentAccountId = user.account?.accountId || 0;
+        accountStore.currentAccount = user.account || {};
+        userStore.user = user;
+
+        const routers = permsToRouter(user.permKeys || []);
+        routers.forEach(routerData => {
+            if (!router.hasRoute(routerData.name)) {
+                router.addRoute('layout', routerData);
+            }
+        });
     }
 }

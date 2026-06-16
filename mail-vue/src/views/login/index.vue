@@ -8,16 +8,9 @@
     <div v-else :style="background"></div>
     <div class="form-wrapper">
       <div class="container">
-        <div class="identity-block">
-          <div class="brand-mark" aria-hidden="true">
-            <Icon icon="mdi:email-lock-outline" width="24" height="24"/>
-          </div>
-          <div class="identity-copy">
-            <span class="form-title">{{ settingStore.settings.title }}</span>
-            <span class="form-desc" v-if="show === 'login'">{{ $t('loginTitle') }}</span>
-            <span class="form-desc" v-else>{{ $t('regTitle') }}</span>
-          </div>
-        </div>
+        <span class="form-title">{{ settingStore.settings.title }}</span>
+        <span class="form-desc" v-if="show === 'login'">{{ $t('loginTitle') }}</span>
+        <span class="form-desc" v-else>{{ $t('regTitle') }}</span>
         <div v-show="show === 'login'">
           <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="form.email"
                     type="text" :placeholder="$t('emailAccount')" :aria-label="$t('emailAccount')" autocomplete="username">
@@ -609,99 +602,58 @@ function submitRegister() {
 
 .form-wrapper {
   position: fixed;
-  inset: 0;
+  right: 0;
+  height: 100%;
   z-index: 10;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
+  display: flex;
   align-items: center;
-  justify-items: end;
-  padding: clamp(24px, 5vw, 64px);
-  pointer-events: none;
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
+  justify-content: center;
   @media (max-width: 767px) {
-    padding: 18px;
+    width: 100%;
   }
 }
 
 .container {
   background: v-bind(loginOpacity);
-  padding: 36px;
+  padding-left: 40px;
+  padding-right: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: min(430px, 100%);
-  min-height: auto;
-  border: 1px solid var(--premium-surface-border);
-  border-radius: 8px;
-  box-shadow: var(--premium-shadow-hover);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  pointer-events: auto;
+  width: 450px;
+  height: 100%;
+  border-left: 1px solid var(--login-border);
+  box-shadow: var(--el-box-shadow-light);
   @media (max-width: 1024px) {
-    width: min(430px, 100%);
+    padding: 20px 18px;
+    width: 384px;
+    margin-left: 18px;
   }
   @media (max-width: 767px) {
-    padding: 24px 18px;
+    border: 1px solid var(--login-border);
+    padding: 20px 18px;
+    border-radius: 6px;
+    height: fit-content;
+    width: 100%;
+    margin-right: 18px;
+    margin-left: 18px;
   }
 
   .btn {
-    height: 40px;
+    height: 36px;
     width: 100%;
     border-radius: 6px;
-    font-weight: 600;
-    transition:
-        transform var(--motion-duration-base) var(--motion-smooth),
-        box-shadow var(--motion-duration-base) var(--motion-smooth),
-        border-color var(--motion-duration-base) var(--motion-smooth);
-  }
-
-  .btn:active {
-    transform: scale(0.98);
-  }
-
-  .btn.el-button--primary {
-    box-shadow: 0 10px 24px rgba(24, 144, 255, 0.24);
   }
 
   .form-desc {
-    margin-top: 4px;
+    margin-top: 5px;
+    margin-bottom: 18px;
     color: var(--form-desc-color);
-    line-height: 1.55;
   }
 
   .form-title {
     font-weight: bold;
-    font-size: 24px !important;
-    line-height: 1.2;
-  }
-
-  .identity-block {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    margin-bottom: 26px;
-  }
-
-  .brand-mark {
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #1890ff, #1064c0);
-    box-shadow: 0 12px 28px rgba(24, 144, 255, 0.24);
-  }
-
-  .identity-copy {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
+    font-size: 22px !important;
   }
 
   .switch {
@@ -716,31 +668,21 @@ function submitRegister() {
 
   :deep(.el-input__wrapper) {
     border-radius: 6px;
-    background: var(--premium-surface);
-    border: 1px solid var(--premium-surface-border);
-    box-shadow: var(--premium-inset);
-    transition:
-        border-color var(--motion-duration-base) var(--motion-smooth),
-        box-shadow var(--motion-duration-base) var(--motion-smooth),
-        background-color var(--motion-duration-base) var(--motion-smooth);
-  }
-
-  :deep(.el-input__wrapper.is-focus) {
-    border-color: var(--el-color-primary-light-5);
-    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.12);
+    background: var(--el-bg-color);
   }
 
   .email-input :deep(.el-input__wrapper) {
     border-radius: 6px 0 0 6px;
+    background: var(--el-bg-color);
   }
 
   .el-input {
-    height: 42px;
+    height: 38px;
     width: 100%;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 
     :deep(.el-input__inner) {
-      height: 40px;
+      height: 36px;
     }
   }
 }
@@ -790,8 +732,7 @@ function submitRegister() {
   padding: 0 !important;
   padding-left: 8px !important;
   padding-right: 4px !important;
-  background: var(--premium-surface);
-  border-color: var(--premium-surface-border);
+  background: var(--el-bg-color);
   border-radius: 0 8px 8px 0;
 }
 
