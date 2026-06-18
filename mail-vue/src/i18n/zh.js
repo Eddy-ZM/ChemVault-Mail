@@ -159,6 +159,7 @@ const zh = {
     cloudflareAccessExternalPerms: '外部邮箱权限',
     cloudflareAccessExternalPermsDesc: 'Cloudflare Access 外部邮箱优先使用 Role 页面指定的角色权限；未指定角色时使用这里的兼容权限',
     cloudflareAccessRoleDesc: 'Cloudflare Access 外部邮箱登录后会使用这个角色的读写权限',
+    useForCloudflareAccess: '作为 Cloudflare 外部角色',
     setCloudflareAccessRole: '设为 Cloudflare 外部角色',
     clearCloudflareAccessRole: '取消 Cloudflare 外部角色',
     allMailReadPermission: '全部邮件查看',

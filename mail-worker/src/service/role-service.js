@@ -36,12 +36,14 @@ const roleService = {
 		roleRow = await orm(c).insert(role).values({...params, banEmail, availDomain, userId}).returning().get();
 
 		if (permIds.length === 0) {
-			return;
+			return roleRow;
 		}
 
 		const rolePermList = permIds.map(permId => ({ permId, roleId: roleRow.roleId }));
 
 		await orm(c).insert(rolePerm).values(rolePermList).run();
+
+		return roleRow;
 
 
 	},

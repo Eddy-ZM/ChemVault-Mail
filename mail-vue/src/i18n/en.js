@@ -159,6 +159,7 @@ const en = {
     cloudflareAccessExternalPerms: 'External Email Permissions',
     cloudflareAccessExternalPermsDesc: 'External Cloudflare Access emails use the role selected in Role first; these compatibility permissions are used only when no role is selected.',
     cloudflareAccessRoleDesc: 'External Cloudflare Access emails inherit this role\'s read and write permissions after sign-in.',
+    useForCloudflareAccess: 'Use as Cloudflare Access role',
     setCloudflareAccessRole: 'Use for Cloudflare Access',
     clearCloudflareAccessRole: 'Clear Cloudflare Access role',
     allMailReadPermission: 'View all mail',

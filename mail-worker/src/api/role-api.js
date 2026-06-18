@@ -6,8 +6,8 @@ import permService from '../service/perm-service';
 import settingService from '../service/setting-service';
 
 app.post('/role/add', async (c) => {
-	await roleService.add(c, await c.req.json(), userContext.getUserId(c));
-	return c.json(result.ok());
+	const role = await roleService.add(c, await c.req.json(), userContext.getUserId(c));
+	return c.json(result.ok(role));
 });
 
 app.put('/role/setDefault', async (c) => {
@@ -45,5 +45,4 @@ app.get('/role/selectUse', async (c) => {
 	const roleList = await roleService.roleSelectUse(c);
 	return c.json(result.ok(roleList));
 });
-
 

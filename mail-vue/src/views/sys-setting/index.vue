@@ -659,6 +659,7 @@
               <el-option key="success" label="Success" value="success"/>
               <el-option key="warning" label="Warning" value="warning"/>
               <el-option key="info" label="Info" value="info"/>
+              <el-option key="destructive" label="Destructive" value="destructive"/>
             </el-select>
             <el-select v-model="noticeForm.noticePosition">
               <template #prefix>

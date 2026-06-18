@@ -104,6 +104,13 @@
           <el-input-number :placeholder="$t('order')" :min="0" :max="9999" v-model.number="form.sort"
                            controls-position="right" autocomplete="off"/>
         </div>
+        <div class="dialog-input access-role-setting">
+          <div class="access-role-copy">
+            <div class="access-role-title">{{ $t('useForCloudflareAccess') }}</div>
+            <div class="access-role-desc">{{ $t('cloudflareAccessRoleDesc') }}</div>
+          </div>
+          <el-switch v-model="form.cloudflareAccessExternalRole"/>
+        </div>
         <el-radio-group v-model="expand" size="small" @change="expandChange" class="perm-expand">
           <el-radio-button :label="$t('expand')" :value="true"/>
           <el-radio-button :label="$t('collapse')" :value="false"/>
@@ -196,7 +203,8 @@ const form = reactive({
   accountCount: 0,
   sort: 0,
   isDefault: 0,
-  availDomain: []
+  availDomain: [],
+  cloudflareAccessExternalRole: false
 })
 
 let domainOptions = []
@@ -266,14 +274,34 @@ function isCloudflareAccessRole(role) {
 
 function setCloudflareAccessRole(role) {
   const nextRoleId = isCloudflareAccessRole(role) ? 0 : role.roleId;
-  roleSetCloudflareAccess(nextRoleId).then(() => {
-    settingStore.settings.cloudflareAccessExternalRoleId = nextRoleId;
+  saveCloudflareAccessRole(nextRoleId).then(() => {
     ElMessage({
       message: t('saveSuccessMsg'),
       type: "success",
       plain: true
     })
   })
+}
+
+function saveCloudflareAccessRole(roleId) {
+  const normalizedRoleId = Number(roleId) || 0;
+  return roleSetCloudflareAccess(normalizedRoleId).then(() => {
+    settingStore.settings.cloudflareAccessExternalRoleId = normalizedRoleId;
+  })
+}
+
+function syncCloudflareAccessRole(roleId, enabled) {
+  const currentRoleId = Number(settingStore.settings.cloudflareAccessExternalRoleId) || 0;
+  const normalizedRoleId = Number(roleId) || 0;
+  const nextRoleId = enabled
+      ? normalizedRoleId
+      : (currentRoleId === normalizedRoleId ? 0 : currentRoleId);
+
+  if (nextRoleId === currentRoleId) {
+    return Promise.resolve();
+  }
+
+  return saveCloudflareAccessRole(nextRoleId);
 }
 
 function delRole(role) {
@@ -310,7 +338,7 @@ function expandChange(e) {
 
 }
 
-function setRole() {
+async function setRole() {
 
   if (!form.name) {
     ElMessage({
@@ -321,13 +349,12 @@ function setRole() {
     return
   }
 
-  const params = {...form, roleId: chooseRole.roleId}
-  const checkedId = tree.value.getCheckedKeys()
-  const halfId = tree.value.getHalfCheckedKeys()
-  params.permIds = [...checkedId, ...halfId]
+  const params = buildRoleParams({roleId: chooseRole.roleId})
 
   permLoading.value = true
-  roleSet(params).then(() => {
+  try {
+    await roleSet(params)
+    await syncCloudflareAccessRole(chooseRole.roleId, form.cloudflareAccessExternalRole)
     ElMessage({
       message: t('saveSuccessMsg'),
       type: "success",
@@ -342,9 +369,9 @@ function setRole() {
 
     roleFormShow.value = false
     getRoleList()
-  }).finally(() => {
+  } finally {
     permLoading.value = false
-  })
+  }
 }
 
 function resetForm() {
@@ -356,6 +383,7 @@ function resetForm() {
   form.accountCount = 0
   form.banEmail = []
   form.availDomain = []
+  form.cloudflareAccessExternalRole = false
   tree.value.setCheckedKeys([])
 }
 
@@ -372,6 +400,7 @@ function openRoleSet(role) {
   form.accountCount = role.accountCount
   form.banEmail = role.banEmail
   form.availDomain = role.availDomain
+  form.cloudflareAccessExternalRole = isCloudflareAccessRole(role)
   nextTick(() => {
     tree.value.setCheckedKeys(role.permIds)
   })
@@ -384,14 +413,24 @@ function openAddRole() {
   roleFormShow.value = true
 }
 
-function addRole() {
-  const params = {...form}
+function buildRoleParams(extra = {}) {
+  const params = {...form, ...extra}
+  delete params.cloudflareAccessExternalRole
   const checkedId = tree.value.getCheckedKeys()
   const halfId = tree.value.getHalfCheckedKeys()
   params.permIds = [...checkedId, ...halfId]
+  return params
+}
+
+async function addRole() {
+  const params = buildRoleParams()
 
   permLoading.value = true
-  roleAdd(params).then(() => {
+  try {
+    const role = await roleAdd(params)
+    if (form.cloudflareAccessExternalRole && role?.roleId) {
+      await saveCloudflareAccessRole(role.roleId)
+    }
     ElMessage({
       message: t('addSuccessMsg'),
       type: "success",
@@ -400,9 +439,9 @@ function addRole() {
     roleFormShow.value = false
     getRoleList()
     roleStore.refreshSelect()
-  }).finally(() => {
+  } finally {
     permLoading.value = false
-  })
+  }
 }
 
 
@@ -549,6 +588,36 @@ window.onresize = () => {
   .dialog-input {
     margin-bottom: 15px !important;
   }
+}
+
+.access-role-setting {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--el-fill-color-lighter);
+}
+
+.access-role-copy {
+  min-width: 0;
+}
+
+.access-role-title {
+  color: var(--el-text-color-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.access-role-desc {
+  margin-top: 2px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .perm-expand {
