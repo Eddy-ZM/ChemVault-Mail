@@ -63,8 +63,8 @@ onBeforeUnmount(() => {
 }
 
 .aside-show {
-  -webkit-box-shadow: var(--aside-right-border);
-  box-shadow: var(--aside-right-border);
+  -webkit-box-shadow: none;
+  box-shadow: none;
   transform: translateX(0);
   transition:
       transform var(--motion-duration-base) var(--motion-smooth),
