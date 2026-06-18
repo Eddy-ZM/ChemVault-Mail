@@ -21,6 +21,8 @@ const zh = {
     openNotice: '打开公告',
     userMenu: '用户菜单',
     mainMenu: '主菜单',
+    pinSidebar: '固定侧栏',
+    unpinSidebar: '取消固定侧栏',
     receiveAllMail: '接收全部邮件',
     receiveOwnMail: '仅接收本邮箱邮件',
     account: '邮箱',

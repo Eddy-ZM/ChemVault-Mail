@@ -7,11 +7,12 @@ export const useUiStore = defineStore('ui', {
         backgroundLoading: true,
         changeNotice: 0,
         writerRef: null,
-        changePreview: 0,
-        previewData: {},
-        key: 0,
-        dark: false,
-        asideCount: {
+	        changePreview: 0,
+	        previewData: {},
+	        key: 0,
+	        dark: false,
+	        sidebarPinned: false,
+	        asideCount: {
             email: 0,
             send: 0,
             sysEmail: 0
@@ -26,7 +27,7 @@ export const useUiStore = defineStore('ui', {
             this.changePreview ++
         }
     },
-    persist: {
-        pick: ['accountShow','dark'],
-    },
+	    persist: {
+	        pick: ['accountShow','dark','sidebarPinned'],
+	    },
 })

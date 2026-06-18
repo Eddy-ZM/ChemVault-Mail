@@ -21,6 +21,8 @@ const en = {
     openNotice: 'Open notices',
     userMenu: 'User menu',
     mainMenu: 'Main menu',
+    pinSidebar: 'Pin sidebar',
+    unpinSidebar: 'Unpin sidebar',
     receiveAllMail: 'Receive all mail',
     receiveOwnMail: 'Receive own mail',
     account: 'Address',

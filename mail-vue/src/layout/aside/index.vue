@@ -6,15 +6,26 @@
       @mouseleave="setExpanded(false)"
   >
     <div class="sidebar-inner">
-      <button class="org-switch" type="button" @click="router.push({ name: 'email' })">
-        <span class="org-avatar">
-          <Icon icon="mdi:email-outline" width="16" height="16"/>
-        </span>
-        <span class="org-copy">
-          <span class="org-name">{{ settingStore.settings.title }}</span>
-        </span>
-        <Icon class="org-toggle" icon="lucide:chevrons-up-down" width="16" height="16"/>
-      </button>
+      <div class="sidebar-head">
+        <button class="org-switch" type="button" @click="router.push({ name: 'email' })">
+          <span class="org-avatar">
+            <Icon icon="mdi:email-outline" width="16" height="16"/>
+          </span>
+          <span class="org-copy">
+            <span class="org-name">{{ settingStore.settings.title }}</span>
+          </span>
+        </button>
+        <button
+            class="sidebar-pin"
+            :class="{ 'is-active': uiStore.sidebarPinned }"
+            type="button"
+            :title="uiStore.sidebarPinned ? $t('unpinSidebar') : $t('pinSidebar')"
+            :aria-label="uiStore.sidebarPinned ? $t('unpinSidebar') : $t('pinSidebar')"
+            @click.stop="toggleSidebarPinned"
+        >
+          <Icon :icon="uiStore.sidebarPinned ? 'lucide:pin-off' : 'lucide:pin'" width="16" height="16"/>
+        </button>
+      </div>
 
       <el-scrollbar class="nav-scroll">
         <el-menu :collapse="false" class="sidebar-menu">
@@ -158,20 +169,29 @@ import {Icon} from "@iconify/vue";
 import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import {useSettingStore} from "@/store/setting.js";
 import {useUserStore} from "@/store/user.js";
+import {useUiStore} from "@/store/ui.js";
 
 const settingStore = useSettingStore();
 const userStore = useUserStore();
+const uiStore = useUiStore();
 const route = useRoute();
 const hoverExpanded = ref(false);
 const isDesktop = ref(window.innerWidth > 1024);
 
-const isExpanded = computed(() => !isDesktop.value || hoverExpanded.value);
+const isExpanded = computed(() => !isDesktop.value || uiStore.sidebarPinned || hoverExpanded.value);
 const userInitial = computed(() => formatInitial(userStore.user.email));
 const accountName = computed(() => userStore.user.name || userStore.user.email || '');
 
 function setExpanded(value) {
-  if (isDesktop.value) {
+  if (isDesktop.value && !uiStore.sidebarPinned) {
     hoverExpanded.value = value;
+  }
+}
+
+function toggleSidebarPinned() {
+  uiStore.sidebarPinned = !uiStore.sidebarPinned;
+  if (uiStore.sidebarPinned) {
+    hoverExpanded.value = false;
   }
 }
 
@@ -237,18 +257,51 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.org-switch {
+.sidebar-head {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) 18px;
+  grid-template-columns: minmax(0, 1fr) 36px;
   align-items: center;
-  gap: 8px;
   height: 54px;
   padding: 8px;
   border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.org-switch {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 36px;
+  padding: 0;
+  border-radius: 6px;
   text-align: left;
   transition:
       background-color var(--motion-duration-base) var(--motion-smooth),
       color var(--motion-duration-base) var(--motion-smooth);
+}
+
+.sidebar-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--el-text-color-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition:
+      opacity 180ms ease-out,
+      transform 180ms ease-out,
+      background-color var(--motion-duration-base) var(--motion-smooth),
+      color var(--motion-duration-base) var(--motion-smooth);
+}
+
+.sidebar-pin.is-active {
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
 }
 
 .org-avatar,
@@ -269,7 +322,6 @@ onBeforeUnmount(() => {
 
 .org-copy,
 .account-copy,
-.org-toggle,
 .account-toggle,
 .menu-name,
 .manage-title span {
@@ -283,7 +335,6 @@ onBeforeUnmount(() => {
 .is-collapsed {
   .org-copy,
   .account-copy,
-  .org-toggle,
   .account-toggle,
   .menu-name,
   .manage-title span {
@@ -309,7 +360,6 @@ onBeforeUnmount(() => {
   font-weight: 650;
 }
 
-.org-toggle,
 .account-toggle {
   color: var(--el-text-color-secondary);
 }
@@ -437,7 +487,8 @@ onBeforeUnmount(() => {
 
 @media (hover: hover) {
   .org-switch:hover,
-  .account-card:hover {
+  .account-card:hover,
+  .sidebar-pin:hover {
     color: var(--el-color-primary);
     background: var(--el-fill-color-light);
   }
@@ -456,6 +507,10 @@ onBeforeUnmount(() => {
   .sidebar-shell,
   .sidebar-shell.is-expanded {
     width: 240px;
+  }
+
+  .sidebar-pin {
+    display: none;
   }
 }
 </style>
