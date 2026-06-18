@@ -12,6 +12,15 @@ const avatarPerms = [
 	{ name: '用户邮箱头像修改', permKey: 'user:set-account-avatar', pid: 6, type: 2, sort: 8 }
 ];
 
+const filesRootPerm = { name: 'ChemVault Files', permKey: 'files', pid: 0, type: 1, sort: 7 };
+const filesPerms = [
+	{ name: '文件查看', permKey: 'files:read', type: 2, sort: 0 },
+	{ name: '文件写入', permKey: 'files:write', type: 2, sort: 1 },
+	{ name: '文件删除', permKey: 'files:delete', type: 2, sort: 2 },
+	{ name: '文件分享', permKey: 'files:share', type: 2, sort: 3 },
+	{ name: '文件权限管理', permKey: 'files:manage', type: 2, sort: 4 }
+];
+
 export async function ensureAvatarPerms(c) {
 	const promises = avatarPerms.map(item => c.env.db.prepare(`
 		INSERT INTO perm (name, perm_key, pid, type, sort)
@@ -22,9 +31,28 @@ export async function ensureAvatarPerms(c) {
 	await Promise.all(promises);
 }
 
+export async function ensureFilesPerms(c) {
+	await c.env.db.prepare(`
+		INSERT INTO perm (name, perm_key, pid, type, sort)
+		SELECT ?, ?, ?, ?, ?
+		WHERE NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = ?)
+	`).bind(filesRootPerm.name, filesRootPerm.permKey, filesRootPerm.pid, filesRootPerm.type, filesRootPerm.sort, filesRootPerm.permKey).run();
+
+	const promises = filesPerms.map(item => c.env.db.prepare(`
+		INSERT INTO perm (name, perm_key, pid, type, sort)
+		SELECT ?, ?, parent.perm_id, ?, ?
+		FROM perm parent
+		WHERE parent.perm_key = 'files'
+			AND NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = ?)
+	`).bind(item.name, item.permKey, item.type, item.sort, item.permKey).run());
+
+	await Promise.all(promises);
+}
+
 const permService = {
 	async tree(c) {
 		await ensureAvatarPerms(c);
+		await ensureFilesPerms(c);
 
 		const pList = await orm(c).select().from(perm).where(eq(perm.pid, 0)).orderBy(asc(perm.sort)).all();
 		const cList = await orm(c).select().from(perm).where(ne(perm.pid, 0)).orderBy(asc(perm.sort)).all();

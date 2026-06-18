@@ -20,4 +20,8 @@ describe('avatar permission route mapping', () => {
 	it('maps role updates to the Cloudflare Access role selection endpoint', () => {
 		expect(permKeyToPaths(['role:set'])).toContain('/role/setCloudflareAccess');
 	});
+
+	it('keeps ChemVault Files permissions as role-only capabilities without mail API routes', () => {
+		expect(permKeyToPaths(['files:read', 'files:write', 'files:delete', 'files:share', 'files:manage'])).toEqual([]);
+	});
 });

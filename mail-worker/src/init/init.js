@@ -35,8 +35,59 @@ const dbInit = {
 		await this.v3_4DB(c);
 		await this.v3_5DB(c);
 		await this.v3_6DB(c);
+		await this.v3_7DB(c);
 		await settingService.refresh(c);
 		return c.text('success');
+	},
+
+	async v3_7DB(c) {
+		try {
+			await c.env.db.prepare(`
+				INSERT INTO perm (name, perm_key, pid, type, sort)
+				SELECT 'ChemVault Files', 'files', 0, 1, 7
+				WHERE NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'files')
+			`).run();
+
+			await c.env.db.batch([
+				c.env.db.prepare(`
+					INSERT INTO perm (name, perm_key, pid, type, sort)
+					SELECT '文件查看', 'files:read', parent.perm_id, 2, 0
+					FROM perm parent
+					WHERE parent.perm_key = 'files'
+						AND NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'files:read')
+				`),
+				c.env.db.prepare(`
+					INSERT INTO perm (name, perm_key, pid, type, sort)
+					SELECT '文件写入', 'files:write', parent.perm_id, 2, 1
+					FROM perm parent
+					WHERE parent.perm_key = 'files'
+						AND NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'files:write')
+				`),
+				c.env.db.prepare(`
+					INSERT INTO perm (name, perm_key, pid, type, sort)
+					SELECT '文件删除', 'files:delete', parent.perm_id, 2, 2
+					FROM perm parent
+					WHERE parent.perm_key = 'files'
+						AND NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'files:delete')
+				`),
+				c.env.db.prepare(`
+					INSERT INTO perm (name, perm_key, pid, type, sort)
+					SELECT '文件分享', 'files:share', parent.perm_id, 2, 3
+					FROM perm parent
+					WHERE parent.perm_key = 'files'
+						AND NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'files:share')
+				`),
+				c.env.db.prepare(`
+					INSERT INTO perm (name, perm_key, pid, type, sort)
+					SELECT '文件权限管理', 'files:manage', parent.perm_id, 2, 4
+					FROM perm parent
+					WHERE parent.perm_key = 'files'
+						AND NOT EXISTS (SELECT 1 FROM perm WHERE perm_key = 'files:manage')
+				`)
+			]);
+		} catch (e) {
+			console.warn(`跳过数据：${e.message}`);
+		}
 	},
 
 	async v3_6DB(c) {

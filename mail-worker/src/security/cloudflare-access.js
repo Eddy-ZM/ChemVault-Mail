@@ -34,9 +34,17 @@ export const EXTERNAL_ACCESS_ALLOWED_PERM_KEYS = [
 	'analysis:query',
 	'reg-key:add',
 	'reg-key:query',
-	'reg-key:delete'
+	'reg-key:delete',
+	'files:read',
+	'files:write',
+	'files:delete',
+	'files:share',
+	'files:manage'
 ];
-const EXTERNAL_ACCESS_WRITE_PERM_KEYS = EXTERNAL_ACCESS_ALLOWED_PERM_KEYS.filter(key => !key.endsWith(':query'));
+const EXTERNAL_ACCESS_READ_ONLY_PERM_KEYS = ['files:read'];
+const EXTERNAL_ACCESS_WRITE_PERM_KEYS = EXTERNAL_ACCESS_ALLOWED_PERM_KEYS.filter(key => {
+	return !key.endsWith(':query') && !EXTERNAL_ACCESS_READ_ONLY_PERM_KEYS.includes(key);
+});
 
 const EXTERNAL_ROLE = {
 	name: 'external-viewer',

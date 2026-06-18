@@ -128,6 +128,21 @@ describe('Cloudflare Access auth helpers', () => {
 		expect(normalizeExternalAccessPermKeys('')).toEqual(EXTERNAL_ACCESS_PERM_KEYS);
 	});
 
+	it('keeps ChemVault Files permissions selected on the external Access role', () => {
+		expect(normalizeExternalAccessPermKeys('files:read,files:write,files:delete,files:share,files:manage,unknown')).toEqual([
+			'files:read',
+			'files:write',
+			'files:delete',
+			'files:share',
+			'files:manage'
+		]);
+	});
+
+	it('treats files:read as read-only for external Access users', () => {
+		expect(createExternalAccessUser('Guest@Outside.test', ['files:read']).readOnly).toBe(true);
+		expect(createExternalAccessUser('Guest@Outside.test', ['files:read', 'files:write']).readOnly).toBe(false);
+	});
+
 	it('normalizes invalid or empty email input to null', () => {
 		expect(normalizeAccessEmail('')).toBeNull();
 		expect(normalizeAccessEmail('not-an-email')).toBeNull();
