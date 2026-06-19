@@ -36,9 +36,47 @@ function normalizeAppleApiBaseURL(value) {
 	}
 }
 
+const settingCompatibilityColumns = [
+	{
+		name: 'apple_api_base_url',
+		sql: `ALTER TABLE setting ADD COLUMN apple_api_base_url TEXT NOT NULL DEFAULT '';`
+	},
+	{
+		name: 'cloudflare_access_external_perms',
+		sql: `ALTER TABLE setting ADD COLUMN cloudflare_access_external_perms TEXT NOT NULL DEFAULT 'all-email:query';`
+	},
+	{
+		name: 'cloudflare_access_external_role_id',
+		sql: `ALTER TABLE setting ADD COLUMN cloudflare_access_external_role_id INTEGER NOT NULL DEFAULT 0;`
+	}
+];
+
+async function ensureSettingCompatibilityColumns(c) {
+	if (!c?.env?.db?.prepare) return;
+
+	const { results = [] } = await c.env.db.prepare(`PRAGMA table_info(setting)`).all();
+	const existingColumns = new Set(results.map(row => row.name).filter(Boolean));
+
+	if (existingColumns.size === 0) return;
+
+	for (const column of settingCompatibilityColumns) {
+		if (!existingColumns.has(column.name)) {
+			try {
+				await c.env.db.prepare(column.sql).run();
+			} catch (error) {
+				if (!/duplicate column|already exists/i.test(error?.message || '')) {
+					throw error;
+				}
+			}
+		}
+	}
+}
+
 const settingService = {
 
 	async refresh(c) {
+		await ensureSettingCompatibilityColumns(c);
+
 		const settingRow = await orm(c).select().from(setting).get();
 		settingRow.resendTokens = JSON.parse(settingRow.resendTokens);
 		c.set('setting', settingRow);
@@ -185,6 +223,7 @@ const settingService = {
 		}
 
 		params.resendTokens = JSON.stringify(resendTokens);
+		await ensureSettingCompatibilityColumns(c);
 		await orm(c).update(setting).set({ ...params }).returning().get();
 		await this.refresh(c);
 	},

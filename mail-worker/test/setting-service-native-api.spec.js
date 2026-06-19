@@ -3,11 +3,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import settingService from '../src/service/setting-service.js';
 
-const { update, set, returning, get } = vi.hoisted(() => ({
+const { update, set, returning, get, prepare, pragmaAll, alterRun } = vi.hoisted(() => ({
 	update: vi.fn(),
 	set: vi.fn(),
 	returning: vi.fn(),
-	get: vi.fn()
+	get: vi.fn(),
+	prepare: vi.fn(),
+	pragmaAll: vi.fn(),
+	alterRun: vi.fn()
 }));
 
 vi.mock('../src/entity/orm.js', () => ({
@@ -87,6 +90,47 @@ describe('native app API setting', () => {
 			resendTokens: {}
 		});
 
+		expect(set).toHaveBeenCalledWith(expect.objectContaining({
+			cloudflareAccessExternalRoleId: 12
+		}));
+	});
+
+	it('adds the Cloudflare Access external role column before saving legacy settings', async () => {
+		get.mockResolvedValue({});
+		returning.mockReturnValue({ get });
+		set.mockReturnValue({ returning });
+		update.mockReturnValue({ set });
+		pragmaAll.mockResolvedValue({
+			results: [
+				{ name: 'id' },
+				{ name: 'apple_api_base_url' },
+				{ name: 'cloudflare_access_external_perms' }
+			]
+		});
+		alterRun.mockResolvedValue({});
+		prepare.mockImplementation((sql) => {
+			if (sql === 'PRAGMA table_info(setting)') {
+				return { all: pragmaAll };
+			}
+			return { run: alterRun };
+		});
+		settingService.query = async () => ({ resendTokens: {} });
+		settingService.refresh = async () => {};
+
+		await settingService.set({
+			env: {
+				db: {
+					prepare
+				}
+			}
+		}, {
+			cloudflareAccessExternalRoleId: '12',
+			resendTokens: {}
+		});
+
+		expect(prepare).toHaveBeenCalledWith('PRAGMA table_info(setting)');
+		expect(prepare).toHaveBeenCalledWith(expect.stringContaining('cloudflare_access_external_role_id'));
+		expect(alterRun).toHaveBeenCalledTimes(1);
 		expect(set).toHaveBeenCalledWith(expect.objectContaining({
 			cloudflareAccessExternalRoleId: 12
 		}));
