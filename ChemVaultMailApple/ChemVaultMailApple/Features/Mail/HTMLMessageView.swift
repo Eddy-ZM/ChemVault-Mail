@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import WebKit
 
@@ -46,7 +47,9 @@ struct HTMLMessageView: UIViewRepresentable {
 
 enum HTMLMessageDocument {
     static func wrap(_ html: String) -> String {
-        """
+        let messageHTML = bodyContent(from: html)
+
+        return """
         <html>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -86,6 +89,17 @@ enum HTMLMessageDocument {
               padding-bottom: 24px;
             }
 
+            #chemvault-message-inner {
+              box-sizing: border-box;
+              width: 100%;
+              max-width: 100%;
+              transform-origin: top left;
+            }
+
+            #chemvault-message-inner.chemvault-scaled-email {
+              max-width: none;
+            }
+
             img,
             video,
             canvas,
@@ -113,14 +127,7 @@ enum HTMLMessageDocument {
             }
 
             table {
-              max-width: 100% !important;
               table-layout: auto;
-            }
-
-            table[width],
-            td[width],
-            th[width] {
-              max-width: 100% !important;
             }
 
             pre,
@@ -142,8 +149,81 @@ enum HTMLMessageDocument {
             }
           </style>
         </head>
-        <body><div id="chemvault-message-root">\(html)</div></body>
+        <body>
+          <div id="chemvault-message-root">
+            <div id="chemvault-message-inner">\(messageHTML)</div>
+          </div>
+          <script>
+            (function () {
+              function declaredWidth(element) {
+                var width = element.getAttribute("width");
+                if (width && /^[0-9.]+$/.test(width)) {
+                  return parseFloat(width);
+                }
+
+                var inlineWidth = element.style && element.style.width;
+                if (inlineWidth && inlineWidth.indexOf("px") !== -1) {
+                  return parseFloat(inlineWidth);
+                }
+
+                return 0;
+              }
+
+              function widestTable(root) {
+                var tables = root.querySelectorAll("table");
+                var width = 0;
+                for (var index = 0; index < tables.length; index += 1) {
+                  width = Math.max(width, declaredWidth(tables[index]), tables[index].scrollWidth, tables[index].offsetWidth);
+                }
+                return width;
+              }
+
+              function fitMessage() {
+                var root = document.getElementById("chemvault-message-root");
+                var inner = document.getElementById("chemvault-message-inner");
+                if (!root || !inner) {
+                  return;
+                }
+
+                inner.classList.remove("chemvault-scaled-email");
+                inner.style.transform = "none";
+                inner.style.width = "100%";
+                root.style.height = "";
+
+                var viewportWidth = root.clientWidth || document.documentElement.clientWidth || window.innerWidth;
+                var contentWidth = Math.max(widestTable(inner), inner.scrollWidth, inner.offsetWidth);
+
+                if (viewportWidth > 0 && contentWidth > viewportWidth + 1) {
+                  var scale = Math.min(1, viewportWidth / contentWidth);
+                  inner.classList.add("chemvault-scaled-email");
+                  inner.style.width = contentWidth + "px";
+                  inner.style.transform = "scale(" + scale + ")";
+                  root.style.height = Math.ceil(inner.scrollHeight * scale) + "px";
+                }
+              }
+
+              window.addEventListener("load", fitMessage);
+              window.addEventListener("resize", fitMessage);
+              setTimeout(fitMessage, 50);
+              setTimeout(fitMessage, 300);
+              setTimeout(fitMessage, 1000);
+            }());
+          </script>
+        </body>
         </html>
         """
+    }
+
+    private static func bodyContent(from html: String) -> String {
+        if let bodyRegex = try? NSRegularExpression(pattern: #"<body\b[^>]*>([\s\S]*?)</body>"#, options: [.caseInsensitive]),
+           let match = bodyRegex.firstMatch(in: html, range: NSRange(html.startIndex..<html.endIndex, in: html)),
+           let bodyRange = Range(match.range(at: 1), in: html) {
+            return String(html[bodyRange])
+        }
+
+        return html
+            .replacingOccurrences(of: #"(?is)<!doctype[^>]*>"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"(?is)<meta\b[^>]*name=["']?viewport["']?[^>]*>"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"(?is)</?(html|head|body)\b[^>]*>"#, with: "", options: .regularExpression)
     }
 }

@@ -175,7 +175,17 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertTrue(wrapped.contains(#"<meta name="color-scheme" content="light">"#))
         XCTAssertTrue(wrapped.contains("background: #ffffff !important;"))
         XCTAssertTrue(wrapped.contains("table-layout: auto;"))
+        XCTAssertTrue(wrapped.contains("chemvault-scaled-email"))
+        XCTAssertTrue(wrapped.contains("widestTable(inner)"))
         XCTAssertFalse(wrapped.contains("table,\n            pre {\n              display: block;"))
+    }
+
+    func testHTMLMessageDocumentExtractsBodyFromFullEmailDocuments() {
+        let wrapped = HTMLMessageDocument.wrap(#"<html><head><meta name="viewport" content="width=600"></head><body><p>Cloudflare</p></body></html>"#)
+
+        XCTAssertTrue(wrapped.contains("<p>Cloudflare</p>"))
+        XCTAssertFalse(wrapped.contains(#"content="width=600""#))
+        XCTAssertFalse(wrapped.contains("<body><html>"))
     }
 
     func testMailStoreMarksSingleEmailReadLocally() async throws {
