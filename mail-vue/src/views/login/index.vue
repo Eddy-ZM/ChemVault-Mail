@@ -162,9 +162,6 @@
         </el-button>
       </div>
     </el-dialog>
-    <a v-show="settingStore.settings.projectLink && !isDesktopApp" class="github" href="https://github.com/Eddy-ZM/ChemVault-Mail" aria-label="GitHub" title="GitHub" target="_blank" rel="noopener noreferrer">
-      <Icon icon="mingcute:github-line" color="#1890ff" width="20" height="20" />
-    </a>
   </div>
 </template>
 
@@ -972,23 +969,6 @@ function submitRegister() {
 .setting-icon {
   position: relative;
   top: 6px;
-}
-
-.github {
-  position: fixed;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  background: var(--el-bg-color);
-  bottom: 10px;
-  right: 10px;
-  z-index: 1000;
-  border: 1px solid var(--el-border-color-light);
-  box-shadow: var(--el-box-shadow-light);
-  cursor: pointer;
 }
 
 :deep(.el-input-group__append) {
