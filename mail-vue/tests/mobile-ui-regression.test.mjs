@@ -83,6 +83,30 @@ assert.match(
 
 assert.match(
   loginView,
+  /const canRegister = computed\(\(\) => Number\(settingStore\.settings\.register\) === 0\);/,
+  'login page should normalize the website register setting before showing registration UI'
+);
+
+assert.match(
+  loginView,
+  /v-show="canRegister && show !== 'login'"/,
+  'registration form should be hidden when website registration is closed'
+);
+
+assert.match(
+  loginView,
+  /<template v-if="canRegister">/,
+  'registration switch should be hidden when website registration is closed'
+);
+
+assert.match(
+  loginView,
+  /watch\(canRegister,\s*\(enabled\) => \{[\s\S]*show\.value = 'login'/,
+  'login page should leave registration mode when website registration is closed'
+);
+
+assert.match(
+  loginView,
   /<span class="form-title">ChemVault<\/span>/,
   'login title should display ChemVault instead of the configured site title'
 );

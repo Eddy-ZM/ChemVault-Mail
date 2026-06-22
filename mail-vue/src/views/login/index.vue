@@ -68,7 +68,7 @@
             <el-avatar src="/image/linuxdo.webp" :size="18" style="margin-right: 10px" />LinuxDo
           </el-button>
         </div>
-        <div v-show="show !== 'login'">
+        <div v-show="canRegister && show !== 'login'">
           <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="registerForm.email" type="text" :placeholder="$t('emailAccount')"
                     :aria-label="$t('emailAccount')" autocomplete="username">
             <template #append v-if="!hideLoginDomain">
@@ -119,7 +119,7 @@
             <el-avatar src="/image/linuxdo.webp" :size="18" style="margin-right: 10px" />LinuxDo
           </el-button>
         </div>
-        <template v-if="settingStore.settings.register === 0">
+        <template v-if="canRegister">
           <div class="switch" @click="show = 'register'" v-if="show === 'login'">{{ $t('noAccount') }}
             <span>{{ $t('regSwitch') }}</span></div>
           <div class="switch" @click="show = 'login'" v-else>{{ $t('hasAccount') }} <span>{{ $t('loginSwitch') }}</span>
@@ -170,7 +170,7 @@
 
 <script setup>
 import router from "@/router";
-import {computed, nextTick, reactive, ref} from "vue";
+import {computed, nextTick, reactive, ref, watch} from "vue";
 import {login} from "@/request/login.js";
 import {register} from "@/request/login.js";
 import {websiteConfig} from "@/request/setting.js";
@@ -201,6 +201,13 @@ const isDesktopApp =
 const authenticating = computed(() => loginLoading.value || oauthLoading.value || bindLoading.value);
 const authTitle = computed(() => locale.value === 'zh' ? '正在认证' : 'Authenticating');
 const authDesc = computed(() => locale.value === 'zh' ? '正在建立安全邮箱会话' : 'Securing mailbox session');
+const canRegister = computed(() => Number(settingStore.settings.register) === 0);
+
+watch(canRegister, (enabled) => {
+  if (!enabled && show.value !== 'login') {
+    show.value = 'login';
+  }
+})
 
 const bindForm = reactive({
   email: '',
@@ -466,6 +473,11 @@ function refreshWebsiteConfig() {
 
 
 function submitRegister() {
+
+  if (!canRegister.value) {
+    show.value = 'login'
+    return
+  }
 
   if (!registerForm.email) {
     ElMessage({
