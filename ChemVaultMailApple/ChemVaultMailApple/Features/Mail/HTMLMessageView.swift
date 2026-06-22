@@ -50,20 +50,22 @@ enum HTMLMessageDocument {
         <html>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+          <meta name="color-scheme" content="light">
+          <meta name="supported-color-schemes" content="light">
           <style>
             :root {
-              color-scheme: light dark;
+              color-scheme: light;
               font: -apple-system-body;
               -webkit-text-size-adjust: 100%;
             }
 
             html,
             body {
-              min-height: 100%;
+              min-height: 100vh;
               margin: 0;
               padding: 0;
-              color: CanvasText;
-              background: transparent;
+              color: #1f2937;
+              background: #ffffff !important;
               overflow-wrap: anywhere;
               word-break: break-word;
             }
@@ -71,6 +73,16 @@ enum HTMLMessageDocument {
             body {
               font: -apple-system-body;
               line-height: 1.48;
+            }
+
+            #chemvault-message-root {
+              box-sizing: border-box;
+              min-height: 100vh;
+              width: 100%;
+              max-width: 100%;
+              overflow-x: hidden;
+              background: #ffffff;
+              color: #1f2937;
               padding-bottom: 24px;
             }
 
@@ -78,24 +90,48 @@ enum HTMLMessageDocument {
             video,
             canvas,
             svg {
-              max-width: 100%;
+              max-width: 100% !important;
               height: auto;
             }
 
+            a,
+            td,
+            th,
+            div,
+            p,
+            span {
+              overflow-wrap: anywhere;
+              word-break: break-word;
+            }
+
             table,
+            tbody,
+            tr,
+            td,
+            th {
+              box-sizing: border-box;
+            }
+
+            table {
+              max-width: 100% !important;
+              table-layout: auto;
+            }
+
+            table[width],
+            td[width],
+            th[width] {
+              max-width: 100% !important;
+            }
+
             pre,
             code {
               max-width: 100%;
             }
 
-            table,
             pre {
               display: block;
               overflow-x: auto;
               -webkit-overflow-scrolling: touch;
-            }
-
-            pre {
               white-space: pre-wrap;
             }
 
@@ -106,7 +142,7 @@ enum HTMLMessageDocument {
             }
           </style>
         </head>
-        <body>\(html)</body>
+        <body><div id="chemvault-message-root">\(html)</div></body>
         </html>
         """
     }

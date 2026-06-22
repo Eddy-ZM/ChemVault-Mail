@@ -169,6 +169,15 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertEqual(ComposeRichText.html(from: plainBody), "<p>A &lt; B<br>Next</p>")
     }
 
+    func testHTMLMessageDocumentKeepsTableEmailsOnLightCanvas() {
+        let wrapped = HTMLMessageDocument.wrap(#"<table width="600"><tr><td>Cloudflare access request</td></tr></table>"#)
+
+        XCTAssertTrue(wrapped.contains(#"<meta name="color-scheme" content="light">"#))
+        XCTAssertTrue(wrapped.contains("background: #ffffff !important;"))
+        XCTAssertTrue(wrapped.contains("table-layout: auto;"))
+        XCTAssertFalse(wrapped.contains("table,\n            pre {\n              display: block;"))
+    }
+
     func testMailStoreMarksSingleEmailReadLocally() async throws {
         AccountRequestURLProtocol.reset()
         let client = makeStubbedClient()
