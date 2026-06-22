@@ -78,7 +78,7 @@ struct MailDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .navigationTitle("Message")
+        .navigationTitle(email.title)
         .toolbar {
             ToolbarItemGroup {
                 Button(action: markRead) {
