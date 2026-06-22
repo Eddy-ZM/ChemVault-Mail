@@ -1,14 +1,35 @@
 <template>
-  <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''" v-loading="oauthLoading" element-loading-text="登录中...">
-    <div id="background-wrap" v-if="!settingStore.settings.background" aria-hidden="true">
-      <div class="login-backdrop login-backdrop-primary"></div>
-      <div class="login-backdrop login-backdrop-secondary"></div>
-      <div class="login-grid"></div>
+  <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''">
+    <div id="background-wrap" v-if="!settingStore.settings.background" class="logo-wallpaper" aria-hidden="true">
+      <img class="logo-wallpaper-image" src="/mail.png" alt="">
     </div>
     <div v-else :style="background"></div>
+    <Transition name="auth-stage">
+      <div v-if="authenticating" class="auth-overlay" role="status" aria-live="polite">
+        <div class="auth-panel">
+          <div class="auth-visual" aria-hidden="true">
+            <div class="auth-ring"></div>
+            <Icon class="auth-mail" icon="solar:letter-bold-duotone" width="36" height="36" />
+            <Icon class="auth-key" icon="solar:key-minimalistic-bold-duotone" width="24" height="24" />
+            <div class="auth-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <div class="auth-copy">
+            <span class="auth-title">{{ authTitle }}</span>
+            <span class="auth-desc">{{ authDesc }}</span>
+          </div>
+          <div class="auth-progress" aria-hidden="true">
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </Transition>
     <div class="form-wrapper">
       <div class="container">
-        <span class="form-title">{{ settingStore.settings.title }}</span>
+        <span class="form-title">ChemVault</span>
         <span class="form-desc" v-if="show === 'login'">{{ $t('loginTitle') }}</span>
         <span class="form-desc" v-else>{{ $t('regTitle') }}</span>
         <div v-show="show === 'login'">
@@ -165,7 +186,7 @@ import {permsToRouter} from "@/perm/perm.js";
 import {useI18n} from "vue-i18n";
 import {oauthBindUser, oauthLinuxDoLogin} from "@/request/ouath.js";
 
-const {t} = useI18n();
+const {t, locale} = useI18n();
 const accountStore = useAccountStore();
 const userStore = useUserStore();
 const uiStore = useUiStore();
@@ -177,6 +198,9 @@ const showBindForm = ref(false);
 const show = ref('login')
 const isDesktopApp =
   navigator.userAgent.includes("ChemVaultMail");
+const authenticating = computed(() => loginLoading.value || oauthLoading.value || bindLoading.value);
+const authTitle = computed(() => locale.value === 'zh' ? '正在认证' : 'Authenticating');
+const authDesc = computed(() => locale.value === 'zh' ? '正在建立安全邮箱会话' : 'Securing mailbox session');
 
 const bindForm = reactive({
   email: '',
@@ -613,6 +637,231 @@ function submitRegister() {
   }
 }
 
+.auth-stage-enter-active,
+.auth-stage-leave-active {
+  transition:
+      opacity var(--motion-duration-base) var(--motion-smooth),
+      transform var(--motion-duration-base) var(--motion-smooth);
+}
+
+.auth-stage-enter-from,
+.auth-stage-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(241, 247, 252, 0.66);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+:global(.dark) .auth-overlay {
+  background: rgba(10, 12, 14, 0.68);
+}
+
+.auth-panel {
+  width: min(360px, calc(100vw - 40px));
+  padding: 24px;
+  border: 1px solid rgba(24, 144, 255, 0.18);
+  border-radius: 8px;
+  background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 252, 255, 0.86)),
+      var(--el-bg-color);
+  box-shadow:
+      0 24px 70px rgba(24, 87, 140, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+:global(.dark) .auth-panel {
+  border-color: rgba(102, 177, 255, 0.18);
+  background:
+      linear-gradient(180deg, rgba(31, 34, 38, 0.94), rgba(18, 20, 23, 0.88)),
+      var(--el-bg-color);
+  box-shadow:
+      0 24px 70px rgba(0, 0, 0, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.auth-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 116px;
+  overflow: hidden;
+  border-radius: 8px;
+  background-image:
+      linear-gradient(rgba(24, 144, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(24, 144, 255, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+:global(.dark) .auth-visual {
+  background-image:
+      linear-gradient(rgba(102, 177, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(102, 177, 255, 0.08) 1px, transparent 1px);
+}
+
+.auth-ring {
+  width: 74px;
+  height: 74px;
+  border: 1px solid rgba(24, 144, 255, 0.26);
+  border-radius: 50%;
+  animation: auth-ring-pulse 1.8s var(--motion-smooth) infinite;
+}
+
+.auth-mail {
+  position: absolute;
+  color: var(--el-color-primary);
+  filter: drop-shadow(0 10px 18px rgba(24, 144, 255, 0.22));
+  animation: auth-mail-flight 2.2s var(--motion-smooth) infinite;
+}
+
+.auth-key {
+  position: absolute;
+  right: calc(50% - 44px);
+  top: 44px;
+  color: #13a8a8;
+  animation: auth-key-unlock 2.2s var(--motion-smooth) infinite;
+}
+
+.auth-dots {
+  position: absolute;
+  bottom: 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.auth-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--el-color-primary);
+  opacity: 0.35;
+  animation: auth-dot-step 1.2s ease-in-out infinite;
+}
+
+.auth-dots span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.auth-dots span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.auth-copy {
+  display: grid;
+  gap: 4px;
+  margin-top: 18px;
+  text-align: center;
+}
+
+.auth-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--el-text-color-primary);
+}
+
+.auth-desc {
+  color: var(--form-desc-color);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.auth-progress {
+  position: relative;
+  height: 4px;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(24, 144, 255, 0.14);
+}
+
+.auth-progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--el-color-primary), #13a8a8);
+  animation: auth-progress 1.35s ease-in-out infinite;
+}
+
+@keyframes auth-mail-flight {
+  0% {
+    opacity: 0;
+    transform: translate3d(-110px, 4px, 0) scale(0.78) rotate(-10deg);
+  }
+  22% {
+    opacity: 1;
+  }
+  52% {
+    transform: translate3d(0, -2px, 0) scale(1) rotate(0deg);
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(110px, -4px, 0) scale(0.82) rotate(10deg);
+  }
+}
+
+@keyframes auth-key-unlock {
+  0%, 42% {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) rotate(-18deg) scale(0.82);
+  }
+  58%, 82% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0) rotate(8deg) scale(0.88);
+  }
+}
+
+@keyframes auth-ring-pulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes auth-dot-step {
+  0%, 100% {
+    opacity: 0.28;
+    transform: translateY(0);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes auth-progress {
+  0% {
+    transform: translateX(-105%);
+  }
+  55% {
+    transform: translateX(72%);
+  }
+  100% {
+    transform: translateX(245%);
+  }
+}
+
 .container {
   background: v-bind(loginOpacity);
   padding-left: 40px;
@@ -654,6 +903,8 @@ function submitRegister() {
   .form-title {
     font-weight: bold;
     font-size: 22px !important;
+    width: 100%;
+    text-align: center;
   }
 
   .switch {
@@ -764,10 +1015,7 @@ function submitRegister() {
 
 #login-box {
   position: relative;
-  background:
-      linear-gradient(135deg, rgba(24, 144, 255, 0.14) 0%, rgba(255, 255, 255, 0) 40%),
-      linear-gradient(315deg, rgba(16, 100, 192, 0.1) 0%, rgba(255, 255, 255, 0) 44%),
-      linear-gradient(180deg, #f6faff 0%, #eef5fb 50%, #ffffff 100%);
+  background: var(--el-bg-color);
   font: 100% Arial, sans-serif;
   height: 100%;
   margin: 0;
@@ -778,10 +1026,7 @@ function submitRegister() {
 }
 
 :global(.dark) #login-box {
-  background:
-      linear-gradient(135deg, rgba(24, 144, 255, 0.16) 0%, rgba(20, 20, 20, 0) 42%),
-      linear-gradient(315deg, rgba(102, 177, 255, 0.08) 0%, rgba(20, 20, 20, 0) 48%),
-      linear-gradient(180deg, #101214 0%, #151719 52%, #101112 100%);
+  background: var(--el-bg-color);
 }
 
 
@@ -794,54 +1039,34 @@ function submitRegister() {
   pointer-events: none;
 }
 
-.login-grid {
+.logo-wallpaper {
+  background: var(--el-bg-color);
+}
+
+.logo-wallpaper-image {
   position: absolute;
-  inset: 0;
-  background-image:
-      linear-gradient(rgba(20, 75, 120, 0.07) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(20, 75, 120, 0.07) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.72), transparent 70%);
+  top: 50%;
+  left: clamp(96px, 28vw, 420px);
+  width: min(360px, 38vw);
+  max-height: 58vh;
+  object-fit: contain;
+  opacity: 0.08;
+  transform: translate(-50%, -50%);
+  user-select: none;
 }
 
-:global(.dark) .login-grid {
-  background-image:
-      linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+:global(.dark) .logo-wallpaper-image {
+  opacity: 0.13;
+  filter: saturate(0.95) brightness(1.12);
 }
 
-.login-backdrop {
-  position: absolute;
-  border: 1px solid rgba(24, 144, 255, 0.12);
-  border-radius: 8px;
-  background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.08)),
-      linear-gradient(180deg, rgba(24, 144, 255, 0.08), rgba(24, 144, 255, 0));
-  box-shadow: 0 28px 80px rgba(25, 62, 104, 0.1);
-}
-
-:global(.dark) .login-backdrop {
-  border-color: rgba(255, 255, 255, 0.06);
-  background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015)),
-      linear-gradient(180deg, rgba(102, 177, 255, 0.08), rgba(102, 177, 255, 0));
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
-}
-
-.login-backdrop-primary {
-  width: 420px;
-  height: 240px;
-  left: clamp(24px, 10vw, 140px);
-  top: 13%;
-  transform: rotate(-8deg);
-}
-
-.login-backdrop-secondary {
-  width: 300px;
-  height: 190px;
-  left: clamp(30px, 20vw, 280px);
-  bottom: 14%;
-  transform: rotate(6deg);
+@media (max-width: 767px) {
+  .logo-wallpaper-image {
+    top: 32%;
+    left: 50%;
+    width: min(220px, 56vw);
+    opacity: 0.07;
+  }
 }
 
 </style>

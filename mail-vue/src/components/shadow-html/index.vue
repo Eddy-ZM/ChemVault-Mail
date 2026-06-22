@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 
 const props = defineProps({
   html: {
@@ -17,6 +17,8 @@ const props = defineProps({
 const container = ref(null)
 const contentBox = ref(null)
 let shadowRoot = null
+let scaleRaf = 0
+const MIN_READABLE_SCALE = 0.86;
 
 function updateContent() {
   if (!shadowRoot) return;
@@ -34,8 +36,9 @@ function updateContent() {
     <style>
       :host {
         all: initial;
+        display: block;
         width: 100%;
-        height: 100%;
+        min-height: 100%;
         font-family: -apple-system, Inter, BlinkMacSystemFont,
                     'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         font-size: 14px;
@@ -61,7 +64,7 @@ function updateContent() {
       .shadow-content {
         background: #FFFFFF;
         width: fit-content;
-        height: fit-content;
+        min-height: 100%;
         min-width: 100%;
         ${bodyStyle ? bodyStyle : ''} /* 注入 body 的 style */
       }
@@ -76,49 +79,86 @@ function updateContent() {
       ${cleanedHtml}
     </div>
   `;
+
+  nextTick(scheduleAutoScale)
+}
+
+function scheduleAutoScale() {
+  if (scaleRaf) {
+    cancelAnimationFrame(scaleRaf)
+  }
+
+  scaleRaf = requestAnimationFrame(() => {
+    scaleRaf = 0
+    autoScale()
+  })
 }
 
 function autoScale() {
   if (!shadowRoot || !contentBox.value) return
-
   const parent = contentBox.value
   const shadowContent = shadowRoot.querySelector('.shadow-content')
 
   if (!shadowContent) return
 
-  const parentWidth = parent.offsetWidth
+  const parentWidth = parent.clientWidth
   const childWidth = shadowContent.scrollWidth
 
-  if (childWidth === 0) return
+  if (!parentWidth || !childWidth) return
 
-  const scale = parentWidth / childWidth
+  const scale = Math.min(1, parentWidth / childWidth)
 
   const hostElement = shadowRoot.host
-  hostElement.style.zoom = scale
+
+  if (scale >= 1) {
+    hostElement.style.zoom = '1'
+    parent.classList.remove('content-box-scroll-x')
+    return
+  }
+
+  if (scale >= MIN_READABLE_SCALE) {
+    hostElement.style.zoom = String(scale)
+    parent.classList.remove('content-box-scroll-x')
+    return
+  }
+
+  hostElement.style.zoom = '1'
+  parent.classList.add('content-box-scroll-x')
 }
 
 onMounted(() => {
   shadowRoot = container.value.attachShadow({ mode: 'open' })
   updateContent()
-  autoScale()
+  window.addEventListener('resize', scheduleAutoScale)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', scheduleAutoScale)
+  if (scaleRaf) {
+    cancelAnimationFrame(scaleRaf)
+  }
 })
 
 watch(() => props.html, () => {
   updateContent()
-  autoScale()
 })
 </script>
 
 <style scoped>
 .content-box {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
   font-family: -apple-system, Inter, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.content-box-scroll-x {
+  overflow-x: auto;
 }
 
 .content-html {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 </style>

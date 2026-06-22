@@ -623,6 +623,7 @@ function close() {
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -640,10 +641,11 @@ function close() {
     overflow: hidden;
     @media (max-width: 1024px) {
       width: 100%;
-      height: 100%;
+      height: 100dvh;
+      min-height: 100dvh;
       border-radius: 0;
       border: 0;
-      padding-top: 10px;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
     }
 
     @media (min-width: 1025px) {
@@ -654,11 +656,13 @@ function close() {
       display: flex;
       justify-content: space-between;
       margin-bottom: 10px;
+      min-width: 0;
 
       .title-left {
         align-items: center;
         display: grid;
         grid-template-columns: auto auto auto 1fr;
+        min-width: 0;
       }
 
       .title-text {
@@ -690,8 +694,9 @@ function close() {
 
     .container {
       height: 100%;
+      min-height: 0;
       display: grid;
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto auto minmax(280px, 1fr) auto;
       gap: 15px;
 
       .item-title {
@@ -700,6 +705,14 @@ function close() {
       .button-item {
         display: grid;
         grid-template-columns: auto auto 1fr auto;
+        align-items: center;
+        gap: 8px;
+        min-height: 36px;
+
+        @media (max-width: 767px) {
+          grid-template-columns: auto auto 1fr auto;
+          gap: 6px;
+        }
 
         .att-add {
           cursor: pointer;
@@ -707,7 +720,6 @@ function close() {
 
         .att-clear {
           cursor: pointer;
-          margin-left: 10px;
         }
 
         .att-list {
@@ -718,8 +730,11 @@ function close() {
           padding-right: 10px;
           max-height: 110px;
           overflow-y: auto;
+          min-width: 0;
           @media (max-width: 450px) {
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            padding-left: 4px;
+            padding-right: 4px;
           }
 
           .att-item {
@@ -742,6 +757,27 @@ function close() {
     }
   }
 
+}
+
+@media (max-width: 767px) {
+  .send {
+    .write-box {
+      .title {
+        .title-left {
+          grid-template-columns: auto auto minmax(0, auto) minmax(0, 1fr);
+        }
+
+        .title-text {
+          display: flex;
+        }
+
+        .sender-name,
+        .send-email {
+          min-width: 0;
+        }
+      }
+    }
+  }
 }
 
 .email-row {

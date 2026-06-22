@@ -38,6 +38,10 @@ const editorRef = ref(null);
 const showLoading = ref(false);
 const uiStore = useUiStore();
 const settingStore = useSettingStore();
+const editorPlugins = 'link image advlist lists emoticons fullscreen table preview code quickbars';
+const editorToolbar = 'undo redo | bold italic underline strikethrough forecolor backcolor fontsize | alignleft aligncenter alignright alignjustify | outdent indent | bullist numlist | link image | table code preview fullscreen';
+const desktopToolbarMode = 'scrolling';
+const mobileToolbarMode = 'wrap';
 
 onMounted(() => {
   initTinyMCE();
@@ -79,9 +83,11 @@ function initTinyMCE() {
     showLoading.value = true;
     const script = document.createElement('script');
     script.src = '/tinymce/tinymce.min.js';
-    script.onload = () => initEditor();
+    script.onload = () => {
+      showLoading.value = false;
+      initEditor();
+    };
     document.head.appendChild(script);
-    showLoading.value = false;
   }
 }
 
@@ -100,14 +106,21 @@ function initEditor() {
          --scrollbar-track-color: ${uiStore.dark ? '#141414' : '#FFFFFF'};
          --scrollbar-thumb-color: ${uiStore.dark ? '#8D9095' : '#A8ABB2'};
     }`,
-    plugins: 'link image advlist lists  emoticons fullscreen  table preview code',
-    toolbar: 'bold emoticons forecolor backcolor italic fontsize | alignleft aligncenter alignright alignjustify | outdent indent |  bullist numlist | link image  | table code preview fullscreen',
-    toolbar_mode: 'scrolling',
+    plugins: editorPlugins,
+    toolbar: editorToolbar,
+    toolbar_mode: desktopToolbarMode,
     font_size_formats: '8px 10px 12px 14px 16px 18px 24px 36px',
     emoticons_search: false,
+    quickbars_selection_toolbar: 'bold italic underline | forecolor backcolor | link',
     language: language.value,
     language_load: true,
     menubar: false,
+    mobile: {
+      menubar: false,
+      plugins: editorPlugins,
+      toolbar: editorToolbar,
+      toolbar_mode: mobileToolbarMode,
+    },
     license_key: 'gpl',
     noneditable_class: 'mceNonEditable',
     setup: (ed) => {
@@ -180,6 +193,9 @@ function destroyEditor() {
 .editor-box {
   height: 100%;
   width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .loading {
@@ -211,6 +227,8 @@ function destroyEditor() {
 :deep(.tox-tinymce) {
   border: none;
   border-radius: 0;
+  flex: 1 1 auto;
+  min-height: 280px;
 }
 
 :deep(.tox-toolbar__group) {
@@ -224,6 +242,25 @@ function destroyEditor() {
 
 :deep(.tox .tox-edit-area::before) {
   display: none;
+}
+
+@media (max-width: 767px) {
+  :deep(.tox .tox-toolbar__primary) {
+    flex-wrap: wrap !important;
+  }
+
+  :deep(.tox .tox-toolbar__group) {
+    border: 0 !important;
+  }
+
+  :deep(.tox-tbtn) {
+    min-width: 34px !important;
+    height: 34px !important;
+  }
+
+  :deep(.tox .tox-edit-area) {
+    min-height: 180px;
+  }
 }
 
 </style>

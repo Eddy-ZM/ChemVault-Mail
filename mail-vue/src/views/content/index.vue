@@ -218,12 +218,16 @@ const handleDelete = () => {
 .box {
   height: 100%;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .header-actions {
   padding: 9px 15px;
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 20px;
   box-shadow: var(--header-actions-border);
   font-size: 18px;
@@ -240,7 +244,9 @@ const handleDelete = () => {
 
 
 .scrollbar {
-  height: calc(100% - 38px);
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
   width: 100%;
 }
 
@@ -261,11 +267,16 @@ const handleDelete = () => {
   }
 
   .htm-scrollbar {
+    width: 100%;
+    height: clamp(360px, calc(100dvh - 260px), 680px);
+    min-height: 0;
+    border-radius: 6px;
   }
 
   .content {
     display: flex;
     flex-direction: column;
+    min-height: 0;
 
     .att {
       margin-top: 30px;
@@ -418,6 +429,28 @@ const handleDelete = () => {
   white-space: pre-wrap;
   word-break: break-word;
   margin: 0;
+  min-height: 100%;
+  padding-right: 8px;
+}
+
+.shadow-html {
+  min-height: 100%;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+
+    .email-title {
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .htm-scrollbar {
+      height: clamp(320px, calc(100dvh - 230px), 560px);
+    }
+  }
 }
 
 .bottom-distance {
