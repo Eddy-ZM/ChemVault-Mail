@@ -114,6 +114,7 @@ import dayjs from "dayjs";
 import {useI18n} from "vue-i18n";
 import router from "@/router/index.js";
 import {ElMessageBox} from "element-plus";
+import {isBlankEditorContent} from "@/utils/editor-content.js";
 
 defineExpose({
   open,
@@ -557,7 +558,7 @@ function close() {
     return;
   }
 
-  if (!(form.content || form.subject || form.receiveEmail.length > 0)) {
+  if (!(form.subject || form.receiveEmail.length > 0 || !isBlankEditorContent(form.content))) {
     show.value = false
     resetForm()
     return;

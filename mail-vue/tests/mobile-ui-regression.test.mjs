@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { isBlankEditorContent } from '../src/utils/editor-content.js';
 
 const root = new URL('../', import.meta.url);
 
@@ -14,6 +15,24 @@ const [contentView, shadowHtml, writeLayout, tinyEditor, loginView] = await Prom
   file('src/components/tiny-editor/index.vue'),
   file('src/views/login/index.vue')
 ]);
+
+assert.equal(
+  isBlankEditorContent('<div><br data-mce-bogus="1"></div>'),
+  true,
+  'TinyMCE empty placeholder HTML should not force the compose window into draft confirmation'
+);
+
+assert.equal(
+  isBlankEditorContent('<p>&nbsp;</p>'),
+  true,
+  'non-breaking-space only editor HTML should be treated as blank'
+);
+
+assert.equal(
+  isBlankEditorContent('<div>Hello</div>'),
+  false,
+  'real editor text should still count as compose content'
+);
 
 assert.match(
   contentView,
@@ -58,6 +77,18 @@ assert.match(
 );
 
 assert.match(
+  writeLayout,
+  /import\s+\{isBlankEditorContent\}\s+from\s+["']@\/utils\/editor-content\.js["'];/,
+  'compose close should use normalized editor content emptiness checks'
+);
+
+assert.match(
+  writeLayout,
+  /isBlankEditorContent\(form\.content\)/,
+  'compose close should not treat TinyMCE empty placeholder markup as draft content'
+);
+
+assert.match(
   tinyEditor,
   /const mobileToolbarMode = 'wrap';/,
   'TinyMCE should expose all formatting controls on mobile instead of hiding overflow'
@@ -67,6 +98,12 @@ assert.match(
   tinyEditor,
   /mobile:\s*\{[\s\S]*toolbar:\s*editorToolbar,[\s\S]*toolbar_mode:\s*mobileToolbarMode/,
   'TinyMCE mobile config should explicitly keep the formatting toolbar enabled'
+);
+
+assert.match(
+  tinyEditor,
+  /return editor\.value\?\.getContent\(\) \|\| '';/,
+  'TinyMCE getContent should be safe while the editor script is still initializing'
 );
 
 assert.match(
