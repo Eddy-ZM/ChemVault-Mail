@@ -106,7 +106,7 @@ struct ContentView: View {
     @MainActor
     private func syncPublicConnectionSettings() async {
         guard let settings: ChemVaultSetting = try? await appEnvironment.apiClient.get("/setting/websiteConfig") else { return }
-        appEnvironment.preferences.applyGlobalBaseURLIfPresent(settings.appleApiBaseURL)
+        appEnvironment.applyPublicSettings(settings)
     }
 }
 

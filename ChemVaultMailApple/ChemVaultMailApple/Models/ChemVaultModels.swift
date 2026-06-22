@@ -372,6 +372,12 @@ struct ChemVaultSetting: Codable, Hashable {
     var blackFrom: String?
 }
 
+extension ChemVaultSetting {
+    var isRegistrationEnabled: Bool {
+        register == 0
+    }
+}
+
 struct AnalyticsData: Codable, Hashable {
     var numberCount: JSONValue?
     var userDayCount: [AnalyticsPoint]?

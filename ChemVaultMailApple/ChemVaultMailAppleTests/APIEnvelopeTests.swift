@@ -93,6 +93,16 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertEqual(setting.appleApiBaseURL, "https://mail.chemvault.science/api")
     }
 
+    func testRegistrationAvailabilityMatchesWebsiteSwitch() throws {
+        let enabled = try JSONDecoder.chemVault.decode(ChemVaultSetting.self, from: Data(#"{"register":0}"#.utf8))
+        let disabled = try JSONDecoder.chemVault.decode(ChemVaultSetting.self, from: Data(#"{"register":1}"#.utf8))
+        let missing = try JSONDecoder.chemVault.decode(ChemVaultSetting.self, from: Data(#"{}"#.utf8))
+
+        XCTAssertTrue(enabled.isRegistrationEnabled)
+        XCTAssertFalse(disabled.isRegistrationEnabled)
+        XCTAssertFalse(missing.isRegistrationEnabled)
+    }
+
     func testChemVaultLoadingConfigurationMatchesNativeSweepLoader() {
         XCTAssertEqual(ChemVaultLoadingConfiguration.primaryHex, "#1890FF")
         XCTAssertEqual(ChemVaultLoadingConfiguration.sweepDuration, 1.55)
@@ -140,6 +150,23 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertTrue(unreadEmail.isUnread)
         XCTAssertFalse(readEmail.isUnread)
         XCTAssertFalse(missingStateEmail.isUnread)
+    }
+
+    func testMailDetailMessageBodyUsesReadableMobileHeight() {
+        let compactPhoneHeight: CGFloat = 844
+
+        let bodyHeight = MailDetailLayout.messageBodyMinHeight(containerHeight: compactPhoneHeight)
+
+        XCTAssertGreaterThanOrEqual(bodyHeight, 600)
+        XCTAssertGreaterThan(bodyHeight, 320)
+    }
+
+    func testComposeRichTextExportsFormattedHTML() {
+        let formattedRun = ComposeRichText.runHTML("ChemVault", formats: [.bold, .italic, .underline])
+        let plainBody = NSAttributedString(string: "A < B\nNext")
+
+        XCTAssertEqual(formattedRun, "<strong><em><u>ChemVault</u></em></strong>")
+        XCTAssertEqual(ComposeRichText.html(from: plainBody), "<p>A &lt; B<br>Next</p>")
     }
 
     func testMailStoreMarksSingleEmailReadLocally() async throws {

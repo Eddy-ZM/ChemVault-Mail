@@ -4,6 +4,7 @@ import SwiftUI
 struct LoginView: View {
     @EnvironmentObject private var authSession: AuthSession
     @EnvironmentObject private var preferences: AppPreferences
+    @EnvironmentObject private var appEnvironment: AppEnvironment
     @Environment(\.colorScheme) private var colorScheme
     @State private var email = ""
     @State private var password = ""
@@ -243,14 +244,18 @@ struct LoginView: View {
 
     private var loginActions: some View {
         HStack(spacing: 14) {
-            Button {
-                showingRegister = true
-            } label: {
-                Label("Create Account", systemImage: "person.badge.plus")
-            }
-            .buttonStyle(ChemVaultLinkButtonStyle())
+            if appEnvironment.isRegistrationEnabled {
+                Button {
+                    showingRegister = true
+                } label: {
+                    Label("Create Account", systemImage: "person.badge.plus")
+                }
+                .buttonStyle(ChemVaultLinkButtonStyle())
 
-            Spacer(minLength: 8)
+                Spacer(minLength: 8)
+            } else {
+                Spacer(minLength: 0)
+            }
 
             Button {
                 showingEndpointSettings = true

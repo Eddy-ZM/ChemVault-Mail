@@ -1,5 +1,14 @@
 import SwiftUI
 
+struct MailDetailLayout {
+    static let minimumMessageBodyHeight: CGFloat = 520
+    static let headerReserveHeight: CGFloat = 220
+
+    static func messageBodyMinHeight(containerHeight: CGFloat) -> CGFloat {
+        max(minimumMessageBodyHeight, containerHeight - headerReserveHeight)
+    }
+}
+
 struct MailDetailView: View {
     let email: ChemVaultEmail
     var markRead: () -> Void
@@ -9,63 +18,65 @@ struct MailDetailView: View {
     @State private var hasAppeared = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(email.title)
-                        .font(.title2.weight(.semibold))
-                        .textSelection(.enabled)
-
-                    Text(email.senderLine)
-                        .font(.headline)
-
-                    if let sendEmail = email.sendEmail {
-                        Text(sendEmail)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+        GeometryReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(email.title)
+                            .font(.title2.weight(.semibold))
                             .textSelection(.enabled)
-                    }
 
-                    if let createTime = email.createTime {
-                        Text(createTime)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .chemVaultEntrance(isVisible: hasAppeared, delay: 0.02, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
-
-                Divider()
-                    .opacity(hasAppeared ? 1 : 0)
-                    .animation(reduceMotion ? nil : ChemVaultMotion.surfaceEntrance.delay(ChemVaultInteractionConfiguration.staggerStep), value: hasAppeared)
-
-                if let html = email.content, !html.isEmpty {
-                    HTMLMessageView(html: html)
-                        .frame(minHeight: 320)
-                        .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 2, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
-                } else if let text = email.text, !text.isEmpty {
-                    Text(text)
-                        .font(.body)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 2, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
-                } else {
-                    ContentUnavailableView("No message body", systemImage: "doc.text")
-                        .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 2, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
-                }
-
-                if let attachments = email.attList, !attachments.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Attachments")
+                        Text(email.senderLine)
                             .font(.headline)
-                        ForEach(attachments) { attachment in
-                            AttachmentRowView(attachment: attachment)
+
+                        if let sendEmail = email.sendEmail {
+                            Text(sendEmail)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                        }
+
+                        if let createTime = email.createTime {
+                            Text(createTime)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
-                    .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 3, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
+                    .chemVaultEntrance(isVisible: hasAppeared, delay: 0.02, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
+
+                    Divider()
+                        .opacity(hasAppeared ? 1 : 0)
+                        .animation(reduceMotion ? nil : ChemVaultMotion.surfaceEntrance.delay(ChemVaultInteractionConfiguration.staggerStep), value: hasAppeared)
+
+                    if let html = email.content, !html.isEmpty {
+                        HTMLMessageView(html: html)
+                            .frame(minHeight: MailDetailLayout.messageBodyMinHeight(containerHeight: proxy.size.height))
+                            .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 2, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
+                    } else if let text = email.text, !text.isEmpty {
+                        Text(text)
+                            .font(.body)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 2, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
+                    } else {
+                        ContentUnavailableView("No message body", systemImage: "doc.text")
+                            .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 2, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
+                    }
+
+                    if let attachments = email.attList, !attachments.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Attachments")
+                                .font(.headline)
+                            ForEach(attachments) { attachment in
+                                AttachmentRowView(attachment: attachment)
+                            }
+                        }
+                        .chemVaultEntrance(isVisible: hasAppeared, delay: ChemVaultInteractionConfiguration.staggerStep * 3, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
+                    }
                 }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle("Message")
         .toolbar {

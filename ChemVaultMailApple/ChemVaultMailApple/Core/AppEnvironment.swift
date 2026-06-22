@@ -6,6 +6,11 @@ final class AppEnvironment: ObservableObject {
     let preferences: AppPreferences
     let apiClient: APIClient
     let authSession: AuthSession
+    @Published private(set) var publicSettings: ChemVaultSetting?
+
+    var isRegistrationEnabled: Bool {
+        publicSettings?.isRegistrationEnabled == true
+    }
 
     init(
         preferences: AppPreferences = AppPreferences(),
@@ -15,5 +20,9 @@ final class AppEnvironment: ObservableObject {
         self.apiClient = APIClient(preferences: preferences)
         self.authSession = AuthSession(apiClient: apiClient, tokenStore: tokenStore)
     }
-}
 
+    func applyPublicSettings(_ settings: ChemVaultSetting) {
+        publicSettings = settings
+        preferences.applyGlobalBaseURLIfPresent(settings.appleApiBaseURL)
+    }
+}
