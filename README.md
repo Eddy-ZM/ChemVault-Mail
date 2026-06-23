@@ -41,4 +41,10 @@ This project is based on the excellent cloud-mail project by the MailLab team an
 
 ## License
 
-Distributed under the [MIT License](./LICENSE). See `LICENSE` for more information.
+ChemVault-specific code and content in this repository are source-available but
+not open source. Public visibility is for review and reference only; no rights
+are granted to use, copy, modify, distribute, host, deploy, or create derivative
+works without prior written permission from Ziwen Mu or the repository owner.
+
+See [LICENSE](./LICENSE). Upstream MailLab cloud-mail notices are preserved in
+[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
