@@ -30,7 +30,8 @@ const exclude = [
 	'/public/genToken',
 	'/telegram',
 	'/test',
-	'/oauth'
+	'/oauth',
+	'/sso/chemvault-user/authorize'
 ];
 
 const requirePerms = [
