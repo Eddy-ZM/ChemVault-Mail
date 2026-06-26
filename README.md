@@ -29,6 +29,18 @@ The system provides reliable custom-domain email services through a fully server
 
 🌐 https://mail.chemvault.science
 
+## App Update and Remote Resource Policy
+
+ChemVault Mail's Apple native app does not download or execute remote code.
+Remote updates are limited to configuration, text, images, announcements,
+templates, links, feature flags, maintenance mode, and WebView content.
+
+Native functionality changes still require a new App Store submission. Feature
+flags only enable or disable functionality already included in the app bundle.
+The app does not download dynamic libraries, executable code, scripts, remote
+native code bundles, or alternative app packages. Version updates redirect users
+to the official App Store page.
+
 ## Maintainer
 
 Ziwen M.

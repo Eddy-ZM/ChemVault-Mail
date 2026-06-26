@@ -2,8 +2,7 @@ import {useUserStore} from "@/store/user.js";
 
 export default {
     mounted(el, binding) {
-        const userStore = useUserStore();
-        const permKeys = userStore.user.permKeys;
+        const permKeys = currentPermKeys();
         const value = binding.value;
 
         if (permKeys.includes('*')) {
@@ -21,19 +20,25 @@ export default {
 }
 
 export function hasPerm(permKey) {
-    const {permKeys} = useUserStore().user;
+    const permKeys = currentPermKeys();
     return permKeys.includes('*') || permKeys.includes(permKey);
 }
 
 
-export function permsToRouter(permKeys) {
+export function permsToRouter(permKeys = []) {
+    const normalizedPermKeys = Array.isArray(permKeys) ? permKeys : [];
     const routerList = []
     Object.keys(routers).forEach(perm => {
-        if (permKeys.includes(perm) || permKeys.includes('*')) {
+        if (normalizedPermKeys.includes(perm) || normalizedPermKeys.includes('*')) {
             routerList.push(...routers[perm])
         }
     })
     return routerList;
+}
+
+function currentPermKeys() {
+    const permKeys = useUserStore().user?.permKeys;
+    return Array.isArray(permKeys) ? permKeys : [];
 }
 
 const routers = {
@@ -86,6 +91,15 @@ const routers = {
         meta: {
             title: 'SystemSettings',
             name: 'sys-setting',
+            menu: true
+        }
+    }, {
+        path: '/app-config',
+        name: 'app-config',
+        component: () => import('@/views/app-config/index.vue'),
+        meta: {
+            title: 'appConfig',
+            name: 'app-config',
             menu: true
         }
     }],

@@ -76,6 +76,46 @@
 		EBFB2DDAC1EF9EF210981F37 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BC02398106D22C67E88A63 /* ContentView.swift */; };
 		ED7EC9142FE83CB292A828DC /* AdminEndpointListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B88BC8B4011E0C91520BDC /* AdminEndpointListView.swift */; };
 		FD641D9EB0B7F9E9B4FD4533 /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E720C848BBBDE5D58DA205E9 /* AnalyticsView.swift */; };
+		180053179C3DE351FA9C416E /* Announcement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C3C5BFC9146F8456700D7A9 /* Announcement.swift */; };
+		5A796CF9B59D3BDB9785A120 /* Announcement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C3C5BFC9146F8456700D7A9 /* Announcement.swift */; };
+		A9A1B6BD39A0F8CEADAB2474 /* AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22458A5171DF9DC8AF40608 /* AppVersion.swift */; };
+		316A2608BF56D4CA7EE3508F /* AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22458A5171DF9DC8AF40608 /* AppVersion.swift */; };
+		B7726DE561160094706FED01 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5928427B6E99C8FC58548261 /* FeatureFlags.swift */; };
+		3F521A12EA9E8CDFCEA0486F /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5928427B6E99C8FC58548261 /* FeatureFlags.swift */; };
+		197BCBEDBAFB88F3752C305D /* RemoteAssetManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B648238191BF1F1D3082515D /* RemoteAssetManifest.swift */; };
+		44A124A0D9A4965699F68FD9 /* RemoteAssetManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B648238191BF1F1D3082515D /* RemoteAssetManifest.swift */; };
+		1A4C3FCC857098EA5988B975 /* RemoteConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88AE1BD5F0A3C4D75B69EBB /* RemoteConfig.swift */; };
+		C0284491DE112FAB598925F5 /* RemoteConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88AE1BD5F0A3C4D75B69EBB /* RemoteConfig.swift */; };
+		7945CF3E1183BC9F460F0275 /* FeatureFlagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41996FDAB6F4403C54E3B90 /* FeatureFlagManager.swift */; };
+		1A996E980860AB82FC8C0612 /* FeatureFlagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41996FDAB6F4403C54E3B90 /* FeatureFlagManager.swift */; };
+		D39E1F9821882D58754ACDA1 /* RemoteConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4092EC74AF6613F19B117D5A /* RemoteConfigManager.swift */; };
+		13863E53D7A2634446BC96E8 /* RemoteConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4092EC74AF6613F19B117D5A /* RemoteConfigManager.swift */; };
+		E36F520566C4302AFFFCAB5C /* ResourceCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763310ACEF73334A335783A8 /* ResourceCacheManager.swift */; };
+		6D9A209ACD31B1778948880A /* ResourceCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763310ACEF73334A335783A8 /* ResourceCacheManager.swift */; };
+		72443961B3800F3920E9E814 /* AssetDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F54CBCD4195BF08F95A8678 /* AssetDownloadService.swift */; };
+		AF6133F96F5818AD1C493337 /* AssetDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F54CBCD4195BF08F95A8678 /* AssetDownloadService.swift */; };
+		ACD20F236CF8DEB4E07EAA96 /* RemoteConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB6DC0BF0BF30FD51B9D661 /* RemoteConfigService.swift */; };
+		DD783ACB2B2621D59B719B91 /* RemoteConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB6DC0BF0BF30FD51B9D661 /* RemoteConfigService.swift */; };
+		0316976D9B0EFC291783787A /* ResourceUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C0D82A3B6610BE3DCD1A23 /* ResourceUpdateService.swift */; };
+		CB52B6FDA551A242F43DDC52 /* ResourceUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C0D82A3B6610BE3DCD1A23 /* ResourceUpdateService.swift */; };
+		72C312758AF8ADA8304867CA /* VersionCheckService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9343D4B7D493316EBF3C046 /* VersionCheckService.swift */; };
+		2CE3E263CCCBC410A42C831F /* VersionCheckService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9343D4B7D493316EBF3C046 /* VersionCheckService.swift */; };
+		C17B1E555EC15D780172CE88 /* JSONSchemaValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03621B65CB191482712F1E1E /* JSONSchemaValidator.swift */; };
+		315C703804F12CB15A0ED9AA /* JSONSchemaValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03621B65CB191482712F1E1E /* JSONSchemaValidator.swift */; };
+		7FF3A522C64379C5F4D02615 /* URLValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E386B213C622A302B83435F1 /* URLValidator.swift */; };
+		EBD74C0D022D4704501601E3 /* URLValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E386B213C622A302B83435F1 /* URLValidator.swift */; };
+		E5A2FA1D29919873E3582B0D /* VersionComparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0AF33BFDBB3705BB4C535F /* VersionComparator.swift */; };
+		6AA3785164441241FF9039B2 /* VersionComparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0AF33BFDBB3705BB4C535F /* VersionComparator.swift */; };
+		DB7BEA56BE3602F698760687 /* AnnouncementBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329288DCDCEA54944717E07E /* AnnouncementBannerView.swift */; };
+		FA1C9684AFFAEF3526275147 /* AnnouncementBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329288DCDCEA54944717E07E /* AnnouncementBannerView.swift */; };
+		9D384AFE241D06AB4CC2561E /* ForceUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7982C29EB6F2127CF1D64E80 /* ForceUpdateView.swift */; };
+		53DFC9F2C9F3ED03292B0974 /* ForceUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7982C29EB6F2127CF1D64E80 /* ForceUpdateView.swift */; };
+		5396BEF9C05738D6702EE660 /* MaintenanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215C88E21B188CABC75C12C5 /* MaintenanceView.swift */; };
+		C0A835A0CB1973A9A075C8D6 /* MaintenanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215C88E21B188CABC75C12C5 /* MaintenanceView.swift */; };
+		3D39BB8AC352BA929DA842AA /* OptionalUpdateAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64091DF6A858964D92E61ACA /* OptionalUpdateAlert.swift */; };
+		0F523FD002E13ADEC75CF491 /* OptionalUpdateAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64091DF6A858964D92E61ACA /* OptionalUpdateAlert.swift */; };
+		B180075CC5E6FE2BE704972C /* ResourceLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED18018345E6406E8AABC60 /* ResourceLoadingView.swift */; };
+		ADB4CB0E8D472DB9993CCD7D /* ResourceLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED18018345E6406E8AABC60 /* ResourceLoadingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,6 +168,26 @@
 		F788A323D89CA5278351E744 /* APIEnvelopeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = APIEnvelopeTests.swift; sourceTree = "<group>"; };
 		F93C0CA91FAB82FBA85643DB /* ChemVault Mail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChemVault Mail.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD3938FF93C15A08B3D35267 /* AdminRolesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AdminRolesView.swift; path = Features/Admin/AdminRolesView.swift; sourceTree = "<group>"; };
+		9C3C5BFC9146F8456700D7A9 /* Announcement.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Announcement.swift; path = Models/Announcement.swift; sourceTree = "<group>"; };
+		B22458A5171DF9DC8AF40608 /* AppVersion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppVersion.swift; path = Models/AppVersion.swift; sourceTree = "<group>"; };
+		5928427B6E99C8FC58548261 /* FeatureFlags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeatureFlags.swift; path = Models/FeatureFlags.swift; sourceTree = "<group>"; };
+		B648238191BF1F1D3082515D /* RemoteAssetManifest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteAssetManifest.swift; path = Models/RemoteAssetManifest.swift; sourceTree = "<group>"; };
+		C88AE1BD5F0A3C4D75B69EBB /* RemoteConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteConfig.swift; path = Models/RemoteConfig.swift; sourceTree = "<group>"; };
+		C41996FDAB6F4403C54E3B90 /* FeatureFlagManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeatureFlagManager.swift; path = Managers/FeatureFlagManager.swift; sourceTree = "<group>"; };
+		4092EC74AF6613F19B117D5A /* RemoteConfigManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteConfigManager.swift; path = Managers/RemoteConfigManager.swift; sourceTree = "<group>"; };
+		763310ACEF73334A335783A8 /* ResourceCacheManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ResourceCacheManager.swift; path = Managers/ResourceCacheManager.swift; sourceTree = "<group>"; };
+		7F54CBCD4195BF08F95A8678 /* AssetDownloadService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AssetDownloadService.swift; path = Services/AssetDownloadService.swift; sourceTree = "<group>"; };
+		FDB6DC0BF0BF30FD51B9D661 /* RemoteConfigService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteConfigService.swift; path = Services/RemoteConfigService.swift; sourceTree = "<group>"; };
+		82C0D82A3B6610BE3DCD1A23 /* ResourceUpdateService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ResourceUpdateService.swift; path = Services/ResourceUpdateService.swift; sourceTree = "<group>"; };
+		B9343D4B7D493316EBF3C046 /* VersionCheckService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VersionCheckService.swift; path = Services/VersionCheckService.swift; sourceTree = "<group>"; };
+		03621B65CB191482712F1E1E /* JSONSchemaValidator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = JSONSchemaValidator.swift; path = Utilities/JSONSchemaValidator.swift; sourceTree = "<group>"; };
+		E386B213C622A302B83435F1 /* URLValidator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = URLValidator.swift; path = Utilities/URLValidator.swift; sourceTree = "<group>"; };
+		7B0AF33BFDBB3705BB4C535F /* VersionComparator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VersionComparator.swift; path = Utilities/VersionComparator.swift; sourceTree = "<group>"; };
+		329288DCDCEA54944717E07E /* AnnouncementBannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AnnouncementBannerView.swift; path = Views/AnnouncementBannerView.swift; sourceTree = "<group>"; };
+		7982C29EB6F2127CF1D64E80 /* ForceUpdateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ForceUpdateView.swift; path = Views/ForceUpdateView.swift; sourceTree = "<group>"; };
+		215C88E21B188CABC75C12C5 /* MaintenanceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MaintenanceView.swift; path = Views/MaintenanceView.swift; sourceTree = "<group>"; };
+		64091DF6A858964D92E61ACA /* OptionalUpdateAlert.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OptionalUpdateAlert.swift; path = Views/OptionalUpdateAlert.swift; sourceTree = "<group>"; };
+		1ED18018345E6406E8AABC60 /* ResourceLoadingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ResourceLoadingView.swift; path = Views/ResourceLoadingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -227,6 +287,26 @@
 				5F05DA4F8C674510A76259CF /* SettingsView.swift */,
 				321F42FA734321351EF5359C /* SystemSettingsView.swift */,
 				88D0D10B114AE796C00025B6 /* ChemVaultModels.swift */,
+				9C3C5BFC9146F8456700D7A9 /* Announcement.swift */,
+				B22458A5171DF9DC8AF40608 /* AppVersion.swift */,
+				5928427B6E99C8FC58548261 /* FeatureFlags.swift */,
+				B648238191BF1F1D3082515D /* RemoteAssetManifest.swift */,
+				C88AE1BD5F0A3C4D75B69EBB /* RemoteConfig.swift */,
+				C41996FDAB6F4403C54E3B90 /* FeatureFlagManager.swift */,
+				4092EC74AF6613F19B117D5A /* RemoteConfigManager.swift */,
+				763310ACEF73334A335783A8 /* ResourceCacheManager.swift */,
+				7F54CBCD4195BF08F95A8678 /* AssetDownloadService.swift */,
+				FDB6DC0BF0BF30FD51B9D661 /* RemoteConfigService.swift */,
+				82C0D82A3B6610BE3DCD1A23 /* ResourceUpdateService.swift */,
+				B9343D4B7D493316EBF3C046 /* VersionCheckService.swift */,
+				03621B65CB191482712F1E1E /* JSONSchemaValidator.swift */,
+				E386B213C622A302B83435F1 /* URLValidator.swift */,
+				7B0AF33BFDBB3705BB4C535F /* VersionComparator.swift */,
+				329288DCDCEA54944717E07E /* AnnouncementBannerView.swift */,
+				7982C29EB6F2127CF1D64E80 /* ForceUpdateView.swift */,
+				215C88E21B188CABC75C12C5 /* MaintenanceView.swift */,
+				64091DF6A858964D92E61ACA /* OptionalUpdateAlert.swift */,
+				1ED18018345E6406E8AABC60 /* ResourceLoadingView.swift */,
 				E10DDDACBB03949975FC99FC /* Info.plist */,
 				0213A8FEC22E4C32818E7597 /* ChemVaultLoginBackground.png */,
 				0213A8FFC22E4C32818E7597 /* ChemVaultLogo.png */,
@@ -421,6 +501,26 @@
 				0EC1A2965794F52E1CC9DB3C /* SettingsView.swift in Sources */,
 				4B12E2EAA5C4881F60AAB30A /* SystemSettingsView.swift in Sources */,
 				80C16D3145792CF5AC651C50 /* ChemVaultModels.swift in Sources */,
+				180053179C3DE351FA9C416E /* Announcement.swift in Sources */,
+				A9A1B6BD39A0F8CEADAB2474 /* AppVersion.swift in Sources */,
+				B7726DE561160094706FED01 /* FeatureFlags.swift in Sources */,
+				197BCBEDBAFB88F3752C305D /* RemoteAssetManifest.swift in Sources */,
+				1A4C3FCC857098EA5988B975 /* RemoteConfig.swift in Sources */,
+				7945CF3E1183BC9F460F0275 /* FeatureFlagManager.swift in Sources */,
+				D39E1F9821882D58754ACDA1 /* RemoteConfigManager.swift in Sources */,
+				E36F520566C4302AFFFCAB5C /* ResourceCacheManager.swift in Sources */,
+				72443961B3800F3920E9E814 /* AssetDownloadService.swift in Sources */,
+				ACD20F236CF8DEB4E07EAA96 /* RemoteConfigService.swift in Sources */,
+				0316976D9B0EFC291783787A /* ResourceUpdateService.swift in Sources */,
+				72C312758AF8ADA8304867CA /* VersionCheckService.swift in Sources */,
+				C17B1E555EC15D780172CE88 /* JSONSchemaValidator.swift in Sources */,
+				7FF3A522C64379C5F4D02615 /* URLValidator.swift in Sources */,
+				E5A2FA1D29919873E3582B0D /* VersionComparator.swift in Sources */,
+				DB7BEA56BE3602F698760687 /* AnnouncementBannerView.swift in Sources */,
+				9D384AFE241D06AB4CC2561E /* ForceUpdateView.swift in Sources */,
+				5396BEF9C05738D6702EE660 /* MaintenanceView.swift in Sources */,
+				3D39BB8AC352BA929DA842AA /* OptionalUpdateAlert.swift in Sources */,
+				B180075CC5E6FE2BE704972C /* ResourceLoadingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -456,6 +556,26 @@
 				3D0DBEC0A03764F595C67AE0 /* SettingsView.swift in Sources */,
 				EB3D2B795AE0A2DD94BE117A /* SystemSettingsView.swift in Sources */,
 				C31E54ADEBA5747222139A4F /* ChemVaultModels.swift in Sources */,
+				5A796CF9B59D3BDB9785A120 /* Announcement.swift in Sources */,
+				316A2608BF56D4CA7EE3508F /* AppVersion.swift in Sources */,
+				3F521A12EA9E8CDFCEA0486F /* FeatureFlags.swift in Sources */,
+				44A124A0D9A4965699F68FD9 /* RemoteAssetManifest.swift in Sources */,
+				C0284491DE112FAB598925F5 /* RemoteConfig.swift in Sources */,
+				1A996E980860AB82FC8C0612 /* FeatureFlagManager.swift in Sources */,
+				13863E53D7A2634446BC96E8 /* RemoteConfigManager.swift in Sources */,
+				6D9A209ACD31B1778948880A /* ResourceCacheManager.swift in Sources */,
+				AF6133F96F5818AD1C493337 /* AssetDownloadService.swift in Sources */,
+				DD783ACB2B2621D59B719B91 /* RemoteConfigService.swift in Sources */,
+				CB52B6FDA551A242F43DDC52 /* ResourceUpdateService.swift in Sources */,
+				2CE3E263CCCBC410A42C831F /* VersionCheckService.swift in Sources */,
+				315C703804F12CB15A0ED9AA /* JSONSchemaValidator.swift in Sources */,
+				EBD74C0D022D4704501601E3 /* URLValidator.swift in Sources */,
+				6AA3785164441241FF9039B2 /* VersionComparator.swift in Sources */,
+				FA1C9684AFFAEF3526275147 /* AnnouncementBannerView.swift in Sources */,
+				53DFC9F2C9F3ED03292B0974 /* ForceUpdateView.swift in Sources */,
+				C0A835A0CB1973A9A075C8D6 /* MaintenanceView.swift in Sources */,
+				0F523FD002E13ADEC75CF491 /* OptionalUpdateAlert.swift in Sources */,
+				ADB4CB0E8D472DB9993CCD7D /* ResourceLoadingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,7 +662,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = science.chemvault.mail.apple;
 				PRODUCT_MODULE_NAME = ChemVaultMailApple;
 				PRODUCT_NAME = "ChemVault Mail";
@@ -695,7 +815,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = science.chemvault.mail.apple;
 				PRODUCT_MODULE_NAME = ChemVaultMailApple;
 				PRODUCT_NAME = "ChemVault Mail";

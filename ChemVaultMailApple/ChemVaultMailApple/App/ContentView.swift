@@ -8,6 +8,7 @@ import UIKit
 struct ContentView: View {
     @EnvironmentObject private var authSession: AuthSession
     @EnvironmentObject private var appEnvironment: AppEnvironment
+    @EnvironmentObject private var remoteConfigManager: RemoteConfigManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var launchLoadingComplete = false
     @State private var bootstrapStarted = false
@@ -16,7 +17,9 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             Group {
-                if !launchLoadingComplete {
+                if let launchBlock = remoteConfigManager.launchBlock {
+                    launchBlockView(launchBlock)
+                } else if !launchLoadingComplete {
                     startupLoading
                 } else {
                     switch authSession.state {
@@ -40,7 +43,17 @@ struct ContentView: View {
                     .transition(ChemVaultRootTransition.successOverlay)
                     .zIndex(2)
             }
+
+            if remoteConfigManager.isRefreshingResources {
+                VStack {
+                    Spacer()
+                    ResourceLoadingView()
+                }
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                .zIndex(3)
+            }
         }
+        .optionalUpdateAlert(version: $remoteConfigManager.optionalUpdate)
         .task {
             await bootstrapOnce()
         }
@@ -59,11 +72,32 @@ struct ContentView: View {
         .transition(.opacity)
     }
 
+    @ViewBuilder
+    private func launchBlockView(_ block: LaunchBlock) -> some View {
+        switch block {
+        case .maintenance(let title, let message, let supportEmail, let helpCenterUrl):
+            MaintenanceView(
+                title: title,
+                message: message,
+                supportEmail: supportEmail,
+                helpCenterUrl: helpCenterUrl,
+                retry: {
+                    Task { await appEnvironment.bootstrapAppConfiguration() }
+                }
+            )
+            .transition(ChemVaultRootTransition.app)
+        case .forceUpdate(let version):
+            ForceUpdateView(version: version)
+                .transition(ChemVaultRootTransition.app)
+        }
+    }
+
     @MainActor
     private func bootstrapOnce() async {
         guard !bootstrapStarted else { return }
         bootstrapStarted = true
 
+        await appEnvironment.bootstrapAppConfiguration()
         async let bootstrap: Void = authSession.bootstrap()
         try? await Task.sleep(nanoseconds: UInt64(ChemVaultLoadingConfiguration.minimumPresentationMilliseconds) * 1_000_000)
         await bootstrap
@@ -116,6 +150,8 @@ struct ContentView: View {
         .environmentObject(environment)
         .environmentObject(environment.preferences)
         .environmentObject(environment.authSession)
+        .environmentObject(environment.remoteConfigManager)
+        .environmentObject(environment.featureFlagManager)
 }
 
 enum ChemVaultLoadingConfiguration {

@@ -62,7 +62,7 @@ end
     settings['GENERATE_INFOPLIST_FILE'] = 'YES'
     settings['INFOPLIST_KEY_CFBundleDisplayName'] = 'ChemVault Mail'
     settings['INFOPLIST_KEY_LSApplicationCategoryType'] = 'public.app-category.productivity'
-    settings['MARKETING_VERSION'] = '0.1'
+    settings['MARKETING_VERSION'] = '0.2'
     settings['PRODUCT_MODULE_NAME'] = app_name
     settings['PRODUCT_NAME'] = 'ChemVault Mail'
     settings['SWIFT_VERSION'] = '6.0'

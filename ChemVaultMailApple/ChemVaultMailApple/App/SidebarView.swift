@@ -60,8 +60,9 @@ struct SidebarView: View {
 
     private var groupedRoutes: [(title: String, routes: [AppRoute])] {
         let order = ["Mail", "Personal", "Admin", "Insights"]
+        let visibleRoutes = AppRoute.visibleRoutes(for: authSession.currentUser)
         return order.compactMap { title in
-            let routes = AppRoute.allCases.filter { $0.groupTitle == title }
+            let routes = visibleRoutes.filter { $0.groupTitle == title }
             return routes.isEmpty ? nil : (title, routes)
         }
     }

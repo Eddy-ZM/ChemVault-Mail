@@ -484,7 +484,7 @@ private struct ChemVaultLoginCardSweep: View {
     }
 }
 
-private struct ChemVaultPrimaryButtonStyle: ButtonStyle {
+struct ChemVaultPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) private var colorScheme
 

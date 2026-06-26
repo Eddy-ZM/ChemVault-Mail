@@ -10,6 +10,7 @@ const zh = {
     permissions: '权限控制',
     inviteCode: '注册密钥',
     SystemSettings: '系统设置',
+    appConfig: 'App 配置',
     noMoreData: '没有更多数据了',
     noMessagesFound: '没有任何邮件',
     addAccount: '添加邮箱',

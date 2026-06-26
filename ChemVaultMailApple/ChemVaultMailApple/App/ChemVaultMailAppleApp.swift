@@ -10,6 +10,8 @@ struct ChemVaultMailAppleApp: App {
                 .environmentObject(appEnvironment)
                 .environmentObject(appEnvironment.preferences)
                 .environmentObject(appEnvironment.authSession)
+                .environmentObject(appEnvironment.remoteConfigManager)
+                .environmentObject(appEnvironment.featureFlagManager)
         }
         .commands {
             CommandMenu("ChemVault Mail") {
@@ -26,6 +28,8 @@ struct ChemVaultMailAppleApp: App {
                 .environmentObject(appEnvironment)
                 .environmentObject(appEnvironment.preferences)
                 .environmentObject(appEnvironment.authSession)
+                .environmentObject(appEnvironment.remoteConfigManager)
+                .environmentObject(appEnvironment.featureFlagManager)
         }
         #endif
     }
@@ -34,4 +38,3 @@ struct ChemVaultMailAppleApp: App {
 extension Notification.Name {
     static let chemVaultRefreshRequested = Notification.Name("chemVaultRefreshRequested")
 }
-

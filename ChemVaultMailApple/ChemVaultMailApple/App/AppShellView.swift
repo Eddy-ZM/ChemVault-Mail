@@ -27,6 +27,9 @@ struct AppShellView: View {
         }
         .tint(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
         .animation(reduceMotion ? nil : ChemVaultMotion.routeTransition, value: selection)
+        .onChange(of: authSession.currentUser) { _, user in
+            keepSelectionVisible(for: user)
+        }
     }
 
     private var splitLayout: some View {
@@ -63,9 +66,7 @@ struct AppShellView: View {
     }
 
     private var compactRoutes: [AppRoute] {
-        AppRoute.allCases.filter { route in
-            route.groupTitle != "Admin" || route.isAvailable(for: authSession.currentUser)
-        }
+        AppRoute.visibleRoutes(for: authSession.currentUser)
     }
 
     @ViewBuilder
@@ -102,6 +103,13 @@ struct AppShellView: View {
         #if canImport(UIKit)
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         #endif
+    }
+
+    private func keepSelectionVisible(for user: ChemVaultUser?) {
+        guard !AppRoute.visibleRoutes(for: user).contains(selection) else {
+            return
+        }
+        selection = .mail
     }
 }
 

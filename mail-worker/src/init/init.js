@@ -36,8 +36,64 @@ const dbInit = {
 		await this.v3_5DB(c);
 		await this.v3_6DB(c);
 		await this.v3_7DB(c);
+		await this.v3_8DB(c);
 		await settingService.refresh(c);
 		return c.text('success');
+	},
+
+	async v3_8DB(c) {
+		try {
+			await c.env.db.batch([
+				c.env.db.prepare(`
+					CREATE TABLE IF NOT EXISTS app_remote_config (
+						id INTEGER PRIMARY KEY AUTOINCREMENT,
+						platform TEXT NOT NULL UNIQUE,
+						minimum_supported_version TEXT NOT NULL DEFAULT '1.0.0',
+						latest_version TEXT NOT NULL DEFAULT '1.0.0',
+						force_update INTEGER NOT NULL DEFAULT 0,
+						app_store_url TEXT NOT NULL DEFAULT '',
+						maintenance_mode INTEGER NOT NULL DEFAULT 0,
+						maintenance_title TEXT NOT NULL DEFAULT '',
+						maintenance_message TEXT NOT NULL DEFAULT '',
+						announcement_json TEXT NOT NULL DEFAULT '{}',
+						feature_flags_json TEXT NOT NULL DEFAULT '{}',
+						theme_json TEXT NOT NULL DEFAULT '{}',
+						links_json TEXT NOT NULL DEFAULT '{}',
+						api_base_url TEXT NOT NULL DEFAULT '',
+						resource_manifest_url TEXT NOT NULL DEFAULT '',
+						config_version TEXT NOT NULL DEFAULT '',
+						created_at TEXT NOT NULL DEFAULT '',
+						updated_at TEXT NOT NULL DEFAULT '',
+						updated_by TEXT NOT NULL DEFAULT ''
+					)
+				`),
+				c.env.db.prepare(`
+					CREATE TABLE IF NOT EXISTS app_resource_manifest (
+						id INTEGER PRIMARY KEY AUTOINCREMENT,
+						platform TEXT NOT NULL UNIQUE,
+						version TEXT NOT NULL DEFAULT '',
+						manifest_json TEXT NOT NULL DEFAULT '{}',
+						created_at TEXT NOT NULL DEFAULT '',
+						updated_at TEXT NOT NULL DEFAULT ''
+					)
+				`),
+				c.env.db.prepare(`
+					CREATE TABLE IF NOT EXISTS app_templates (
+						id INTEGER PRIMARY KEY AUTOINCREMENT,
+						platform TEXT NOT NULL,
+						locale TEXT NOT NULL,
+						template_type TEXT NOT NULL,
+						template_json TEXT NOT NULL DEFAULT '{}',
+						version TEXT NOT NULL DEFAULT '',
+						created_at TEXT NOT NULL DEFAULT '',
+						updated_at TEXT NOT NULL DEFAULT '',
+						UNIQUE(platform, locale, template_type)
+					)
+				`)
+			]);
+		} catch (e) {
+			console.warn(`跳过 App 配置表：${e.message}`);
+		}
 	},
 
 	async v3_7DB(c) {

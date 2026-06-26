@@ -30,29 +30,58 @@ struct SettingsView: View {
                 }
             }
 
-            Section("Connection") {
-                LabeledContent {
-                    Text(preferences.baseURLString)
-                        .multilineTextAlignment(.trailing)
-                        .textSelection(.enabled)
-                } label: {
-                    Label("API Server", systemImage: "network")
-                }
+            Section("Preferences") {
                 Picker("Language", selection: $preferences.language) {
                     Text("English").tag("en")
                     Text("Chinese").tag("zh")
                 }
-                Button {
-                    syncConnectionSettings()
-                } label: {
-                    Label("Sync Managed Settings", systemImage: "arrow.triangle.2.circlepath")
-                }
-                if canManageSystemSettings {
+            }
+
+            if canManageSystemSettings {
+                Section("Connection") {
+                    LabeledContent {
+                        Text(preferences.baseURLString)
+                            .multilineTextAlignment(.trailing)
+                            .textSelection(.enabled)
+                    } label: {
+                        Label("API Server", systemImage: "network")
+                    }
+                    Button {
+                        syncConnectionSettings()
+                    } label: {
+                        Label("Sync Managed Settings", systemImage: "arrow.triangle.2.circlepath")
+                    }
                     NavigationLink {
                         SystemSettingsView()
                     } label: {
                         Label("Manage Global API", systemImage: "server.rack")
                     }
+                }
+            }
+
+            if canManageSystemSettings {
+                Section("App Configuration") {
+                    LabeledContent("Config Version", value: appEnvironment.remoteConfigManager.config.configVersion)
+                    LabeledContent("Latest Version", value: appEnvironment.remoteConfigManager.config.latestVersion)
+                    LabeledContent("Manifest") {
+                        Text(appEnvironment.remoteConfigManager.config.resourceManifestUrl)
+                            .multilineTextAlignment(.trailing)
+                            .textSelection(.enabled)
+                    }
+                    Button {
+                        Task { await appEnvironment.bootstrapAppConfiguration() }
+                    } label: {
+                        Label("Refresh App Config", systemImage: "arrow.clockwise.circle")
+                    }
+                }
+            }
+
+            if canManageSystemSettings && appEnvironment.featureFlagManager.flags.enableDebugPanel {
+                Section("Debug Panel") {
+                    LabeledContent("New Inbox UI", value: appEnvironment.featureFlagManager.flags.enableNewInboxUI ? "Enabled" : "Disabled")
+                    LabeledContent("System Notifications", value: appEnvironment.featureFlagManager.flags.enableSystemNotifications ? "Enabled" : "Disabled")
+                    LabeledContent("Beta Composer", value: appEnvironment.featureFlagManager.flags.enableBetaMailComposer ? "Enabled" : "Disabled")
+                    LabeledContent("Cloudflare Login", value: appEnvironment.featureFlagManager.flags.enableCloudflareLogin ? "Enabled" : "Disabled")
                 }
             }
 

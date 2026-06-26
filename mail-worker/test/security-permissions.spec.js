@@ -24,4 +24,17 @@ describe('avatar permission route mapping', () => {
 	it('keeps ChemVault Files permissions as role-only capabilities without mail API routes', () => {
 		expect(permKeyToPaths(['files:read', 'files:write', 'files:delete', 'files:share', 'files:manage'])).toEqual([]);
 	});
+
+	it('maps app config admin reads and writes to system setting permissions', () => {
+		expect(permKeyToPaths(['setting:query'])).toEqual(expect.arrayContaining([
+			'/app/admin/config',
+			'/app/admin/templates',
+			'/app/admin/manifest'
+		]));
+		expect(permKeyToPaths(['setting:set'])).toEqual(expect.arrayContaining([
+			'/app/admin/config/set',
+			'/app/admin/templates/set',
+			'/app/admin/manifest/set'
+		]));
+	});
 });

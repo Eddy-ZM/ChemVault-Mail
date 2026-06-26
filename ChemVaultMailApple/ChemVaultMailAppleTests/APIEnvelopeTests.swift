@@ -188,6 +188,83 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertFalse(wrapped.contains("<body><html>"))
     }
 
+    func testVersionComparatorHandlesSemanticSegments() {
+        XCTAssertTrue(VersionComparator.isVersion("1.0.9", lessThan: "1.0.10"))
+        XCTAssertFalse(VersionComparator.isVersion("1.0.10", lessThan: "1.0.9"))
+        XCTAssertEqual(VersionComparator.compare("1.2", "1.2.0"), .orderedSame)
+    }
+
+    func testRemoteConfigDecodesMissingFieldsWithSafeDefaults() throws {
+        let config = try JSONDecoder.chemVault.decode(RemoteConfig.self, from: Data(#"{}"#.utf8))
+
+        XCTAssertEqual(config.platform, "ios")
+        XCTAssertEqual(config.minimumSupportedVersion, "1.0.0")
+        XCTAssertFalse(config.forceUpdate)
+        XCTAssertFalse(config.maintenanceMode)
+        XCTAssertFalse(config.featureFlags.enableDebugPanel)
+        XCTAssertEqual(config.links.supportEmail, "support@chemvault.science")
+    }
+
+    func testURLValidatorEnforcesRemoteUpdatePolicy() {
+        XCTAssertTrue(URLValidator.isAppStoreURL("https://apps.apple.com/app/id1234567890"))
+        XCTAssertFalse(URLValidator.isAppStoreURL("https://example.com/app/id1234567890"))
+        XCTAssertTrue(URLValidator.isAllowedAssetURL("https://assets.chemvault.science/mail/logo.png"))
+        XCTAssertFalse(URLValidator.isAllowedAssetURL("http://assets.chemvault.science/mail/logo.png"))
+        XCTAssertFalse(URLValidator.isAllowedAssetURL("https://assets.chemvault.science/mail/update.jsbundle"))
+        XCTAssertFalse(URLValidator.isAllowedAssetURL("https://evil.example.com/mail/logo.png"))
+    }
+
+    func testRemoteAssetManifestValidationRejectsUnsafeAssets() throws {
+        let validManifest = RemoteAssetManifest(
+            version: "2026-06-26-1",
+            assets: [
+                RemoteAsset(
+                    key: "mail_logo",
+                    type: .image,
+                    url: "https://assets.chemvault.science/mail/logo.png",
+                    sha256: String(repeating: "a", count: 64),
+                    required: true
+                )
+            ]
+        )
+
+        XCTAssertNoThrow(try JSONSchemaValidator.validate(manifest: validManifest))
+
+        let invalidManifest = RemoteAssetManifest(
+            version: "2026-06-26-1",
+            assets: [
+                RemoteAsset(
+                    key: "bad_bundle",
+                    type: .json,
+                    url: "https://assets.chemvault.science/mail/update.jsbundle",
+                    sha256: "bad",
+                    required: false
+                )
+            ]
+        )
+
+        XCTAssertThrowsError(try JSONSchemaValidator.validate(manifest: invalidManifest))
+    }
+
+    func testAppRoutesHideControlSurfacesForStandardUsers() throws {
+        let user = try decodeUser(#"{"userId":1,"email":"standard@chemvault.science","permKeys":[]}"#)
+
+        let routes = AppRoute.visibleRoutes(for: user)
+
+        XCTAssertEqual(routes, [.mail, .starred, .accounts, .settings])
+        XCTAssertFalse(routes.contains { $0.isControlSurface })
+    }
+
+    func testAppRoutesKeepControlSurfacesForAdministrators() throws {
+        let admin = try decodeUser(#"{"userId":2,"email":"admin@chemvault.science","permKeys":["*"]}"#)
+
+        let routes = AppRoute.visibleRoutes(for: admin)
+
+        XCTAssertEqual(routes, AppRoute.allCases)
+        XCTAssertTrue(routes.contains(.adminUsers))
+        XCTAssertTrue(routes.contains(.analytics))
+    }
+
     func testMailStoreMarksSingleEmailReadLocally() async throws {
         AccountRequestURLProtocol.reset()
         let client = makeStubbedClient()
@@ -307,6 +384,10 @@ final class APIEnvelopeTests: XCTestCase {
 
     private func decodeEmail(_ json: String) throws -> ChemVaultEmail {
         try JSONDecoder.chemVault.decode(ChemVaultEmail.self, from: Data(json.utf8))
+    }
+
+    private func decodeUser(_ json: String) throws -> ChemVaultUser {
+        try JSONDecoder.chemVault.decode(ChemVaultUser.self, from: Data(json.utf8))
     }
 }
 

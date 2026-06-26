@@ -63,6 +63,10 @@ enum AppRoute: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
+    var isControlSurface: Bool {
+        permissionKey != nil
+    }
+
     var groupTitle: String {
         switch self {
         case .mail, .starred:
@@ -80,5 +84,10 @@ enum AppRoute: String, CaseIterable, Identifiable, Hashable {
         guard let permissionKey else { return true }
         return user?.hasPermission(permissionKey) ?? false
     }
-}
 
+    static func visibleRoutes(for user: ChemVaultUser?) -> [AppRoute] {
+        allCases.filter { route in
+            !route.isControlSurface || route.isAvailable(for: user)
+        }
+    }
+}

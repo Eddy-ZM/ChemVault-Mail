@@ -6,6 +6,9 @@ final class AppEnvironment: ObservableObject {
     let preferences: AppPreferences
     let apiClient: APIClient
     let authSession: AuthSession
+    let resourceCacheManager: ResourceCacheManager
+    let remoteConfigManager: RemoteConfigManager
+    let featureFlagManager: FeatureFlagManager
     @Published private(set) var publicSettings: ChemVaultSetting?
 
     var isRegistrationEnabled: Bool {
@@ -17,6 +20,9 @@ final class AppEnvironment: ObservableObject {
         tokenStore: TokenStoring = KeychainTokenStore()
     ) {
         self.preferences = preferences
+        self.resourceCacheManager = ResourceCacheManager()
+        self.remoteConfigManager = RemoteConfigManager(cacheManager: resourceCacheManager)
+        self.featureFlagManager = FeatureFlagManager(flags: remoteConfigManager.config.featureFlags)
         self.apiClient = APIClient(preferences: preferences)
         self.authSession = AuthSession(apiClient: apiClient, tokenStore: tokenStore)
     }
@@ -24,5 +30,15 @@ final class AppEnvironment: ObservableObject {
     func applyPublicSettings(_ settings: ChemVaultSetting) {
         publicSettings = settings
         preferences.applyGlobalBaseURLIfPresent(settings.appleApiBaseURL)
+    }
+
+    func bootstrapAppConfiguration() async {
+        let config = await remoteConfigManager.bootstrap(apiClient: apiClient)
+        applyRemoteConfig(config)
+    }
+
+    func applyRemoteConfig(_ config: RemoteConfig) {
+        preferences.applyGlobalBaseURLIfPresent(config.apiBaseUrl)
+        featureFlagManager.update(config.featureFlags)
     }
 }

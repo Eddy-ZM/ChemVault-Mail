@@ -77,74 +77,83 @@
             <span class="menu-name">{{ $t('settings') }}</span>
           </el-menu-item>
 
-          <div class="sidebar-separator"></div>
-          <div
-              class="manage-title"
-              v-perm="['all-email:query','user:query','role:query','setting:query','analysis:query','reg-key:query']"
-          >
-            <span>{{ $t('manage') }}</span>
-          </div>
+          <template v-if="hasManageAccess">
+            <div class="sidebar-separator"></div>
+            <div class="manage-title">
+              <span>{{ $t('manage') }}</span>
+            </div>
 
-          <el-menu-item
-              class="nav-item"
-              @click="router.push({ name: 'analysis' })"
-              index="analysis"
-              v-perm="'analysis:query'"
-              :class="route.meta.name === 'analysis' ? 'choose-item' : ''"
-          >
-            <Icon class="nav-icon" icon="fluent:data-pie-20-regular" width="18" height="18"/>
-            <span class="menu-name">{{ $t('analytics') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              class="nav-item"
-              @click="router.push({ name: 'user' })"
-              index="user"
-              v-perm="'user:query'"
-              :class="route.meta.name === 'user' ? 'choose-item' : ''"
-          >
-            <Icon class="nav-icon" icon="si:user-alt-2-line" width="18" height="18"/>
-            <span class="menu-name">{{ $t('allUsers') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              class="nav-item"
-              @click="router.push({ name: 'all-email' })"
-              index="all-email"
-              v-perm="'all-email:query'"
-              :class="route.meta.name === 'all-email' ? 'choose-item' : ''"
-          >
-            <Icon class="nav-icon" icon="fluent:mail-list-28-regular" width="18" height="18"/>
-            <span class="menu-name">{{ $t('allMail') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              class="nav-item"
-              @click="router.push({ name: 'role' })"
-              index="role"
-              v-perm="'role:query'"
-              :class="route.meta.name === 'role' ? 'choose-item' : ''"
-          >
-            <Icon class="nav-icon" icon="fluent:lock-closed-16-regular" width="18" height="18"/>
-            <span class="menu-name">{{ $t('permissions') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              class="nav-item"
-              @click="router.push({ name: 'reg-key' })"
-              index="reg-key"
-              v-perm="'reg-key:query'"
-              :class="route.meta.name === 'reg-key' ? 'choose-item' : ''"
-          >
-            <Icon class="nav-icon" icon="fluent:fingerprint-20-filled" width="18" height="18"/>
-            <span class="menu-name">{{ $t('inviteCode') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              class="nav-item"
-              @click="router.push({ name: 'sys-setting' })"
-              index="sys-setting"
-              v-perm="'setting:query'"
-              :class="route.meta.name === 'sys-setting' ? 'choose-item' : ''"
-          >
-            <Icon class="nav-icon" icon="eos-icons:system-ok-outlined" width="18" height="18"/>
-            <span class="menu-name">{{ $t('SystemSettings') }}</span>
-          </el-menu-item>
+            <el-menu-item
+                class="nav-item"
+                @click="router.push({ name: 'analysis' })"
+                index="analysis"
+                v-perm="'analysis:query'"
+                :class="route.meta.name === 'analysis' ? 'choose-item' : ''"
+            >
+              <Icon class="nav-icon" icon="fluent:data-pie-20-regular" width="18" height="18"/>
+              <span class="menu-name">{{ $t('analytics') }}</span>
+            </el-menu-item>
+            <el-menu-item
+                class="nav-item"
+                @click="router.push({ name: 'user' })"
+                index="user"
+                v-perm="'user:query'"
+                :class="route.meta.name === 'user' ? 'choose-item' : ''"
+            >
+              <Icon class="nav-icon" icon="si:user-alt-2-line" width="18" height="18"/>
+              <span class="menu-name">{{ $t('allUsers') }}</span>
+            </el-menu-item>
+            <el-menu-item
+                class="nav-item"
+                @click="router.push({ name: 'all-email' })"
+                index="all-email"
+                v-perm="'all-email:query'"
+                :class="route.meta.name === 'all-email' ? 'choose-item' : ''"
+            >
+              <Icon class="nav-icon" icon="fluent:mail-list-28-regular" width="18" height="18"/>
+              <span class="menu-name">{{ $t('allMail') }}</span>
+            </el-menu-item>
+            <el-menu-item
+                class="nav-item"
+                @click="router.push({ name: 'role' })"
+                index="role"
+                v-perm="'role:query'"
+                :class="route.meta.name === 'role' ? 'choose-item' : ''"
+            >
+              <Icon class="nav-icon" icon="fluent:lock-closed-16-regular" width="18" height="18"/>
+              <span class="menu-name">{{ $t('permissions') }}</span>
+            </el-menu-item>
+            <el-menu-item
+                class="nav-item"
+                @click="router.push({ name: 'reg-key' })"
+                index="reg-key"
+                v-perm="'reg-key:query'"
+                :class="route.meta.name === 'reg-key' ? 'choose-item' : ''"
+            >
+              <Icon class="nav-icon" icon="fluent:fingerprint-20-filled" width="18" height="18"/>
+              <span class="menu-name">{{ $t('inviteCode') }}</span>
+            </el-menu-item>
+            <el-menu-item
+                class="nav-item"
+                @click="router.push({ name: 'sys-setting' })"
+                index="sys-setting"
+                v-perm="'setting:query'"
+                :class="route.meta.name === 'sys-setting' ? 'choose-item' : ''"
+            >
+              <Icon class="nav-icon" icon="eos-icons:system-ok-outlined" width="18" height="18"/>
+              <span class="menu-name">{{ $t('SystemSettings') }}</span>
+            </el-menu-item>
+            <el-menu-item
+                class="nav-item"
+                @click="router.push({ name: 'app-config' })"
+                index="app-config"
+                v-perm="'setting:query'"
+                :class="route.meta.name === 'app-config' ? 'choose-item' : ''"
+            >
+              <Icon class="nav-icon" icon="lucide:smartphone" width="18" height="18"/>
+              <span class="menu-name">{{ $t('appConfig') }}</span>
+            </el-menu-item>
+          </template>
         </el-menu>
       </el-scrollbar>
 
@@ -177,10 +186,16 @@ const uiStore = useUiStore();
 const route = useRoute();
 const hoverExpanded = ref(false);
 const isDesktop = ref(window.innerWidth > 1024);
+const managePermKeys = ['all-email:query', 'user:query', 'role:query', 'setting:query', 'analysis:query', 'reg-key:query'];
 
 const isExpanded = computed(() => !isDesktop.value || uiStore.sidebarPinned || hoverExpanded.value);
 const userInitial = computed(() => formatInitial(userStore.user.email));
 const accountName = computed(() => userStore.user.name || userStore.user.email || '');
+const userPermKeys = computed(() => Array.isArray(userStore.user?.permKeys) ? userStore.user.permKeys : []);
+const hasManageAccess = computed(() => {
+  const permKeys = userPermKeys.value;
+  return permKeys.includes('*') || managePermKeys.some(key => permKeys.includes(key));
+});
 
 function setExpanded(value) {
   if (isDesktop.value && !uiStore.sidebarPinned) {

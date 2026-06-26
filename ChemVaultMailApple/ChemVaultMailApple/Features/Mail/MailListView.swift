@@ -54,6 +54,20 @@ struct MailListView: View {
 
     private var mailList: some View {
         List {
+            if let announcement = appEnvironment.remoteConfigManager.currentAnnouncement {
+                Section {
+                    AnnouncementBannerView(
+                        announcement: announcement,
+                        dismiss: {
+                            appEnvironment.remoteConfigManager.dismissAnnouncement()
+                        }
+                    )
+                    .listRowInsets(EdgeInsets(top: 12, leading: 14, bottom: 6, trailing: 14))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
+            }
+
             Section {
                 MailboxOverviewCard(
                     mode: mode,
