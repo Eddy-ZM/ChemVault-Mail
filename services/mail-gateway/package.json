@@ -1,0 +1,17 @@
+{
+  "name": "@chemvault/mail-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "node src/main.js",
+    "start": "node src/main.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "mailparser": "^3.7.4",
+    "smtp-server": "^3.15.0"
+  }
+}

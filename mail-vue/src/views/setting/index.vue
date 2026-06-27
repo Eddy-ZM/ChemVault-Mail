@@ -42,6 +42,81 @@
         <el-option label="English" value="en" @pointerdown.prevent.stop="changeLang('en')"/>
       </el-select>
     </div>
+    <div class="mail-client">
+      <div class="title">{{$t('mailClientTitle')}}</div>
+      <div class="mail-client-tip">{{$t('mailClientSecurityTip')}}</div>
+      <div class="mail-client-config" v-if="mailClient.config">
+        <div class="config-panel">
+          <div class="config-title">{{$t('incomingMail')}}</div>
+          <div class="config-row"><span>{{$t('protocol')}}</span><strong>{{ mailClient.config.incoming.protocol }}</strong></div>
+          <div class="config-row"><span>{{$t('server')}}</span><strong>{{ mailClient.config.incoming.host }}</strong></div>
+          <div class="config-row"><span>{{$t('port')}}</span><strong>{{ mailClient.config.incoming.port }}</strong></div>
+          <div class="config-row"><span>{{$t('security')}}</span><strong>{{ mailClient.config.incoming.security }}</strong></div>
+          <div class="config-row"><span>{{$t('username')}}</span><strong>{{ mailClient.config.incoming.username }}</strong></div>
+        </div>
+        <div class="config-panel">
+          <div class="config-title">{{$t('outgoingMail')}}</div>
+          <div class="config-row"><span>{{$t('protocol')}}</span><strong>{{ mailClient.config.outgoing.protocol }}</strong></div>
+          <div class="config-row"><span>{{$t('server')}}</span><strong>{{ mailClient.config.outgoing.host }}</strong></div>
+          <div class="config-row"><span>{{$t('port')}}</span><strong>{{ mailClient.config.outgoing.port }}</strong></div>
+          <div class="config-row"><span>{{$t('security')}}</span><strong>{{ mailClient.config.outgoing.security }}</strong></div>
+          <div class="config-row"><span>{{$t('username')}}</span><strong>{{ mailClient.config.outgoing.username }}</strong></div>
+        </div>
+      </div>
+      <div class="app-password-create">
+        <el-input
+            v-model="mailClient.name"
+            :placeholder="$t('appPasswordNamePlaceholder')"
+            maxlength="80"
+            clearable
+        />
+        <el-button type="primary" :loading="mailClient.creating" @click="createAppPassword">
+          {{$t('generateAppPassword')}}
+        </el-button>
+      </div>
+      <div class="one-time-password" v-if="mailClient.oneTimePassword">
+        <div>
+          <span>{{$t('oneTimePassword')}}</span>
+          <strong>{{ mailClient.oneTimePassword }}</strong>
+        </div>
+        <el-button @click="copyOneTimePassword">{{$t('copy')}}</el-button>
+      </div>
+      <el-table
+          v-if="mailClient.config"
+          :data="mailClient.config.appPasswords"
+          v-loading="mailClient.loading"
+          class="app-password-table"
+          size="small"
+      >
+        <el-table-column prop="name" :label="$t('name')" min-width="160"/>
+        <el-table-column prop="emailAddress" :label="$t('emailAccount')" min-width="190"/>
+        <el-table-column :label="$t('createdAt')" min-width="160">
+          <template #default="{ row }">{{ row.createdAt || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="$t('lastUsedAt')" min-width="160">
+          <template #default="{ row }">{{ row.lastUsedAt || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="$t('status')" width="110">
+          <template #default="{ row }">
+            <el-tag :type="row.revoked ? 'info' : 'success'">
+              {{ row.revoked ? $t('revoked') : $t('active') }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('action')" width="110">
+          <template #default="{ row }">
+            <el-button
+                type="danger"
+                size="small"
+                :disabled="row.revoked"
+                @click="revokeAppPassword(row)"
+            >
+              {{$t('revoke')}}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
     <div class="del-email" v-perm="'my:delete'">
       <div class="title">{{$t('deleteUser')}}</div>
       <div style="color: var(--regular-text-color);">
@@ -61,8 +136,14 @@
   </div>
 </template>
 <script setup>
-import {reactive, ref, defineOptions} from 'vue'
-import {resetPassword, userDelete} from "@/request/my.js";
+import {reactive, ref, defineOptions, onMounted} from 'vue'
+import {
+  createMailClientAppPassword,
+  mailClientConfig,
+  resetPassword,
+  revokeMailClientAppPassword,
+  userDelete
+} from "@/request/my.js";
 import {useUserStore} from "@/store/user.js";
 import router from "@/router/index.js";
 import {accountSetName} from "@/request/account.js";
@@ -78,10 +159,74 @@ const setPwdLoading = ref(false)
 const setNameShow = ref(false)
 const accountName = ref(null)
 const langSelect = ref(settingStore.lang)
+const mailClient = reactive({
+  loading: false,
+  creating: false,
+  name: '',
+  oneTimePassword: '',
+  config: null,
+})
 
 defineOptions({
   name: 'setting'
 })
+
+onMounted(() => {
+  loadMailClientConfig()
+})
+
+function loadMailClientConfig() {
+  mailClient.loading = true
+  mailClientConfig().then(data => {
+    mailClient.config = data
+  }).finally(() => {
+    mailClient.loading = false
+  })
+}
+
+function createAppPassword() {
+  if (!mailClient.name.trim()) {
+    ElMessage({
+      message: t('appPasswordNameRequired'),
+      type: 'error',
+      plain: true,
+    })
+    return
+  }
+
+  mailClient.creating = true
+  createMailClientAppPassword({
+    name: mailClient.name.trim(),
+    scopes: ['imap', 'smtp']
+  }).then(data => {
+    mailClient.oneTimePassword = data.plainAppPassword
+    mailClient.name = ''
+    loadMailClientConfig()
+  }).finally(() => {
+    mailClient.creating = false
+  })
+}
+
+function revokeAppPassword(row) {
+  ElMessageBox.confirm(t('revokeAppPasswordConfirm'), {
+    confirmButtonText: t('confirm'),
+    cancelButtonText: t('cancel'),
+    type: 'warning'
+  }).then(() => {
+    revokeMailClientAppPassword(row.id).then(() => {
+      loadMailClientConfig()
+    })
+  })
+}
+
+function copyOneTimePassword() {
+  navigator.clipboard?.writeText(mailClient.oneTimePassword)
+  ElMessage({
+    message: t('copySuccessMsg'),
+    type: 'success',
+    plain: true,
+  })
+}
 
 function showSetName() {
   accountName.value = userStore.user.name
@@ -283,6 +428,92 @@ function submitPwd() {
 
     .language-select {
       width: 100px;
+    }
+  }
+
+  .mail-client {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 40px;
+
+    .mail-client-tip {
+      color: var(--regular-text-color);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .mail-client-config {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+
+      @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .config-panel {
+      border: 1px solid var(--el-border-color);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      background: var(--el-bg-color);
+    }
+
+    .config-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .config-row {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 12px;
+      font-size: 14px;
+
+      span {
+        color: var(--regular-text-color);
+      }
+
+      strong {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    .app-password-create {
+      display: grid;
+      grid-template-columns: minmax(220px, 360px) auto;
+      gap: 12px;
+      justify-content: start;
+
+      @media (max-width: 767px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .one-time-password {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--el-color-warning-light-5);
+      background: var(--el-color-warning-light-9);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+
+      strong {
+        display: block;
+        margin-top: 4px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    .app-password-table {
+      max-width: 100%;
     }
   }
 

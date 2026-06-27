@@ -22,4 +22,5 @@ import '../api/telegram-api'
 import '../api/oauth-api'
 import '../api/app-api'
 import '../api/sso-api'
+import '../api/mail-client-api'
 export default app;
