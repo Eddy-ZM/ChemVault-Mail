@@ -19,6 +19,7 @@ import dayjs from 'dayjs';
 import { toUtc } from '../utils/date-uitil';
 import { t } from '../i18n/i18n.js';
 import verifyRecordService from './verify-record-service';
+import userCenterSyncService from './user-center-sync-service';
 
 const loginService = {
 
@@ -134,16 +135,27 @@ const loginService = {
 
 		await userService.updateUserInfo(c, userId, true);
 
+		const userCenterSync = await userCenterSyncService.syncMailUser(c, {
+			userId,
+			primaryEmail: email,
+			mailAddress: email,
+			name: emailUtils.getName(email),
+			displayName: emailUtils.getName(email),
+			type: type || defType,
+			canReceive: true,
+			canLoginMail: true
+		});
+
 		if (regKey !== settingConst.regKey.CLOSE && type) {
 			await regKeyService.reduceCount(c, code, 1);
 		}
 
 		if (registerVerify === settingConst.registerVerify.COUNT && !regVerifyOpen) {
 			const row = await verifyRecordService.increaseRegCount(c);
-			return {regVerifyOpen: row.count >= regVerifyCount}
+			return {regVerifyOpen: row.count >= regVerifyCount, userCenterSync}
 		}
 
-		return {regVerifyOpen}
+		return {regVerifyOpen, userCenterSync}
 
 	},
 

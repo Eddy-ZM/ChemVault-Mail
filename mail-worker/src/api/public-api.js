@@ -13,6 +13,6 @@ app.post('/public/emailList', async (c) => {
 });
 
 app.post('/public/addUser', async (c) => {
-	await publicService.addUser(c, await c.req.json());
-	return c.json(result.ok());
+	const data = await publicService.addUser(c, await c.req.json());
+	return c.json(result.ok(data));
 });

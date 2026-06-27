@@ -13,6 +13,7 @@ import roleService from './role-service';
 import { t } from '../i18n/i18n';
 import verifyRecordService from './verify-record-service';
 import accountAvatarService from './account-avatar-service';
+import userCenterSyncService from './user-center-sync-service';
 
 const accountAvatarColumns = [
 	{
@@ -118,6 +119,16 @@ const accountService = {
 
 
 		accountRow = await orm(c).insert(account).values({ email: email, userId: userId, name: emailUtils.getName(email) }).returning().get();
+		accountRow.userCenterSync = await userCenterSyncService.syncMailUser(c, {
+			userId,
+			primaryEmail: userRow.email,
+			mailAddress: accountRow.email,
+			name: emailUtils.getName(userRow.email),
+			displayName: accountRow.name || emailUtils.getName(accountRow.email),
+			type: userRow.type,
+			canReceive: true,
+			canLoginMail: true
+		});
 
 		if (addEmailVerify === settingConst.addEmailVerify.COUNT && !addVerifyOpen) {
 			const row = await verifyRecordService.increaseAddCount(c);

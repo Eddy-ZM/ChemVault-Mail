@@ -18,6 +18,7 @@ import { t } from '../i18n/i18n'
 import reqUtils from '../utils/req-utils';
 import {oauth} from "../entity/oauth";
 import oauthService from "./oauth-service";
+import userCenterSyncService from './user-center-sync-service';
 
 const userService = {
 
@@ -324,7 +325,7 @@ const userService = {
 			throw new BizError(t('isRegAccount'));
 		}
 
-		const role = roleService.selectById(c, type);
+		const role = await roleService.selectById(c, type);
 
 		if (!role) {
 			throw new BizError(t('roleNotExist'));
@@ -337,6 +338,17 @@ const userService = {
 		await userService.updateUserInfo(c, userId, true);
 
 		await accountService.insert(c, { userId: userId, email, type, name: emailUtils.getName(email) });
+
+		return await userCenterSyncService.syncMailUser(c, {
+			userId,
+			primaryEmail: email,
+			mailAddress: email,
+			name: emailUtils.getName(email),
+			displayName: emailUtils.getName(email),
+			type,
+			canReceive: true,
+			canLoginMail: true
+		});
 	},
 
 	async resetDaySendCount(c) {

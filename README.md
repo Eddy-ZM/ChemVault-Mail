@@ -29,6 +29,38 @@ The system provides reliable custom-domain email services through a fully server
 
 🌐 https://mail.chemvault.science
 
+## ChemVault User Center Sync
+
+When ChemVault Mail creates a user or mailbox, the Worker pushes that identity to the main ChemVault User Center immediately.
+
+Synced paths:
+
+- Admin creates a Mail user with `POST /api/user/add`
+- A user self-registers with `POST /api/register`
+- Admin/public batch import creates users with `POST /api/public/addUser`
+- An existing Mail user adds another mailbox with `POST /api/account/add`
+
+The Mail Worker calls:
+
+```text
+POST https://user.chemvault.science/api/integrations/mail/users/sync
+```
+
+Required Worker configuration:
+
+```bash
+npx wrangler secret put USER_SYSTEM_SYNC_SECRET --config mail-worker/wrangler.toml
+```
+
+The secret value must match the User Center `MAIL_SYSTEM_SYNC_SECRET` Pages secret. During migration, Mail Worker falls back to the existing `mail_sso_secret`, and User Center accepts `MAIL_SYSTEM_SSO_SECRET`, so production can sync before a dedicated sync secret is added. For local testing, set `chemvault_user_sync_url` to the local User Center Pages dev URL, for example:
+
+```toml
+[vars]
+chemvault_user_sync_url = "http://localhost:8788/api/integrations/mail/users/sync"
+```
+
+Do not commit `USER_SYSTEM_SYNC_SECRET`, `MAIL_SYSTEM_SYNC_SECRET`, SSO secrets, or JWT secrets.
+
 ## App Update and Remote Resource Policy
 
 ChemVault Mail's Apple native app does not download or execute remote code.

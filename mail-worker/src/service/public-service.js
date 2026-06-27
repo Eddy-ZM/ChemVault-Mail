@@ -14,6 +14,7 @@ import { isDel, roleConst } from '../const/entity-const';
 import email from '../entity/email';
 import userService from './user-service';
 import KvConst from '../const/kv-const';
+import userCenterSyncService from './user-center-sync-service';
 
 const publicService = {
 
@@ -158,6 +159,23 @@ const publicService = {
 			}
 		}
 
+		const userCenterSync = [];
+		for (const emailRow of list) {
+			const userRow = await userService.selectByEmailIncludeDel(c, emailRow.email);
+			if (!userRow) continue;
+			userCenterSync.push(await userCenterSyncService.syncMailUser(c, {
+				userId: userRow.userId,
+				primaryEmail: userRow.email,
+				mailAddress: userRow.email,
+				name: emailUtils.getName(userRow.email),
+				displayName: emailUtils.getName(userRow.email),
+				type: userRow.type,
+				canReceive: true,
+				canLoginMail: true
+			}));
+		}
+
+		return { userCenterSync };
 	},
 
 	async genToken(c, params) {
