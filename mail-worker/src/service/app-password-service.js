@@ -1,5 +1,6 @@
 import BizError from '../error/biz-error';
 import saltHashUtils from '../utils/crypto-utils';
+import { ensureMailClientTables } from './mail-client-schema-service';
 
 const allowedScopes = ['imap', 'smtp'];
 const appPasswordAlphabet = 'abcdefghijkmnopqrstuvwxyz23456789';
@@ -93,6 +94,7 @@ async function syncGateway(c, path, payload) {
 
 const appPasswordService = {
 	async list(c, userId) {
+		await ensureMailClientTables(c);
 		const rows = await c.env.db.prepare(`
 			SELECT id, email_address, name, scopes, created_at, last_used_at, revoked_at, failed_count
 			FROM mail_app_passwords
@@ -125,6 +127,7 @@ const appPasswordService = {
 	},
 
 	async create(c, params, user) {
+		await ensureMailClientTables(c);
 		const name = String(params.name || '').trim();
 		if (!name) {
 			throw new BizError('App password name is required');
@@ -171,6 +174,7 @@ const appPasswordService = {
 	},
 
 	async revoke(c, id, user) {
+		await ensureMailClientTables(c);
 		const record = await c.env.db.prepare(`
 			SELECT id, user_id, email_address, name, scopes, created_at, last_used_at, revoked_at, failed_count
 			FROM mail_app_passwords

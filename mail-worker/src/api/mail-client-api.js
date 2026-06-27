@@ -3,6 +3,7 @@ import result from '../model/result';
 import userContext from '../security/user-context';
 import appPasswordService from '../service/app-password-service';
 import { emailConst } from '../const/entity-const';
+import mailClientSchemaService, { ensureMailClientTables } from '../service/mail-client-schema-service';
 
 app.get('/my/mail-client/config', async (c) => {
 	const user = userContext.getUser(c);
@@ -28,6 +29,7 @@ app.post('/internal/mail-client/inbound', async (c) => {
 	}
 
 	const body = await c.req.json();
+	await mailClientSchemaService.ensure(c);
 	const recipient = String(body.recipient || '').trim().toLowerCase();
 	const messageId = String(body.messageId || '').trim();
 
@@ -100,6 +102,7 @@ app.post('/internal/mail-client/audit', async (c) => {
 	}
 
 	const body = await c.req.json();
+	await ensureMailClientTables(c);
 	const emailAddress = String(body.email || '').trim().toLowerCase();
 	const now = new Date().toISOString();
 	const user = emailAddress
