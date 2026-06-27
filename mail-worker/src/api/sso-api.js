@@ -1,6 +1,11 @@
 import app from '../hono/hono';
 import result from '../model/result';
 import userContext from '../security/user-context';
+import userService from '../service/user-service';
+import accountService from '../service/account-service';
+import roleService from '../service/role-service';
+import cryptoUtils from '../utils/crypto-utils';
+import { isDel, userConst } from '../const/entity-const';
 
 const USER_CENTER_CLIENT_ID = 'chemvault_user';
 const USER_CENTER_CALLBACK_PATH = '/api/auth/sso/mail/callback';
@@ -48,6 +53,48 @@ app.post('/sso/chemvault-user/assertion', async (c) => {
 	return c.json(result.ok({ redirectUrl: callbackUrl.toString() }));
 });
 
+app.post('/internal/user-center/password-login', async (c) => {
+	if (!await verifyInternalSecret(c)) {
+		return c.json(result.fail('Invalid internal secret.', 403), 403);
+	}
+
+	const body = await c.req.json().catch(() => ({}));
+	const email = normalizeEmail(body.email);
+	const password = typeof body.password === 'string' ? body.password : '';
+	if (!email || !password) {
+		return c.json(result.fail('Invalid email or password.', 401), 401);
+	}
+
+	const userRow = await userService.selectByEmailIncludeDel(c, email);
+	if (!userRow || userRow.isDel === isDel.DELETE || userRow.status === userConst.status.BAN) {
+		return c.json(result.fail('Invalid email or password.', 401), 401);
+	}
+
+	const ok = await cryptoUtils.verifyPassword(password, userRow.salt, userRow.password);
+	if (!ok) {
+		return c.json(result.fail('Invalid email or password.', 401), 401);
+	}
+
+	const accountRow = await accountService.selectByEmailIncludeDel(c, userRow.email);
+	const roleRow = await roleService.selectById(c, userRow.type);
+	const canSend = await resolveCanSend(c, userRow);
+	const displayName = accountRow?.name || userRow.email.split('@')[0] || userRow.email;
+
+	return c.json(result.ok({
+		email: normalizeEmail(userRow.email),
+		name: displayName,
+		mailUserId: String(userRow.userId),
+		mailAddress: normalizeEmail(userRow.email),
+		mailRole: resolveMailRole(c, userRow.email, roleRow),
+		mailStatus: 'active',
+		canSend,
+		canReceive: true,
+		canLoginMail: true,
+		mailboxQuotaMb: 1024,
+		aliases: []
+	}));
+});
+
 function validateUserCenterCallback(c, redirectUri) {
 	let url;
 	try {
@@ -82,6 +129,56 @@ function getSsoSecret(c) {
 		throw new Error('Mail SSO secret is not configured.');
 	}
 	return secret;
+}
+
+async function verifyInternalSecret(c) {
+	const authorization = c.req.header('authorization') || '';
+	const bearer = authorization.toLowerCase().startsWith('bearer ') ? authorization.slice(7).trim() : '';
+	const actual = c.req.header('x-chemvault-sync-secret') || c.req.header('x-chemvault-sso-secret') || bearer;
+	if (!actual) return false;
+
+	const candidates = [
+		c.env.user_system_sync_secret,
+		c.env.USER_SYSTEM_SYNC_SECRET,
+		c.env.MAIL_SYSTEM_SYNC_SECRET,
+		c.env.mail_sso_secret,
+		c.env.MAIL_SYSTEM_SSO_SECRET
+	].filter(Boolean);
+
+	for (const candidate of candidates) {
+		if (await timingSafeStringEqual(actual, String(candidate))) return true;
+	}
+	return false;
+}
+
+function resolveMailRole(c, email, roleRow) {
+	if (normalizeEmail(c.env.admin || '') === normalizeEmail(email)) return 'mailbox_super';
+
+	const marker = `${roleRow?.key || ''} ${roleRow?.name || ''}`.toLowerCase();
+	if (marker.includes('super')) return 'mailbox_super';
+	if (marker.includes('admin')) return 'mailbox_admin';
+	return 'mailbox_user';
+}
+
+async function resolveCanSend(c, userRow) {
+	if (normalizeEmail(c.env.admin || '') === normalizeEmail(userRow.email)) return true;
+	const rows = await roleService.selectByIdsHasPermKey(c, [userRow.type], 'email:send');
+	return rows.length > 0;
+}
+
+async function timingSafeStringEqual(a, b) {
+	const [aHash, bHash] = await Promise.all([sha256Bytes(a), sha256Bytes(b)]);
+	if (aHash.byteLength !== bHash.byteLength) return false;
+	let diff = 0;
+	for (let index = 0; index < aHash.byteLength; index += 1) {
+		diff |= aHash[index] ^ bHash[index];
+	}
+	return diff === 0;
+}
+
+async function sha256Bytes(value) {
+	const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+	return new Uint8Array(digest);
 }
 
 async function signMailSsoAssertion(secret, input) {

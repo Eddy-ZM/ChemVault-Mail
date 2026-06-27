@@ -27,6 +27,7 @@ const exclude = [
 	'/app/manifest',
 	'/internal/mail-client/inbound',
 	'/internal/mail-client/audit',
+	'/internal/user-center/password-login',
 	'/webhooks',
 	'/init',
 	'/public/genToken',

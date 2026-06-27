@@ -61,6 +61,14 @@ chemvault_user_sync_url = "http://localhost:8788/api/integrations/mail/users/syn
 
 Do not commit `USER_SYSTEM_SYNC_SECRET`, `MAIL_SYSTEM_SYNC_SECRET`, SSO secrets, or JWT secrets.
 
+User Center also delegates Mail password verification to Mail Worker when a synced Mail user signs in through the User Center email/password form. The protected endpoint is:
+
+```text
+POST /api/internal/user-center/password-login
+```
+
+It is excluded from public auth middleware but requires the shared User Center/Mail secret in `x-chemvault-sso-secret`, `x-chemvault-sync-secret`, or a Bearer token. It returns only normalized identity and mailbox permission metadata after the Mail password is verified.
+
 ## App Update and Remote Resource Policy
 
 ChemVault Mail's Apple native app does not download or execute remote code.
