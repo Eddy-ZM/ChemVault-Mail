@@ -22,8 +22,8 @@ struct RemoteConfig: Codable, Equatable {
 
     init(
         platform: String = "ios",
-        minimumSupportedVersion: String = "1.0.0",
-        latestVersion: String = "1.0.0",
+        minimumSupportedVersion: String = "0.2",
+        latestVersion: String = "0.2",
         forceUpdate: Bool = false,
         appStoreUrl: String = "https://apps.apple.com/app/idXXXXXXXXXX",
         apiBaseUrl: String = "https://mail.chemvault.science/api",

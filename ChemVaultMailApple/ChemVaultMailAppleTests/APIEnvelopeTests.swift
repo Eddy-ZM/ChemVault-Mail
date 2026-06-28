@@ -194,11 +194,45 @@ final class APIEnvelopeTests: XCTestCase {
         XCTAssertEqual(VersionComparator.compare("1.2", "1.2.0"), .orderedSame)
     }
 
+    func testVersionCheckSkipsAppStoreUpdatePromptsForTestFlight() {
+        let config = RemoteConfig(
+            minimumSupportedVersion: "1.0.0",
+            latestVersion: "1.0.0",
+            forceUpdate: true
+        )
+
+        XCTAssertNil(VersionCheckService.evaluate(currentVersion: "0.2", config: config, distributionChannel: .testFlight))
+        XCTAssertNil(VersionCheckService.evaluate(currentVersion: "0.2", config: config, distributionChannel: .development))
+    }
+
+    func testVersionCheckStillAppliesToAppStoreBuilds() {
+        let optionalConfig = RemoteConfig(
+            minimumSupportedVersion: "0.1",
+            latestVersion: "1.0.0",
+            forceUpdate: false
+        )
+        let forcedConfig = RemoteConfig(
+            minimumSupportedVersion: "1.0.0",
+            latestVersion: "1.0.0",
+            forceUpdate: false
+        )
+
+        XCTAssertEqual(
+            VersionCheckService.evaluate(currentVersion: "0.2", config: optionalConfig, distributionChannel: .appStore)?.kind,
+            .optional
+        )
+        XCTAssertEqual(
+            VersionCheckService.evaluate(currentVersion: "0.2", config: forcedConfig, distributionChannel: .appStore)?.kind,
+            .forced
+        )
+    }
+
     func testRemoteConfigDecodesMissingFieldsWithSafeDefaults() throws {
         let config = try JSONDecoder.chemVault.decode(RemoteConfig.self, from: Data(#"{}"#.utf8))
 
         XCTAssertEqual(config.platform, "ios")
-        XCTAssertEqual(config.minimumSupportedVersion, "1.0.0")
+        XCTAssertEqual(config.minimumSupportedVersion, "0.2")
+        XCTAssertEqual(config.latestVersion, "0.2")
         XCTAssertFalse(config.forceUpdate)
         XCTAssertFalse(config.maintenanceMode)
         XCTAssertFalse(config.featureFlags.enableDebugPanel)

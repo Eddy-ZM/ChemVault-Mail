@@ -27,8 +27,8 @@ export const defaultFeatureFlags = {
 
 export const defaultAppConfig = {
 	platform: 'ios',
-	minimumSupportedVersion: '1.0.0',
-	latestVersion: '1.0.0',
+	minimumSupportedVersion: '0.2',
+	latestVersion: '0.2',
 	forceUpdate: false,
 	appStoreUrl: 'https://apps.apple.com/app/idXXXXXXXXXX',
 	apiBaseUrl: 'https://mail.chemvault.science/api',
