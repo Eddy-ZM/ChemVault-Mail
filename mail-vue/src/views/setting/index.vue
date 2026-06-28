@@ -24,9 +24,10 @@
         <div>{{ userStore.user.email }}</div>
       </div>
       <div class="item">
-        <div>{{$t('password')}}</div>
-        <div>
-          <el-button type="primary" @click="pwdShow = true">{{$t('changePwdBtn')}}</el-button>
+        <div>{{$t('accountManagement')}}</div>
+        <div class="account-management">
+          <span>{{$t('accountManagementDesc')}}</span>
+          <el-button type="primary" @click="openUserSystemSettings">{{$t('openUserSystem')}}</el-button>
         </div>
       </div>
     </div>
@@ -126,13 +127,6 @@
         <el-button type="primary" @click="deleteConfirm">{{$t('deleteUserBtn')}}</el-button>
       </div>
     </div>
-    <el-dialog v-model="pwdShow" :title="$t('changePassword')" width="340">
-      <div class="update-pwd">
-        <el-input type="password" :placeholder="$t('newPassword')" v-model="form.password" autocomplete="off"/>
-        <el-input type="password" :placeholder="$t('confirmPassword')" v-model="form.newPwd" autocomplete="off"/>
-        <el-button type="primary" :loading="setPwdLoading" @click="submitPwd">{{$t('save')}}</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script setup>
@@ -140,7 +134,6 @@ import {reactive, ref, defineOptions, onMounted} from 'vue'
 import {
   createMailClientAppPassword,
   mailClientConfig,
-  resetPassword,
   revokeMailClientAppPassword,
   userDelete
 } from "@/request/my.js";
@@ -155,7 +148,6 @@ const { t } = useI18n()
 const accountStore = useAccountStore()
 const settingStore = useSettingStore()
 const userStore = useUserStore();
-const setPwdLoading = ref(false)
 const setNameShow = ref(false)
 const accountName = ref(null)
 const langSelect = ref(settingStore.lang)
@@ -166,6 +158,7 @@ const mailClient = reactive({
   oneTimePassword: '',
   config: null,
 })
+const USER_SYSTEM_DEFAULT_URL = 'https://user.chemvault.science'
 
 defineOptions({
   name: 'setting'
@@ -228,6 +221,19 @@ function copyOneTimePassword() {
   })
 }
 
+function openUserSystemSettings() {
+  window.location.assign(userSystemUrl('/settings/security'))
+}
+
+function userSystemUrl(path) {
+  const base = (import.meta.env.VITE_USER_SYSTEM_URL || USER_SYSTEM_DEFAULT_URL).trim()
+  try {
+    return new URL(path, base.endsWith('/') ? base : `${base}/`).toString()
+  } catch (e) {
+    return `${USER_SYSTEM_DEFAULT_URL}${path}`
+  }
+}
+
 function showSetName() {
   accountName.value = userStore.user.name
   setNameShow.value = true
@@ -278,12 +284,6 @@ function changeLang(lang) {
   window.location.reload()
 }
 
-const pwdShow = ref(false)
-const form = reactive({
-  password: '',
-  newPwd: '',
-})
-
 const deleteConfirm = () => {
   ElMessageBox.confirm(t('delAccountConfirm'), {
     confirmButtonText: t('confirm'),
@@ -302,53 +302,6 @@ const deleteConfirm = () => {
   })
 }
 
-
-function submitPwd() {
-
-  if (!form.password) {
-    ElMessage({
-      message: t('emptyPwdMsg'),
-      type: 'error',
-      plain: true,
-    })
-    return
-  }
-
-  if (form.password.length < 6) {
-    ElMessage({
-      message: t('pwdLengthMsg'),
-      type: 'error',
-      plain: true,
-    })
-    return
-  }
-
-  if (form.password !== form.newPwd) {
-    ElMessage({
-      message: t('confirmPwdFailMsg'),
-      type: 'error',
-      plain: true,
-    })
-    return
-  }
-
-  setPwdLoading.value = true
-  resetPassword(form.password).then(() => {
-    ElMessage({
-      message: t('saveSuccessMsg'),
-      type: 'success',
-      plain: true,
-    })
-    pwdShow.value = false
-    setPwdLoading.value = false
-    form.password = ''
-    form.newPwd = ''
-  }).catch(() => {
-    setPwdLoading.value = false
-  })
-
-}
-
 </script>
 <style scoped lang="scss">
 .box {
@@ -356,12 +309,6 @@ function submitPwd() {
 
   @media (max-width: 767px) {
     padding: 30px 30px;
-  }
-
-  .update-pwd {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
   }
 
   .title {
@@ -402,6 +349,17 @@ function submitPwd() {
         color: #4dabff;
         padding-left: 10px;
         cursor: pointer;
+      }
+
+      div.account-management {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        color: var(--regular-text-color);
+        overflow: visible;
+        white-space: normal;
+        text-overflow: clip;
       }
 
       @media (max-width: 767px) {

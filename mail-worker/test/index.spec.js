@@ -2,19 +2,26 @@ import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloud
 import { describe, it, expect } from 'vitest';
 import worker from '../src';
 
-describe('Hello World worker', () => {
-	it('responds with Hello World! (unit style)', async () => {
+async function expectMailAppShell(response) {
+	expect(response.status).toBe(200);
+	const html = await response.text();
+	expect(html).toContain('ChemVault Mail');
+	expect(html).toContain('id="app"');
+}
+
+describe('ChemVault Mail worker', () => {
+	it('serves the mail app shell (unit style)', async () => {
 		const request = new Request('http://example.com');
 		// Create an empty context to pass to `worker.fetch()`.
 		const ctx = createExecutionContext();
 		const response = await worker.fetch(request, env, ctx);
 		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
 		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+		await expectMailAppShell(response);
 	});
 
-	it('responds with Hello World! (integration style)', async () => {
+	it('serves the mail app shell (integration style)', async () => {
 		const response = await SELF.fetch('http://example.com');
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+		await expectMailAppShell(response);
 	});
 });

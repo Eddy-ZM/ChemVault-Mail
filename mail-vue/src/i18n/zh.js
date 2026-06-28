@@ -1,4 +1,7 @@
 const zh = {
+    accountManagement: 'Account',
+    accountManagementDesc: 'Change password and account security in ChemVault User System.',
+    openUserSystem: 'Open User System',
     inbox: '收件箱',
     drafts: '草稿箱',
     sent: '已发送',

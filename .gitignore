@@ -28,3 +28,10 @@ mail-vue/dist
 ChemVaultMailApple/build
 .wrangler
 .venv
+.env
+.env.local
+*.pem
+*.p8
+*.p12
+*.mobileprovision
+*.cer
