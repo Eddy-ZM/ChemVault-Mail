@@ -1,102 +1,81 @@
 # ChemVault Mail
 
-## About
+ChemVault Mail 是 ChemVault 生态的邮箱服务，提供网页邮箱和 Apple 原生 App 两类使用入口。项目面向个人邮箱使用、团队邮箱管理、管理员运维和移动端访问场景。
 
-ChemVault Mail is a Cloudflare-powered email platform developed for the ChemVault ecosystem.
+## 网站
 
-The system provides reliable custom-domain email services through a fully serverless architecture built on Cloudflare Workers and D1.
+访问地址：https://mail.chemvault.science
 
-## Key Features
+### 邮箱使用
 
-- Custom domain email hosting
-- Webmail client
-- Cloudflare Workers backend
-- D1 database integration
-- Contact management
-- Global edge deployment
-- Lightweight serverless infrastructure
+- 收件箱：查看收到的邮件、未读状态、邮件时间、发件人、主题和正文预览。
+- 邮件详情：阅读完整邮件内容，查看 HTML 邮件、附件信息和收件地址。
+- 写信：选择发件邮箱，填写收件人、抄送、密送、主题和正文并发送邮件。
+- 草稿：保存和继续编辑未完成的邮件。
+- 星标：标记重要邮件，并在星标邮件列表中集中查看。
+- 邮件操作：支持标记已读、星标/取消星标、删除邮件、刷新列表等常用操作。
+- 多邮箱地址：在同一用户下管理多个邮箱地址，适用于别名、不同用途邮箱和团队邮箱。
 
-## Tech Stack
+### 账户与安全
 
-| Component | Technology |
-|-----------|------------|
-| Frontend | Vue.js |
-| Backend | Cloudflare Workers |
-| Database | Cloudflare D1 |
-| Hosting | Cloudflare Pages |
+- 登录与注册：支持 ChemVault Mail 账户登录、注册和验证码/邀请码相关流程。
+- 账户资料：查看邮箱、用户名、角色等个人信息。
+- 主账户管理：密码和账户安全修改跳转到 ChemVault User System 统一处理。
+- 邮件客户端配置：查看 IMAP/SMTP 客户端配置，用于 Outlook、Apple Mail 等第三方邮件客户端。
+- App Password：为邮件客户端生成一次性展示的 App Password，并可查看、撤销已创建的 App Password。
+- 语言设置：支持中文和英文界面切换。
+- 账户删除：用户可在权限允许时删除自己的账户。
 
-## Website
+### 管理功能
 
-🌐 https://mail.chemvault.science
+- 用户管理：管理员可查看用户列表、搜索用户、筛选状态、创建用户、禁用/启用用户、恢复已删除用户。
+- 邮箱地址管理：管理员可查看和管理用户关联邮箱地址。
+- 角色与权限：管理用户角色、权限配置和默认权限策略。
+- 邀请码：创建、查看和管理注册邀请码及使用记录。
+- 全部邮件：具备权限的管理员可查看和管理系统内邮件数据。
+- 系统设置：管理网站标题、注册开关、收发信设置、域名策略、转发规则、黑名单、对象存储、通知和外观配置。
+- App 配置：管理 Apple App 的版本提示、维护模式、公告、主题、链接和资源配置。
 
-## ChemVault User Center Sync
+### 数据看板
 
-When ChemVault Mail creates a user or mailbox, the Worker pushes that identity to the main ChemVault User Center immediately.
+- 总览指标：查看总收件数、总发件数、邮箱地址数和用户数。
+- 趋势分析：查看用户增长、收发邮件增长和每日发送量。
+- 来源分析：查看邮件来源分布。
+- 状态拆分：区分正常数据和已删除数据，便于管理员判断系统运行情况。
 
-Synced paths:
+## Apple App
 
-- Admin creates a Mail user with `POST /api/user/add`
-- A user self-registers with `POST /api/register`
-- Admin/public batch import creates users with `POST /api/public/addUser`
-- An existing Mail user adds another mailbox with `POST /api/account/add`
+ChemVault Mail 提供 Apple 原生 App，用于 iPhone、iPad 和 Mac 场景下的邮箱访问与管理。
 
-The Mail Worker calls:
+### 邮箱使用
 
-```text
-POST https://user.chemvault.science/api/integrations/mail/users/sync
-```
+- 收件箱：浏览邮件列表，查看未读状态、发件人、主题、正文预览和邮件时间。
+- 邮件阅读：查看邮件详情，阅读 HTML 内容并处理常见邮件操作。
+- 写信：支持选择发件邮箱，填写收件人、抄送、密送、主题和富文本正文后发送。
+- 星标邮件：查看和管理重要邮件。
+- 邮件操作：支持刷新、标记已读、星标/取消星标和删除。
 
-Required Worker configuration:
+### 个人功能
 
-```bash
-npx wrangler secret put USER_SYSTEM_SYNC_SECRET --config mail-worker/wrangler.toml
-```
+- 登录与注册：支持在 App 内登录和注册 ChemVault Mail 账户。
+- 邮箱地址：查看和管理当前账户下的邮箱地址。
+- 个人设置：查看账户资料、切换语言、刷新个人信息和退出登录。
+- 密码修改：在 App 设置中提供密码更新入口。
 
-The secret value must match the User Center `MAIL_SYSTEM_SYNC_SECRET` Pages secret. During migration, Mail Worker falls back to the existing `mail_sso_secret`, and User Center accepts `MAIL_SYSTEM_SSO_SECRET`, so production can sync before a dedicated sync secret is added. For local testing, set `chemvault_user_sync_url` to the local User Center Pages dev URL, for example:
+### 管理功能
 
-```toml
-[vars]
-chemvault_user_sync_url = "http://localhost:8788/api/integrations/mail/users/sync"
-```
+具备相应权限的用户可在 App 内访问管理功能：
 
-Do not commit `USER_SYSTEM_SYNC_SECRET`, `MAIL_SYSTEM_SYNC_SECRET`, SSO secrets, or JWT secrets.
+- 用户管理
+- 角色管理
+- 注册邀请码管理
+- 全部邮件管理
+- 系统设置
+- 数据分析
 
-User Center also delegates Mail password verification to Mail Worker when a synced Mail user signs in through the User Center email/password form. The protected endpoint is:
+### App 体验
 
-```text
-POST /api/internal/user-center/password-login
-```
-
-It is excluded from public auth middleware but requires the shared User Center/Mail secret in `x-chemvault-sso-secret`, `x-chemvault-sync-secret`, or a Bearer token. It returns only normalized identity and mailbox permission metadata after the Mail password is verified.
-
-## App Update and Remote Resource Policy
-
-ChemVault Mail's Apple native app does not download or execute remote code.
-Remote updates are limited to configuration, text, images, announcements,
-templates, links, feature flags, maintenance mode, and WebView content.
-
-Native functionality changes still require a new App Store submission. Feature
-flags only enable or disable functionality already included in the app bundle.
-The app does not download dynamic libraries, executable code, scripts, remote
-native code bundles, or alternative app packages. Version updates redirect users
-to the official App Store page.
-
-## Maintainer
-
-Ziwen M.
-University of Manchester  
-Chemistry BSc
-
-## Acknowledgements
-
-This project is based on the excellent cloud-mail project by the MailLab team and has been adapted for ChemVault.
-
-## License
-
-ChemVault-specific code and content in this repository are source-available but
-not open source. Public visibility is for review and reference only; no rights
-are granted to use, copy, modify, distribute, host, deploy, or create derivative
-works without prior written permission from Ziwen Mu or the repository owner.
-
-See [LICENSE](./LICENSE). Upstream MailLab cloud-mail notices are preserved in
-[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+- 自适应布局：适配手机、平板和桌面窗口。
+- 深色模式：支持系统深色/浅色外观。
+- 公告与维护提示：可在 App 内展示服务公告、维护状态和版本更新提示。
+- 权限可见性：根据当前用户权限显示可访问的管理入口。
