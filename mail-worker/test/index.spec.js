@@ -24,4 +24,16 @@ describe('ChemVault Mail worker', () => {
 		const response = await SELF.fetch('http://example.com');
 		await expectMailAppShell(response);
 	});
+
+	it('preserves ChemVault SSO parameters when Mail login is required', async () => {
+		const response = await SELF.fetch(
+			'http://example.com/api/sso/chemvault-user/authorize?redirect_uri=https%3A%2F%2Fuser.chemvault.science%2Fapi%2Fauth%2Fsso%2Fmail%2Fcallback&return_to=https%3A%2F%2Ffile.chemvault.science%2F%3Fproject%3Dspectra'
+		);
+
+		expect(response.status).toBe(200);
+		const html = await response.text();
+		expect(html).toContain("loginUrl.searchParams.set('sso', 'chemvault-user')");
+		expect(html).toContain("https://file.chemvault.science/?project=spectra");
+		expect(html).not.toContain('then start SSO again from User Center');
+	});
 });

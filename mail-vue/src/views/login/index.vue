@@ -182,6 +182,7 @@ import {loginUserInfo} from "@/request/my.js";
 import {permsToRouter} from "@/perm/perm.js";
 import {useI18n} from "vue-i18n";
 import {oauthBindUser, oauthLinuxDoLogin} from "@/request/ouath.js";
+import {chemVaultSsoAuthorizeUrlFromSearch} from "@/utils/chemvault-sso.js";
 
 const {t, locale} = useI18n();
 const accountStore = useAccountStore();
@@ -195,6 +196,7 @@ const showBindForm = ref(false);
 const show = ref('login')
 const isDesktopApp =
   navigator.userAgent.includes("ChemVaultMail");
+const pendingSsoAuthorizeUrl = chemVaultSsoAuthorizeUrlFromSearch(window.location.search);
 const authenticating = computed(() => loginLoading.value || oauthLoading.value || bindLoading.value);
 const authTitle = computed(() => locale.value === 'zh' ? '正在认证' : 'Authenticating');
 const authDesc = computed(() => locale.value === 'zh' ? '正在建立安全邮箱会话' : 'Securing mailbox session');
@@ -313,10 +315,12 @@ async function linuxDoGetUser() {
   const params = new URLSearchParams(window.location.search)
   const code = params.get('code')
 
-  if (code) {
+  if (!code) {
+    return
+  }
 
-    oauthLoading.value = true
-    oauthLinuxDoLogin(code).then(data => {
+  oauthLoading.value = true
+  oauthLinuxDoLogin(code).then(data => {
 
       bindForm.oauthUserId = data.userInfo.oauthUserId;
 
@@ -332,14 +336,12 @@ async function linuxDoGetUser() {
         return;
       }
 
-      saveToken(data.token);
-    }).catch(() => {
-      oauthLoading.value = false
-    })
-  }
+    saveToken(data.token);
+  }).catch(() => {
+    oauthLoading.value = false
+  })
 
-  const cleanUrl = window.location.origin + window.location.pathname
-  window.history.replaceState({}, '', cleanUrl)
+  cleanLinuxDoCallbackUrl()
 }
 
 function bind() {
@@ -449,10 +451,25 @@ async function saveToken(token) {
   routers.forEach(routerData => {
     router.addRoute('layout', routerData);
   });
+  if (pendingSsoAuthorizeUrl) {
+    window.location.replace(pendingSsoAuthorizeUrl)
+    return
+  }
   await router.replace({name: 'layout'})
   uiStore.showNotice()
   oauthLoading.value = false;
   bindLoading.value = false;
+}
+
+function cleanLinuxDoCallbackUrl() {
+  const params = new URLSearchParams(window.location.search)
+  if (!params.has('code')) return
+
+  params.delete('code')
+  params.delete('state')
+  const query = params.toString()
+  const cleanUrl = `${window.location.origin}${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`
+  window.history.replaceState({}, '', cleanUrl)
 }
 
 function refreshWebsiteConfig() {

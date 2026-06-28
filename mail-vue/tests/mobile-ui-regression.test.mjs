@@ -8,12 +8,14 @@ function file(path) {
   return readFile(new URL(path, root), 'utf8');
 }
 
-const [contentView, shadowHtml, writeLayout, tinyEditor, loginView] = await Promise.all([
+const [contentView, shadowHtml, writeLayout, tinyEditor, loginView, routerSource, ssoUtil] = await Promise.all([
   file('src/views/content/index.vue'),
   file('src/components/shadow-html/index.vue'),
   file('src/layout/write/index.vue'),
   file('src/components/tiny-editor/index.vue'),
-  file('src/views/login/index.vue')
+  file('src/views/login/index.vue'),
+  file('src/router/index.js'),
+  file('src/utils/chemvault-sso.js')
 ]);
 
 assert.equal(
@@ -182,4 +184,46 @@ assert.match(
   loginView,
   /@keyframes auth-progress/,
   'authentication overlay should include a progress animation'
+);
+
+assert.match(
+  loginView,
+  /const pendingSsoAuthorizeUrl = chemVaultSsoAuthorizeUrlFromSearch\(window\.location\.search\);/,
+  'login page should preserve ChemVault SSO context from the URL'
+);
+
+assert.match(
+  loginView,
+  /if \(pendingSsoAuthorizeUrl\) \{[\s\S]*window\.location\.replace\(pendingSsoAuthorizeUrl\)/,
+  'login success should continue ChemVault SSO instead of entering the mailbox'
+);
+
+assert.match(
+  loginView,
+  /function cleanLinuxDoCallbackUrl\(\)/,
+  'login page should only clean LinuxDo callback parameters'
+);
+
+assert.doesNotMatch(
+  loginView,
+  /const cleanUrl = window\.location\.origin \+ window\.location\.pathname[\s\S]*window\.history\.replaceState\(\{\}, '', cleanUrl\)/,
+  'login page should not wipe SSO query parameters on load'
+);
+
+assert.match(
+  routerSource,
+  /chemVaultSsoAuthorizeUrlFromQuery\(to\.query\)/,
+  'router should continue ChemVault SSO when a Mail session already exists'
+);
+
+assert.match(
+  ssoUtil,
+  /\/api\/sso\/chemvault-user\/authorize/,
+  'SSO utility should target the Mail Worker authorize endpoint'
+);
+
+assert.match(
+  ssoUtil,
+  /return Boolean\(redirectUri && returnTo\)/,
+  'SSO utility should continue SSO even when the login URL only has redirect_uri and return_to'
 );

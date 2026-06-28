@@ -10,6 +10,25 @@ import { isDel, userConst } from '../const/entity-const';
 const USER_CENTER_CLIENT_ID = 'chemvault_user';
 const USER_CENTER_CALLBACK_PATH = '/api/auth/sso/mail/callback';
 const DEFAULT_USER_CENTER_ORIGIN = 'https://user.chemvault.science';
+const ALLOWED_RETURN_HOSTS = new Set([
+	'user.chemvault.science',
+	'app.chemvault.science',
+	'extract.chemvault.science',
+	'file.chemvault.science',
+	'files.chemvault.science',
+	'docs.chemvault.science',
+	'model.chemvault.science',
+	'molecule.chemvault.science',
+	'notif.chemvault.science',
+	'chemvault.science'
+]);
+const ALLOWED_LOCAL_RETURN_HOSTS = new Set(['localhost', '127.0.0.1']);
+const ALLOWED_PAGES_PREVIEW_SUFFIXES = [
+	'.chemvault-files.pages.dev',
+	'.chemvault-user.pages.dev',
+	'.chemvault-app.pages.dev',
+	'.chemvault-docs.pages.dev'
+];
 
 app.get('/sso/chemvault-user/authorize', async (c) => {
 	const url = new URL(c.req.url);
@@ -260,10 +279,16 @@ function renderAuthorizePage(params) {
     const statusEl = document.getElementById('status');
     const actionEl = document.getElementById('action');
     const token = localStorage.getItem('token');
+    const loginUrl = new URL('/login', location.origin);
+    loginUrl.searchParams.set('sso', 'chemvault-user');
+    loginUrl.searchParams.set('client_id', payload.clientId);
+    loginUrl.searchParams.set('redirect_uri', payload.redirectUri);
+    loginUrl.searchParams.set('return_to', payload.returnTo);
 
     if (!token) {
-      statusEl.textContent = 'Please sign in to ChemVault Mail first, then start SSO again from User Center.';
-      actionEl.innerHTML = '<a href="/login">Open Mail Login</a>';
+      statusEl.textContent = 'Please sign in to ChemVault Mail to continue ChemVault SSO.';
+      actionEl.innerHTML = '<a id="mail-login-link">Open Mail Login</a>';
+      document.getElementById('mail-login-link').href = loginUrl.pathname + loginUrl.search;
     } else {
       fetch('/api/sso/chemvault-user/assertion', {
         method: 'POST',
@@ -287,10 +312,24 @@ function renderAuthorizePage(params) {
 }
 
 function sanitizeReturnTo(value) {
-	if (!value || typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
+	if (!value || typeof value !== 'string') return '/dashboard';
+	if (value.startsWith('/') && !value.startsWith('//')) return value;
+	try {
+		const url = new URL(value);
+		if (url.protocol === 'https:' && (ALLOWED_RETURN_HOSTS.has(url.hostname) || isAllowedPagesPreviewHost(url.hostname))) {
+			return url.toString();
+		}
+		if ((url.protocol === 'http:' || url.protocol === 'https:') && ALLOWED_LOCAL_RETURN_HOSTS.has(url.hostname)) {
+			return url.toString();
+		}
+	} catch {
 		return '/dashboard';
 	}
-	return value;
+	return '/dashboard';
+}
+
+function isAllowedPagesPreviewHost(hostname) {
+	return ALLOWED_PAGES_PREVIEW_SUFFIXES.some((suffix) => hostname === suffix.slice(1) || hostname.endsWith(suffix));
 }
 
 function normalizeEmail(value) {

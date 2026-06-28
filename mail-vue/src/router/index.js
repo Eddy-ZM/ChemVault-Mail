@@ -4,6 +4,7 @@ import {useUiStore} from "@/store/ui.js";
 import {useSettingStore} from "@/store/setting.js";
 import {cvtR2Url} from "@/utils/convert.js";
 import {useUserStore} from "@/store/user.js";
+import {chemVaultSsoAuthorizeUrlFromQuery} from "@/utils/chemvault-sso.js";
 
 const routes = [
     {
@@ -114,6 +115,11 @@ router.beforeEach((to, from, next) => {
     }
 
     if (hasSession && to.name === 'login') {
+        const ssoAuthorizeUrl = chemVaultSsoAuthorizeUrlFromQuery(to.query)
+        if (ssoAuthorizeUrl) {
+            window.location.replace(ssoAuthorizeUrl)
+            return
+        }
         return next(from.path)
     }
 
