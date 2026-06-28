@@ -87,7 +87,9 @@ mac_target.build_configurations.each do |config|
   settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'science.chemvault.mail.mac'
   settings['SDKROOT'] = 'macosx'
   settings['SUPPORTED_PLATFORMS'] = 'macosx'
+  settings['ENABLE_APP_SANDBOX'] = 'YES'
   settings['ENABLE_HARDENED_RUNTIME'] = 'YES'
+  settings['ENABLE_OUTGOING_NETWORK_CONNECTIONS'] = 'YES'
 end
 
 tests_target.build_configurations.each do |config|
