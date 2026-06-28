@@ -631,7 +631,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = science.chemvault.mail.mac;
+				PRODUCT_BUNDLE_IDENTIFIER = science.chemvault.mail.apple;
 				PRODUCT_MODULE_NAME = ChemVaultMailApple;
 				PRODUCT_NAME = "ChemVault Mail";
 				SDKROOT = macosx;
@@ -870,7 +870,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = science.chemvault.mail.mac;
+				PRODUCT_BUNDLE_IDENTIFIER = science.chemvault.mail.apple;
 				PRODUCT_MODULE_NAME = ChemVaultMailApple;
 				PRODUCT_NAME = "ChemVault Mail";
 				SDKROOT = macosx;

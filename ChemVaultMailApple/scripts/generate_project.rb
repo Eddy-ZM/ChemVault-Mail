@@ -84,7 +84,7 @@ end
 
 mac_target.build_configurations.each do |config|
   settings = config.build_settings
-  settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'science.chemvault.mail.mac'
+  settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'science.chemvault.mail.apple'
   settings['SDKROOT'] = 'macosx'
   settings['SUPPORTED_PLATFORMS'] = 'macosx'
   settings['ENABLE_APP_SANDBOX'] = 'YES'
