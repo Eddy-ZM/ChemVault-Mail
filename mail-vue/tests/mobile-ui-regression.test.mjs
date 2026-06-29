@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { isBlankEditorContent } from '../src/utils/editor-content.js';
+import {
+  chemVaultProductFromReturnTo,
+  chemVaultSsoSourceFromSearch
+} from '../src/utils/chemvault-sso.js';
 
 const root = new URL('../', import.meta.url);
 
@@ -34,6 +38,30 @@ assert.equal(
   isBlankEditorContent('<div>Hello</div>'),
   false,
   'real editor text should still count as compose content'
+);
+
+assert.equal(
+  chemVaultProductFromReturnTo('https://file.chemvault.science/?project=spectra')?.key,
+  'files',
+  'Files production URLs should resolve to the Files SSO source'
+);
+
+assert.equal(
+  chemVaultProductFromReturnTo('https://501bcba2.chemvault-files.pages.dev/')?.key,
+  'files',
+  'Files preview URLs should resolve to the Files SSO source'
+);
+
+assert.equal(
+  chemVaultSsoSourceFromSearch('?sso=chemvault-user&return_to=https%3A%2F%2Ffile.chemvault.science%2F')?.visual,
+  'files',
+  'Mail login should detect Files as the original site during ChemVault SSO'
+);
+
+assert.equal(
+  chemVaultSsoSourceFromSearch('?return_to=https%3A%2F%2Ffile.chemvault.science%2F'),
+  null,
+  'plain return_to URLs should not theme normal Mail login without SSO context'
 );
 
 assert.match(
@@ -178,6 +206,24 @@ assert.match(
   loginView,
   /@keyframes auth-mail-flight/,
   'authentication overlay should include the mail-flight animation'
+);
+
+assert.match(
+  loginView,
+  /authExperience\.visual === 'files'/,
+  'SSO authentication overlay should switch to the Files visual when Files is the original site'
+);
+
+assert.match(
+  loginView,
+  /class="auth-folder"/,
+  'SSO authentication overlay should include the Files folder icon'
+);
+
+assert.match(
+  loginView,
+  /@keyframes auth-folder-scan/,
+  'SSO authentication overlay should include the Files folder scan animation'
 );
 
 assert.match(

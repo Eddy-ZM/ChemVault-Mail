@@ -5,11 +5,16 @@
     </div>
     <div v-else :style="background"></div>
     <Transition name="auth-stage">
-      <div v-if="authenticating" class="auth-overlay" role="status" aria-live="polite">
+      <div v-if="authenticating" class="auth-overlay" :data-auth-source="authExperience.key" role="status" aria-live="polite">
         <div class="auth-panel">
-          <div class="auth-visual" aria-hidden="true">
+          <div class="auth-visual" :class="`auth-visual--${authExperience.visual}`" aria-hidden="true">
             <div class="auth-ring"></div>
-            <Icon class="auth-mail" icon="solar:letter-bold-duotone" width="36" height="36" />
+            <svg v-if="authExperience.visual === 'files'" class="auth-folder" viewBox="0 0 36 36" aria-hidden="true">
+              <path d="M5.5 13A3.5 3.5 0 0 1 9 9.5h6.3l3.1 3H27A3.5 3.5 0 0 1 30.5 16v9A3.5 3.5 0 0 1 27 28.5H9A3.5 3.5 0 0 1 5.5 25V13Z" fill="currentColor" opacity=".16" />
+              <path d="M6.8 14.5h11.7l2.9 3H29M9 28h18a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2V26a2 2 0 0 0 2 2Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M13 21h10M13 24h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <Icon v-else class="auth-mail" :icon="authExperience.icon" width="36" height="36" />
             <Icon class="auth-key" icon="solar:key-minimalistic-bold-duotone" width="24" height="24" />
             <div class="auth-dots">
               <span></span>
@@ -182,7 +187,7 @@ import {loginUserInfo} from "@/request/my.js";
 import {permsToRouter} from "@/perm/perm.js";
 import {useI18n} from "vue-i18n";
 import {oauthBindUser, oauthLinuxDoLogin} from "@/request/ouath.js";
-import {chemVaultSsoAuthorizeUrlFromSearch} from "@/utils/chemvault-sso.js";
+import {chemVaultSsoAuthorizeUrlFromSearch, chemVaultSsoSourceFromSearch} from "@/utils/chemvault-sso.js";
 
 const {t, locale} = useI18n();
 const accountStore = useAccountStore();
@@ -197,9 +202,27 @@ const show = ref('login')
 const isDesktopApp =
   navigator.userAgent.includes("ChemVaultMail");
 const pendingSsoAuthorizeUrl = chemVaultSsoAuthorizeUrlFromSearch(window.location.search);
+const pendingSsoSource = chemVaultSsoSourceFromSearch(window.location.search);
+const defaultAuthExperience = {
+  key: 'mail',
+  visual: 'mail',
+  icon: 'solar:letter-bold-duotone',
+  productName: 'ChemVault Mail',
+  zhProductName: 'ChemVault Mail',
+  sessionDescription: 'Securing mailbox session',
+  zhSessionDescription: '正在建立安全邮箱会话'
+};
 const authenticating = computed(() => loginLoading.value || oauthLoading.value || bindLoading.value);
-const authTitle = computed(() => locale.value === 'zh' ? '正在认证' : 'Authenticating');
-const authDesc = computed(() => locale.value === 'zh' ? '正在建立安全邮箱会话' : 'Securing mailbox session');
+const authExperience = computed(() => pendingSsoAuthorizeUrl && pendingSsoSource ? pendingSsoSource : defaultAuthExperience);
+const isPendingProductSso = computed(() => Boolean(pendingSsoAuthorizeUrl && pendingSsoSource));
+const authTitle = computed(() => {
+  if (isPendingProductSso.value) {
+    const productName = locale.value === 'zh' ? authExperience.value.zhProductName : authExperience.value.productName;
+    return locale.value === 'zh' ? `正在返回 ${productName}` : `Returning to ${productName}`;
+  }
+  return locale.value === 'zh' ? '正在认证' : 'Authenticating';
+});
+const authDesc = computed(() => locale.value === 'zh' ? authExperience.value.zhSessionDescription : authExperience.value.sessionDescription);
 const canRegister = computed(() => Number(settingStore.settings.register) === 0);
 
 watch(canRegister, (enabled) => {
@@ -749,6 +772,31 @@ function submitRegister() {
   animation: auth-mail-flight 2.2s var(--motion-smooth) infinite;
 }
 
+.auth-folder {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  color: #0071e3;
+  filter: drop-shadow(0 10px 18px rgba(0, 113, 227, 0.22));
+  animation: auth-folder-scan 2.2s var(--motion-smooth) infinite;
+}
+
+.auth-overlay[data-auth-source="files"] .auth-ring {
+  border-color: rgba(0, 113, 227, 0.26);
+}
+
+.auth-overlay[data-auth-source="files"] .auth-dots span {
+  background: #0071e3;
+}
+
+.auth-overlay[data-auth-source="files"] .auth-progress {
+  background: rgba(0, 113, 227, 0.14);
+}
+
+.auth-overlay[data-auth-source="files"] .auth-progress span {
+  background: linear-gradient(90deg, #0071e3, #13a8a8);
+}
+
 .auth-key {
   position: absolute;
   right: calc(50% - 44px);
@@ -839,6 +887,27 @@ function submitRegister() {
   }
 }
 
+@keyframes auth-folder-scan {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.86);
+  }
+  22% {
+    opacity: 1;
+  }
+  52% {
+    transform: translate3d(0, -2px, 0) scale(1);
+  }
+  78% {
+    opacity: 1;
+    transform: translate3d(0, -2px, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -12px, 0) scale(0.9);
+  }
+}
+
 @keyframes auth-key-unlock {
   0%, 42% {
     opacity: 0;
@@ -885,6 +954,18 @@ function submitRegister() {
   }
   100% {
     transform: translateX(245%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-ring,
+  .auth-mail,
+  .auth-folder,
+  .auth-key,
+  .auth-dots span,
+  .auth-progress span {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
   }
 }
 
