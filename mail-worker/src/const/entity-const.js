@@ -59,6 +59,14 @@ export const emailConst = {
 	unread: {
 		UNREAD: 0,
 		READ: 1
+	},
+	flagged: {
+		NORMAL: 0,
+		FLAGGED: 1
+	},
+	archived: {
+		NORMAL: 0,
+		ARCHIVED: 1
 	}
 }
 

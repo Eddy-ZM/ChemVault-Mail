@@ -22,12 +22,20 @@ import domainUtils from '../utils/domain-uitls';
 import account from "../entity/account";
 import { att } from '../entity/att';
 import telegramService from './telegram-service';
+import {
+	ensureEmailOrganizationColumns,
+	defaultEmailCategories,
+	normalizeBinaryState,
+	normalizeCategory,
+	normalizeEmailIds
+} from './email-organization-service';
 
 const emailService = {
 
 	async list(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
 
-		let { emailId, type, accountId, size, timeSort, allReceive } = params;
+		let { emailId, type, accountId, size, timeSort, allReceive, folder, category } = params;
 
 		size = Number(size);
 		emailId = Number(emailId);
@@ -54,6 +62,8 @@ const emailService = {
 			allReceive = accountRow.allReceive;
 		}
 
+		const folderConditions = this.folderConditions(folder, category);
+
 		const query = orm(c)
 			.select({
 				...email,
@@ -77,7 +87,8 @@ const emailService = {
 					timeSort ? gt(email.emailId, emailId) : lt(email.emailId, emailId),
 					eq(email.type, type),
 					eq(email.isDel, isDel.NORMAL),
-					eq(account.isDel, isDel.NORMAL)
+					eq(account.isDel, isDel.NORMAL),
+					...folderConditions
 				)
 			);
 
@@ -100,7 +111,8 @@ const emailService = {
 					eq(email.userId, userId),
 					eq(email.type, type),
 					eq(email.isDel, isDel.NORMAL),
-					eq(account.isDel, isDel.NORMAL)
+					eq(account.isDel, isDel.NORMAL),
+					...folderConditions
 				)
 		).get();
 
@@ -109,7 +121,8 @@ const emailService = {
 				allReceive ? eq(1,1) : eq(email.accountId, accountId),
 				eq(email.userId, userId),
 				eq(email.type, type),
-				eq(email.isDel, isDel.NORMAL)
+				eq(email.isDel, isDel.NORMAL),
+				...folderConditions
 			))
 			.orderBy(desc(email.emailId)).limit(1).get();
 
@@ -134,7 +147,28 @@ const emailService = {
 		return { list, total: totalRow.total, latestEmail };
 	},
 
+	folderConditions(folder, category) {
+		const categoryName = normalizeCategory(category);
+
+		if (folder === 'archive') {
+			return [eq(email.archived, emailConst.archived.ARCHIVED)];
+		}
+
+		if (folder === 'flagged') {
+			return [eq(email.flagged, emailConst.flagged.FLAGGED)];
+		}
+
+		const conditions = [eq(email.archived, emailConst.archived.NORMAL)];
+
+		if (folder === 'category' || categoryName) {
+			conditions.push(eq(email.category, categoryName));
+		}
+
+		return conditions;
+	},
+
 	async delete(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
 		const { emailIds } = params;
 		const emailIdList = emailIds.split(',').map(Number);
 		await orm(c).update(email).set({ isDel: isDel.DELETE }).where(
@@ -144,13 +178,16 @@ const emailService = {
 			.run();
 	},
 
-	receive(c, params, cidAttList, r2domain) {
+	async receive(c, params, cidAttList, r2domain) {
+		await ensureEmailOrganizationColumns(c);
 		params.content = this.imgReplace(params.content, cidAttList, r2domain)
 		return orm(c).insert(email).values({ ...params }).returning().get();
 	},
 
 	//邮件发送
 	async send(c, params, userId) {
+
+		await ensureEmailOrganizationColumns(c);
 
 		let {
 			accountId, //发送账号id
@@ -693,7 +730,8 @@ const emailService = {
 		return document.toString();
 	},
 
-	selectById(c, emailId) {
+	async selectById(c, emailId) {
+		await ensureEmailOrganizationColumns(c);
 		return orm(c).select().from(email).where(
 			and(eq(email.emailId, emailId),
 				eq(email.isDel, isDel.NORMAL)))
@@ -701,6 +739,7 @@ const emailService = {
 	},
 
 	async latest(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
 		let { emailId, accountId, allReceive } = params;
 		allReceive = Number(allReceive);
 
@@ -719,6 +758,7 @@ const emailService = {
 					gt(email.emailId, emailId),
 					eq(email.userId, userId),
 					eq(email.isDel, isDel.NORMAL),
+					eq(email.archived, emailConst.archived.NORMAL),
 					eq(account.isDel, isDel.NORMAL),
 					allReceive ? eq(1,1) : eq(email.accountId, accountId),
 					eq(email.type, emailConst.type.RECEIVE)
@@ -732,6 +772,7 @@ const emailService = {
 	},
 
 	async physicsDelete(c, params) {
+		await ensureEmailOrganizationColumns(c);
 		let { emailIds } = params;
 		emailIds = emailIds.split(',').map(Number);
 		await attService.removeByEmailIds(c, emailIds);
@@ -740,11 +781,13 @@ const emailService = {
 	},
 
 	async physicsDeleteUserIds(c, userIds) {
+		await ensureEmailOrganizationColumns(c);
 		await attService.removeByUserIds(c, userIds);
 		await orm(c).delete(email).where(inArray(email.userId, userIds)).run();
 	},
 
-	updateEmailStatus(c, params) {
+	async updateEmailStatus(c, params) {
+		await ensureEmailOrganizationColumns(c);
 		const { status, resendEmailId, message } = params;
 		return orm(c).update(email).set({
 			status: status,
@@ -753,6 +796,7 @@ const emailService = {
 	},
 
 	async selectUserEmailCountList(c, userIds, type, del = isDel.NORMAL) {
+		await ensureEmailOrganizationColumns(c);
 		const result = await orm(c)
 			.select({
 				userId: email.userId,
@@ -770,6 +814,7 @@ const emailService = {
 	},
 
 	async allList(c, params) {
+		await ensureEmailOrganizationColumns(c);
 
 		let { emailId, size, name, subject, accountEmail, userEmail, type, timeSort } = params;
 
@@ -882,6 +927,7 @@ const emailService = {
 	},
 
 	async allEmailLatest(c, params) {
+		await ensureEmailOrganizationColumns(c);
 
 		const { emailId } = params;
 
@@ -917,10 +963,12 @@ const emailService = {
 	},
 
 	async restoreByUserId(c, userId) {
+		await ensureEmailOrganizationColumns(c);
 		await orm(c).update(email).set({ isDel: isDel.NORMAL }).where(eq(email.userId, userId)).run();
 	},
 
 	async completeReceive(c, status, emailId) {
+		await ensureEmailOrganizationColumns(c);
 		return await orm(c).update(email).set({
 			isDel: isDel.NORMAL,
 			status: status
@@ -928,11 +976,13 @@ const emailService = {
 	},
 
 	async completeReceiveAll(c) {
+		await ensureEmailOrganizationColumns(c);
 		await c.env.db.prepare(`UPDATE email as e SET status = ${emailConst.status.RECEIVE} WHERE status = ${emailConst.status.SAVING} AND EXISTS (SELECT 1 FROM account WHERE account_id = e.account_id)`).run();
 		await c.env.db.prepare(`UPDATE email as e SET status = ${emailConst.status.NOONE} WHERE status = ${emailConst.status.SAVING} AND NOT EXISTS (SELECT 1 FROM account WHERE account_id = e.account_id)`).run();
 	},
 
 	async batchDelete(c, params) {
+		await ensureEmailOrganizationColumns(c);
 		let { sendName, sendEmail, toEmail, subject, startTime, endTime, type  } = params
 
 		let right = type === 'left' || type === 'include'
@@ -979,13 +1029,71 @@ const emailService = {
 	},
 
 	async physicsDeleteByAccountId(c, accountId) {
+		await ensureEmailOrganizationColumns(c);
 		await attService.removeByAccountId(c, accountId);
 		await orm(c).delete(email).where(eq(email.accountId, accountId)).run();
 	},
 
 	async read(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
 		const { emailIds } = params;
-		await orm(c).update(email).set({ unread: emailConst.unread.READ }).where(and(eq(email.userId, userId), inArray(email.emailId, emailIds)));
+		const emailIdList = normalizeEmailIds(emailIds);
+		if (emailIdList.length === 0) return;
+		await orm(c).update(email).set({ unread: emailConst.unread.READ }).where(and(eq(email.userId, userId), inArray(email.emailId, emailIdList))).run();
+	},
+
+	async setFlag(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
+		const emailIdList = normalizeEmailIds(params.emailIds ?? params.emailId);
+		if (emailIdList.length === 0) return;
+		const flagged = normalizeBinaryState(params.flagged);
+		await orm(c).update(email).set({ flagged }).where(and(
+			eq(email.userId, userId),
+			inArray(email.emailId, emailIdList),
+			eq(email.isDel, isDel.NORMAL)
+		)).run();
+	},
+
+	async archive(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
+		const emailIdList = normalizeEmailIds(params.emailIds ?? params.emailId);
+		if (emailIdList.length === 0) return;
+		const archived = normalizeBinaryState(params.archived);
+		await orm(c).update(email).set({ archived }).where(and(
+			eq(email.userId, userId),
+			inArray(email.emailId, emailIdList),
+			eq(email.isDel, isDel.NORMAL)
+		)).run();
+	},
+
+	async setCategory(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
+		const emailIdList = normalizeEmailIds(params.emailIds ?? params.emailId);
+		if (emailIdList.length === 0) return;
+		const category = normalizeCategory(params.category);
+		await orm(c).update(email).set({ category }).where(and(
+			eq(email.userId, userId),
+			inArray(email.emailId, emailIdList),
+			eq(email.isDel, isDel.NORMAL)
+		)).run();
+	},
+
+	async categories(c, userId) {
+		await ensureEmailOrganizationColumns(c);
+		const rows = await orm(c)
+			.select({ category: email.category })
+			.from(email)
+			.where(and(
+				eq(email.userId, userId),
+				eq(email.isDel, isDel.NORMAL),
+				ne(email.category, '')
+			))
+			.groupBy(email.category)
+			.orderBy(asc(email.category))
+			.all();
+
+		const savedCategories = rows.map(row => row.category).filter(Boolean);
+		return [...new Set([...defaultEmailCategories, ...savedCategories])];
 	}
 };
 

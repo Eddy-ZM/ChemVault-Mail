@@ -7,9 +7,11 @@ import email from '../entity/email';
 import { isDel } from '../const/entity-const';
 import attService from "./att-service";
 import { t } from '../i18n/i18n'
+import { ensureEmailOrganizationColumns } from './email-organization-service';
 const starService = {
 
 	async add(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
 		const { emailId } = params;
 		const email = await emailService.selectById(c, emailId);
 		if (!email) {
@@ -41,6 +43,7 @@ const starService = {
 	},
 
 	async list(c, params, userId) {
+		await ensureEmailOrganizationColumns(c);
 		let { emailId, size } = params;
 		emailId = Number(emailId);
 		size = Number(size);

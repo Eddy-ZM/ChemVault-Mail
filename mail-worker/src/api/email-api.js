@@ -34,3 +34,22 @@ app.put('/email/read', async (c) => {
 	return c.json(result.ok());
 })
 
+app.put('/email/flag', async (c) => {
+	await emailService.setFlag(c, await c.req.json(), userContext.getUserId(c));
+	return c.json(result.ok());
+})
+
+app.put('/email/archive', async (c) => {
+	await emailService.archive(c, await c.req.json(), userContext.getUserId(c));
+	return c.json(result.ok());
+})
+
+app.put('/email/category', async (c) => {
+	await emailService.setCategory(c, await c.req.json(), userContext.getUserId(c));
+	return c.json(result.ok());
+})
+
+app.get('/email/categories', async (c) => {
+	const categories = await emailService.categories(c, userContext.getUserId(c));
+	return c.json(result.ok(categories));
+})

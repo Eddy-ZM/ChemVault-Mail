@@ -200,6 +200,9 @@ struct ChemVaultEmail: Codable, Identifiable, Hashable {
     var resendEmailId: String?
     var message: String?
     var unread: Int?
+    var flagged: Int?
+    var category: String?
+    var archived: Int?
     var createTime: String?
     var isDel: Int?
     var starId: Int?
@@ -213,6 +216,14 @@ struct ChemVaultEmail: Codable, Identifiable, Hashable {
     var previewText: String { text?.isEmpty == false ? text! : (message ?? "") }
     var isUnread: Bool { unread == ChemVaultEmailReadState.unread }
     var starred: Bool { (isStar ?? 0) != 0 || starId != nil }
+    var isFlagged: Bool { (flagged ?? 0) != 0 }
+    var isArchived: Bool { (archived ?? 0) != 0 }
+    var categoryLabel: String? {
+        guard let category, !category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
+        return category
+    }
 }
 
 enum ChemVaultEmailReadState {
@@ -289,6 +300,21 @@ struct ComposeAttachment: Codable, Hashable {
     var content: String
     var mimeType: String?
     var contentId: String?
+}
+
+struct EmailFlagRequest: Encodable {
+    var emailIds: [Int]
+    var flagged: Int
+}
+
+struct EmailArchiveRequest: Encodable {
+    var emailIds: [Int]
+    var archived: Int
+}
+
+struct EmailCategoryRequest: Encodable {
+    var emailIds: [Int]
+    var category: String
 }
 
 struct AccountAddRequest: Encodable {

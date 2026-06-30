@@ -3,6 +3,8 @@ import SwiftUI
 enum AppRoute: String, CaseIterable, Identifiable, Hashable {
     case mail
     case starred
+    case flagged
+    case archive
     case accounts
     case settings
     case adminUsers
@@ -18,6 +20,8 @@ enum AppRoute: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .mail: return "Inbox"
         case .starred: return "Starred"
+        case .flagged: return "Flagged"
+        case .archive: return "Archive"
         case .accounts: return "Accounts"
         case .settings: return "Settings"
         case .adminUsers: return "Users"
@@ -33,6 +37,8 @@ enum AppRoute: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .mail: return "tray.full"
         case .starred: return "star"
+        case .flagged: return "flag"
+        case .archive: return "archivebox"
         case .accounts: return "person.2"
         case .settings: return "gearshape"
         case .adminUsers: return "person.crop.circle.badge.gearshape"
@@ -46,7 +52,7 @@ enum AppRoute: String, CaseIterable, Identifiable, Hashable {
 
     var permissionKey: String? {
         switch self {
-        case .mail, .starred, .accounts, .settings:
+        case .mail, .starred, .flagged, .archive, .accounts, .settings:
             return nil
         case .adminUsers:
             return "user:query"
@@ -69,7 +75,7 @@ enum AppRoute: String, CaseIterable, Identifiable, Hashable {
 
     var groupTitle: String {
         switch self {
-        case .mail, .starred:
+        case .mail, .starred, .flagged, .archive:
             return "Mail"
         case .accounts, .settings:
             return "Personal"

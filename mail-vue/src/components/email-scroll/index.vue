@@ -38,6 +38,36 @@
                 @keydown.enter.prevent="handleRead"
                 @keydown.space.prevent="handleRead"/>
         </el-tooltip>
+        <el-tooltip v-if="getSelectedMailsIds().length > 0 && canArchive" effect="dark" :content="props.type === 'archive' ? $t('unarchive') : $t('archive')">
+          <Icon class="icon" icon="material-symbols:archive-outline" width="20" height="20"
+                role="button"
+                tabindex="0"
+                :aria-label="props.type === 'archive' ? $t('unarchive') : $t('archive')"
+                @click="handleArchiveSelected"
+                @keydown.enter.prevent="handleArchiveSelected"
+                @keydown.space.prevent="handleArchiveSelected"/>
+        </el-tooltip>
+        <el-tooltip v-if="getSelectedMailsIds().length > 0 && canFlag" effect="dark" :content="$t('flag')">
+          <Icon class="icon" icon="mdi:flag-outline" width="20" height="20"
+                role="button"
+                tabindex="0"
+                :aria-label="$t('flag')"
+                @click="handleFlagSelected"
+                @keydown.enter.prevent="handleFlagSelected"
+                @keydown.space.prevent="handleFlagSelected"/>
+        </el-tooltip>
+        <el-dropdown v-if="getSelectedMailsIds().length > 0 && canCategory" trigger="click" @command="command => handleCategoryCommand(command)">
+          <Icon class="icon" icon="mdi:tag-outline" width="20" height="20" role="button" tabindex="0" :aria-label="$t('category')"/>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="category in categoryOptions" :key="category" :command="category">
+                {{ category }}
+              </el-dropdown-item>
+              <el-dropdown-item divided command="__custom__">{{ $t('customCategory') }}</el-dropdown-item>
+              <el-dropdown-item command="">{{ $t('clearCategory') }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
 
       <div class="header-right">
@@ -83,6 +113,11 @@
                 <Icon v-else icon="solar:star-line-duotone" width="18" height="18"/>
               </div>
               <div v-if="!showStar"></div>
+              <div @click.stop="flagChange(item)" class="pc-flag" v-if="canFlag">
+                <Icon v-if="item.flagged" icon="mdi:flag" width="18" height="18"/>
+                <Icon v-else icon="mdi:flag-outline" width="18" height="18"/>
+              </div>
+              <div v-if="!canFlag"></div>
               <div class="title" :class="accountShow ? 'title-column' : 'title-column'">
 
                 <div class="email-sender" :style=" (showStatus ? 'gap: 10px;' : '') + ((item.unread === EmailUnreadEnum.UNREAD && showUnread)  ? 'font-weight: bold' : '')">
@@ -104,6 +139,7 @@
                     </span>
                     <span>
                       <Icon v-if="item.isStar" icon="fluent-color:star-16" width="18" height="18"/>
+                      <Icon v-if="item.flagged" icon="mdi:flag" width="16" height="16" class="flag-badge"/>
                     </span>
                   </span>
                   <span class="phone-time">{{ item.formatCreateTime }}</span>
@@ -113,6 +149,7 @@
                     <span class="email-subject" :style="(item.unread === EmailUnreadEnum.UNREAD && showUnread)  ? 'font-weight: bold' : ''">
                       <div class="unread" v-if="!isMobile && (item.unread === EmailUnreadEnum.UNREAD && showUnread) "/>
                       <span v-if="item.code" class="code-tag" @click.stop="copyCode(item.code)">[{{ t('codeLabel') }}{{ item.code }}]</span>
+                      <span v-if="item.category" class="category-tag">{{ item.category }}</span>
                       <span class="subject-text">
                         <slot name="subject" :email="item" >
                           {{ item.subject || '\u200B' }}
@@ -217,11 +254,35 @@
               </div>
             </template>
           </el-dropdown-item>
-          <el-dropdown-item v-if="['email','send', 'star'].includes(props.type)" @click="starChange(rightClickEmail)">
+          <el-dropdown-item v-if="['email','send', 'star', 'flagged', 'archive'].includes(props.type)" @click="starChange(rightClickEmail)">
             <template #default>
               <div class="right-dropdown-item">
                 <Icon icon="solar:star-line-duotone" width="19" height="19"/>
                 <span>{{t('star')}}</span>
+              </div>
+            </template>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="canFlag" @click="flagChange(rightClickEmail)">
+            <template #default>
+              <div class="right-dropdown-item">
+                <Icon :icon="rightClickEmail.flagged ? 'mdi:flag-remove-outline' : 'mdi:flag-outline'" width="19" height="19"/>
+                <span>{{ rightClickEmail.flagged ? t('unflag') : t('flag') }}</span>
+              </div>
+            </template>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="canArchive" @click="archiveChange(rightClickEmail)">
+            <template #default>
+              <div class="right-dropdown-item">
+                <Icon :icon="rightClickEmail.archived ? 'material-symbols:unarchive-outline' : 'material-symbols:archive-outline'" width="19" height="19"/>
+                <span>{{ rightClickEmail.archived ? t('unarchive') : t('archive') }}</span>
+              </div>
+            </template>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="canCategory" @click="promptCategory([rightClickEmail.emailId])">
+            <template #default>
+              <div class="right-dropdown-item">
+                <Icon icon="mdi:tag-outline" width="19" height="19"/>
+                <span>{{t('setCategory')}}</span>
               </div>
             </template>
           </el-dropdown-item>
@@ -282,6 +343,9 @@ const props = defineProps({
   getEmailList: Function,
   emailDelete: Function,
   emailRead: Function,
+  emailArchive: Function,
+  emailFlag: Function,
+  emailCategory: Function,
   starAdd: Function,
   starCancel: Function,
   cancelSuccess: Function,
@@ -325,6 +389,26 @@ const props = defineProps({
   showUnread: {
     type: Boolean,
     default: false
+  },
+  showArchive: {
+    type: Boolean,
+    default: true
+  },
+  showFlag: {
+    type: Boolean,
+    default: true
+  },
+  showCategory: {
+    type: Boolean,
+    default: true
+  },
+  categoryList: {
+    type: Array,
+    default: () => []
+  },
+  activeCategory: {
+    type: String,
+    default: ''
   }
 })
 
@@ -366,6 +450,15 @@ const position = ref(
 
 const canDelete = computed(() => {
   return props.type === 'all-email' ? hasPerm('all-email:delete') : hasPerm('email:delete')
+})
+
+const canArchive = computed(() => props.showArchive && !!props.emailArchive)
+const canFlag = computed(() => props.showFlag && !!props.emailFlag)
+const canCategory = computed(() => props.showCategory && !!props.emailCategory)
+
+const categoryOptions = computed(() => {
+  const defaults = ['Work', 'Personal', 'Finance', 'Follow-up']
+  return [...new Set([...(props.categoryList || []), ...defaults].filter(Boolean))]
 })
 
 const triggerRef = ref({
@@ -515,6 +608,21 @@ watch(() => emailStore.addStarEmailId, () => {
   })
 })
 
+watch(() => emailStore.archiveEvent, (event) => {
+  if (!event?.emailIds?.length) return;
+  applyArchiveEvent(event.emailIds, event.archived)
+})
+
+watch(() => emailStore.flagEvent, (event) => {
+  if (!event?.emailIds?.length) return;
+  applyFlagEvent(event.emailIds, event.flagged)
+})
+
+watch(() => emailStore.categoryEvent, (event) => {
+  if (!event?.emailIds?.length) return;
+  applyCategoryEvent(event.emailIds, event.category)
+})
+
 window.addEventListener('wheel', (event) => {
   if (dropdownShow.value) {
     dropdownRef.value.handleClose();
@@ -644,6 +752,87 @@ function starChange(email) {
   }
 }
 
+function flagChange(email, flagged = email.flagged ? 0 : 1) {
+  if (!props.emailFlag || !email?.emailId) return;
+  const previous = email.flagged ? 1 : 0;
+  email.flagged = flagged;
+  props.emailFlag([email.emailId], flagged).then(() => {
+    emailStore.flagEvent = { emailIds: [email.emailId], flagged, time: Date.now() }
+    applyFlagEvent([email.emailId], flagged)
+  }).catch(e => {
+    console.error(e)
+    email.flagged = previous;
+  })
+}
+
+function archiveChange(email, archived = email.archived ? 0 : 1) {
+  if (!props.emailArchive || !email?.emailId) return;
+  const previous = email.archived ? 1 : 0;
+  email.archived = archived;
+  props.emailArchive([email.emailId], archived).then(() => {
+    emailStore.archiveEvent = { emailIds: [email.emailId], archived, time: Date.now() }
+    applyArchiveEvent([email.emailId], archived)
+  }).catch(e => {
+    console.error(e)
+    email.archived = previous;
+  })
+}
+
+function handleFlagSelected() {
+  const emailIds = getSelectedMailsIds();
+  if (!props.emailFlag || emailIds.length === 0) return;
+  props.emailFlag(emailIds, 1).then(() => {
+    emailStore.flagEvent = { emailIds, flagged: 1, time: Date.now() }
+    applyFlagEvent(emailIds, 1)
+  })
+}
+
+function handleArchiveSelected() {
+  const emailIds = getSelectedMailsIds();
+  if (!props.emailArchive || emailIds.length === 0) return;
+  const archived = props.type === 'archive' ? 0 : 1;
+  ElMessageBox.confirm(archived ? t('archiveEmailsConfirm') : t('unarchive'), {
+    confirmButtonText: t('confirm'),
+    cancelButtonText: t('cancel'),
+    type: 'warning'
+  }).then(() => {
+    props.emailArchive(emailIds, archived).then(() => {
+      emailStore.archiveEvent = { emailIds, archived, time: Date.now() }
+      applyArchiveEvent(emailIds, archived)
+    })
+  })
+}
+
+function handleCategoryCommand(command) {
+  const emailIds = getSelectedMailsIds();
+  if (emailIds.length === 0) return;
+  if (command === '__custom__') {
+    promptCategory(emailIds);
+    return;
+  }
+  setCategory(emailIds, command);
+}
+
+function promptCategory(emailIds) {
+  if (!props.emailCategory || emailIds.length === 0) return;
+  ElMessageBox.prompt(t('categoryPlaceholder'), t('customCategory'), {
+    confirmButtonText: t('confirm'),
+    cancelButtonText: t('cancel'),
+    inputValue: rightClickEmail.value?.category || '',
+    inputPlaceholder: t('categoryPlaceholder')
+  }).then(({ value }) => {
+    setCategory(emailIds, value || '')
+  }).catch(() => {})
+}
+
+function setCategory(emailIds, category) {
+  if (!props.emailCategory) return;
+  props.emailCategory(emailIds, category).then(() => {
+    emailStore.categoryEvent = { emailIds, category, time: Date.now() }
+    applyCategoryEvent(emailIds, category)
+  })
+}
+
 function changeAccountShow() {
   uiStore.accountShow = !uiStore.accountShow;
 }
@@ -666,6 +855,51 @@ function localRead(emailIds) {
       emailList[index].unread = EmailUnreadEnum.READ;
       emailList[index].checked = false;
     }
+  })
+}
+
+function applyArchiveEvent(emailIds, archived) {
+  emailIds.forEach(emailId => {
+    const index = emailList.findIndex(email => email.emailId === emailId);
+    if (index === -1) return;
+
+    if ((props.type === 'archive' && !archived) || (props.type === 'email' && archived)) {
+      emailList.splice(index, 1);
+      return;
+    }
+
+    emailList[index].archived = archived;
+    emailList[index].checked = false;
+  })
+}
+
+function applyFlagEvent(emailIds, flagged) {
+  emailIds.forEach(emailId => {
+    const index = emailList.findIndex(email => email.emailId === emailId);
+    if (index === -1) return;
+
+    if (props.type === 'flagged' && !flagged) {
+      emailList.splice(index, 1);
+      return;
+    }
+
+    emailList[index].flagged = flagged;
+    emailList[index].checked = false;
+  })
+}
+
+function applyCategoryEvent(emailIds, category) {
+  emailIds.forEach(emailId => {
+    const index = emailList.findIndex(email => email.emailId === emailId);
+    if (index === -1) return;
+
+    if (props.activeCategory && props.activeCategory !== category) {
+      emailList.splice(index, 1);
+      return;
+    }
+
+    emailList[index].category = category;
+    emailList[index].checked = false;
   })
 }
 
@@ -907,6 +1141,9 @@ function getEmailList(refresh = false) {
 
 function handleList(list) {
   list.forEach(email => {
+    email.flagged = Number(email.flagged || 0)
+    email.archived = Number(email.archived || 0)
+    email.category = email.category || ''
     email.formatText = htmlToText(email)
     email.formatCreateTime = fromNow(email.createTime);
     email.test = t('received')
@@ -1231,6 +1468,21 @@ function loadData() {
         cursor: pointer;
       }
 
+      .category-tag {
+        flex: 0 0 auto;
+        max-width: 120px;
+        height: 20px;
+        padding: 0 7px;
+        border-radius: 999px;
+        color: var(--el-color-primary);
+        background: var(--el-color-primary-light-9);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        line-height: 20px;
+      }
+
       .subject-text {
         overflow: hidden;
         white-space: nowrap;
@@ -1321,8 +1573,21 @@ function loadData() {
   width: 40px;
 }
 
+.pc-flag {
+  display: flex;
+  width: 30px;
+  color: #dc2626;
+}
+
+.flag-badge {
+  color: #dc2626;
+}
+
 @media (max-width: 1366px) {
   .pc-star {
+    display: none;
+  }
+  .pc-flag {
     display: none;
   }
   .phone-star {

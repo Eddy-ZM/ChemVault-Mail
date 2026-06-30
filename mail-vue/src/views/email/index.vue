@@ -4,8 +4,13 @@
                :star-success="addStar"
                :getEmailList="getEmailList"
                :emailDelete="emailDelete"
+               :email-archive="emailArchive"
+               :email-flag="emailFlag"
+               :email-category="emailCategory"
                :star-add="starAdd"
                :star-cancel="starCancel"
+               :category-list="categories"
+               :active-category="params.category"
                :time-sort="params.timeSort"
                :email-read="emailRead"
                :show-unread="true"
@@ -17,6 +22,17 @@
             v-if="params.timeSort === 0" width="28" height="28"/>
       <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else
             width="28" height="28"/>
+      <el-select
+          v-model="params.category"
+          class="category-filter"
+          clearable
+          :placeholder="$t('allCategories')"
+          size="small"
+          @change="changeCategory"
+      >
+        <el-option :label="$t('allCategories')" value=""/>
+        <el-option v-for="category in categories" :key="category" :label="category" :value="category"/>
+      </el-select>
     </template>
 
   </emailScroll>
@@ -27,7 +43,7 @@ import {useAccountStore} from "@/store/account.js";
 import {useEmailStore} from "@/store/email.js";
 import {useSettingStore} from "@/store/setting.js";
 import emailScroll from "@/components/email-scroll/index.vue"
-import {emailList, emailDelete, emailLatest, emailRead} from "@/request/email.js";
+import {emailList, emailDelete, emailLatest, emailRead, emailArchive, emailFlag, emailCategory, emailCategories} from "@/request/email.js";
 import {starAdd, starCancel} from "@/request/star.js";
 import {defineOptions, h, onMounted, reactive, ref, watch} from "vue";
 import {sleep} from "@/utils/time-utils.js";
@@ -44,12 +60,15 @@ const emailStore = useEmailStore();
 const accountStore = useAccountStore();
 const settingStore = useSettingStore();
 const scroll = ref({})
+const categories = ref([])
 const params = reactive({
   timeSort: 0,
+  category: '',
 })
 
 onMounted(() => {
   emailStore.emailScroll = scroll;
+  loadCategories()
   latest()
 })
 
@@ -61,6 +80,16 @@ watch(() => accountStore.currentAccountId, () => {
 function changeTimeSort() {
   params.timeSort = params.timeSort ? 0 : 1
   scroll.value.refreshList();
+}
+
+function changeCategory() {
+  scroll.value.refreshList();
+}
+
+function loadCategories() {
+  emailCategories().then(data => {
+    categories.value = data || []
+  })
 }
 
 function jumpContent(email) {
@@ -81,6 +110,10 @@ async function latest() {
     await sleep(autoRefresh > 1 ? autoRefresh * 1000 : 3000);
 
     if (route.name !== 'email') {
+      continue;
+    }
+
+    if (params.category) {
       continue;
     }
 
@@ -141,9 +174,13 @@ function cancelStar(email) {
 function getEmailList(emailId, size) {
   const accountId =  accountStore.currentAccountId;
   const allReceive = accountStore.currentAccount.allReceive;
-  return emailList(accountId, allReceive, emailId, params.timeSort, size, 0).then(data => {
+  return emailList(accountId, allReceive, emailId, params.timeSort, size, 0, {
+    folder: 'inbox',
+    category: params.category
+  }).then(data => {
     data.latestEmail.reqAccountId = accountId;
     data.latestEmail.allReceive = allReceive;
+    loadCategories()
     return data;
   })
 }
@@ -152,5 +189,9 @@ function getEmailList(emailId, size) {
 <style>
 .icon {
   cursor: pointer;
+}
+
+.category-filter {
+  width: 150px;
 }
 </style>

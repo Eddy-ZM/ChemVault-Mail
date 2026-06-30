@@ -53,6 +53,26 @@ const routes = [
                     menu: true
                 }
             },
+            {
+                path: '/flagged',
+                name: 'flagged',
+                component: () => import('@/views/flagged/index.vue'),
+                meta: {
+                    title: 'flagged',
+                    name: 'flagged',
+                    menu: true
+                }
+            },
+            {
+                path: '/archive',
+                name: 'archive',
+                component: () => import('@/views/archive/index.vue'),
+                meta: {
+                    title: 'archive',
+                    name: 'archive',
+                    menu: true
+                }
+            },
         ]
 
     },

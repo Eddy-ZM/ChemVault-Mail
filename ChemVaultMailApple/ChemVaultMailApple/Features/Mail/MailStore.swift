@@ -4,11 +4,15 @@ import Foundation
 enum MailboxMode: String {
     case inbox
     case starred
+    case flagged
+    case archive
 
     var title: String {
         switch self {
         case .inbox: return "Inbox"
         case .starred: return "Starred"
+        case .flagged: return "Flagged"
+        case .archive: return "Archive"
         }
     }
 }
@@ -32,6 +36,10 @@ final class MailStore: ObservableObject {
                 response = try await apiClient.inbox()
             case .starred:
                 response = try await apiClient.starred()
+            case .flagged:
+                response = try await apiClient.flagged()
+            case .archive:
+                response = try await apiClient.archived()
             }
             emails = response.list
             total = response.total
@@ -107,6 +115,49 @@ final class MailStore: ObservableObject {
                     email.isStar = 1
                 }
             }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func toggleFlag(email: ChemVaultEmail, apiClient: APIClient, mode: MailboxMode) async {
+        do {
+            let flagged = !email.isFlagged
+            try await apiClient.setFlag(emailIds: [email.emailId], flagged: flagged)
+            if mode == .flagged && !flagged {
+                emails.removeAll { $0.emailId == email.emailId }
+                if selectedEmail?.emailId == email.emailId {
+                    selectedEmail = emails.first
+                }
+            } else {
+                update(emailId: email.emailId) { $0.flagged = flagged ? 1 : 0 }
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func toggleArchive(email: ChemVaultEmail, apiClient: APIClient, mode: MailboxMode) async {
+        do {
+            let archived = !email.isArchived
+            try await apiClient.archiveEmails(emailIds: [email.emailId], archived: archived)
+            if (mode == .archive && !archived) || (mode == .inbox && archived) {
+                emails.removeAll { $0.emailId == email.emailId }
+                if selectedEmail?.emailId == email.emailId {
+                    selectedEmail = emails.first
+                }
+            } else {
+                update(emailId: email.emailId) { $0.archived = archived ? 1 : 0 }
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func setCategory(email: ChemVaultEmail, category: String, apiClient: APIClient) async {
+        do {
+            try await apiClient.setCategory(emailIds: [email.emailId], category: category)
+            update(emailId: email.emailId) { $0.category = category }
         } catch {
             errorMessage = error.localizedDescription
         }

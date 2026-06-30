@@ -4,6 +4,10 @@
                :cancel-success="cancelStar"
                :getEmailList="starList"
                :emailDelete="emailDelete"
+               :email-archive="emailArchive"
+               :email-flag="emailFlag"
+               :email-category="emailCategory"
+               :category-list="categories"
                :star-add="starAdd"
                :star-cancel="starCancel"
                @jump="jumpContent"
@@ -14,7 +18,7 @@
 
 <script setup>
 import emailScroll from "@/components/email-scroll/index.vue"
-import {emailDelete} from "@/request/email.js";
+import {emailDelete, emailArchive, emailFlag, emailCategory, emailCategories} from "@/request/email.js";
 import {starAdd, starCancel, starList} from "@/request/star.js";
 import {useEmailStore} from "@/store/email.js";
 import {defineOptions, onMounted, ref} from "vue";
@@ -25,6 +29,7 @@ defineOptions({
 })
 
 const scroll = ref({})
+const categories = ref([])
 const emailStore = useEmailStore();
 
 function jumpContent(email) {
@@ -42,6 +47,9 @@ function cancelStar(email) {
 
 onMounted(() => {
   emailStore.starScroll = scroll
+  emailCategories().then(data => {
+    categories.value = data || []
+  })
 })
 
 </script>

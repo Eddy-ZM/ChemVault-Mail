@@ -129,18 +129,41 @@ final class APIClient {
         let _: EmptyResponse = try await delete("/account/delete", query: [URLQueryItem(name: "accountId", value: String(accountId))])
     }
 
-    func inbox(accountId: Int = 0, allReceive: Bool = true, emailId: Int = 0, size: Int = 30, type: Int = 0) async throws -> MailListResponse {
+    func inbox(
+        accountId: Int = 0,
+        allReceive: Bool = true,
+        emailId: Int = 0,
+        size: Int = 30,
+        type: Int = 0,
+        folder: String = "inbox",
+        category: String? = nil
+    ) async throws -> MailListResponse {
+        var query = [
+            URLQueryItem(name: "accountId", value: String(accountId)),
+            URLQueryItem(name: "allReceive", value: allReceive ? "1" : "0"),
+            URLQueryItem(name: "emailId", value: String(emailId)),
+            URLQueryItem(name: "timeSort", value: "0"),
+            URLQueryItem(name: "size", value: String(size)),
+            URLQueryItem(name: "type", value: String(type)),
+            URLQueryItem(name: "folder", value: folder)
+        ]
+
+        if let category, !category.isEmpty {
+            query.append(URLQueryItem(name: "category", value: category))
+        }
+
         try await get(
             "/email/list",
-            query: [
-                URLQueryItem(name: "accountId", value: String(accountId)),
-                URLQueryItem(name: "allReceive", value: allReceive ? "1" : "0"),
-                URLQueryItem(name: "emailId", value: String(emailId)),
-                URLQueryItem(name: "timeSort", value: "0"),
-                URLQueryItem(name: "size", value: String(size)),
-                URLQueryItem(name: "type", value: String(type))
-            ]
+            query: query
         )
+    }
+
+    func flagged(emailId: Int = 0, size: Int = 30) async throws -> MailListResponse {
+        try await inbox(emailId: emailId, size: size, folder: "flagged")
+    }
+
+    func archived(emailId: Int = 0, size: Int = 30) async throws -> MailListResponse {
+        try await inbox(emailId: emailId, size: size, folder: "archive")
     }
 
     func starred(emailId: Int = 0, size: Int = 30) async throws -> MailListResponse {
@@ -159,6 +182,18 @@ final class APIClient {
 
     func markRead(emailIds: [Int]) async throws {
         let _: EmptyResponse = try await put("/email/read", body: ["emailIds": emailIds])
+    }
+
+    func setFlag(emailIds: [Int], flagged: Bool) async throws {
+        let _: EmptyResponse = try await put("/email/flag", body: EmailFlagRequest(emailIds: emailIds, flagged: flagged ? 1 : 0))
+    }
+
+    func archiveEmails(emailIds: [Int], archived: Bool) async throws {
+        let _: EmptyResponse = try await put("/email/archive", body: EmailArchiveRequest(emailIds: emailIds, archived: archived ? 1 : 0))
+    }
+
+    func setCategory(emailIds: [Int], category: String) async throws {
+        let _: EmptyResponse = try await put("/email/category", body: EmailCategoryRequest(emailIds: emailIds, category: category))
     }
 
     func deleteEmails(_ emailIds: [Int]) async throws {

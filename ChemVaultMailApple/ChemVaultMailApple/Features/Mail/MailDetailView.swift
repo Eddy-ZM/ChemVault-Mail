@@ -14,6 +14,9 @@ struct MailDetailView: View {
     var markRead: () -> Void
     var delete: () -> Void
     var toggleStar: () -> Void
+    var toggleFlag: () -> Void
+    var toggleArchive: () -> Void
+    var setCategory: (String) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hasAppeared = false
 
@@ -41,6 +44,8 @@ struct MailDetailView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+
+                        MailMetadataPills(email: email)
                     }
                     .chemVaultEntrance(isVisible: hasAppeared, delay: 0.02, animation: reduceMotion ? nil : ChemVaultMotion.surfaceEntrance)
 
@@ -88,6 +93,24 @@ struct MailDetailView: View {
                 Button(action: toggleStar) {
                     Label(email.starred ? "Unstar" : "Star", systemImage: email.starred ? "star.slash" : "star")
                 }
+                Button(action: toggleFlag) {
+                    Label(email.isFlagged ? "Clear Flag" : "Flag", systemImage: email.isFlagged ? "flag.slash" : "flag")
+                }
+                Button(action: toggleArchive) {
+                    Label(email.isArchived ? "Move to Inbox" : "Archive", systemImage: email.isArchived ? "archivebox.fill" : "archivebox")
+                }
+                Menu {
+                    ForEach(["Work", "Personal", "Finance", "Follow-up"], id: \.self) { category in
+                        Button(category) {
+                            setCategory(category)
+                        }
+                    }
+                    Button("Clear Category") {
+                        setCategory("")
+                    }
+                } label: {
+                    Label("Category", systemImage: "tag")
+                }
                 Button(role: .destructive, action: delete) {
                     Label("Delete", systemImage: "trash")
                 }
@@ -132,6 +155,30 @@ struct AttachmentRowView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(ChemVaultWorkspaceTheme.panelStroke(for: colorScheme), lineWidth: 1)
+        }
+    }
+}
+
+private struct MailMetadataPills: View {
+    let email: ChemVaultEmail
+
+    var body: some View {
+        if email.isFlagged || email.isArchived || email.categoryLabel != nil {
+            HStack(spacing: 8) {
+                if email.isFlagged {
+                    Label("Flagged", systemImage: "flag.fill")
+                        .foregroundStyle(.red)
+                }
+                if let category = email.categoryLabel {
+                    Label(category, systemImage: "tag.fill")
+                }
+                if email.isArchived {
+                    Label("Archived", systemImage: "archivebox.fill")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .font(.caption.weight(.medium))
+            .lineLimit(1)
         }
     }
 }

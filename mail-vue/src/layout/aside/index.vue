@@ -69,6 +69,24 @@
           </el-menu-item>
           <el-menu-item
               class="nav-item"
+              @click="router.push({ name: 'flagged' })"
+              index="flagged"
+              :class="route.meta.name === 'flagged' ? 'choose-item' : ''"
+          >
+            <Icon class="nav-icon" icon="mdi:flag-outline" width="18" height="18"/>
+            <span class="menu-name">{{ $t('flagged') }}</span>
+          </el-menu-item>
+          <el-menu-item
+              class="nav-item"
+              @click="router.push({ name: 'archive' })"
+              index="archive"
+              :class="route.meta.name === 'archive' ? 'choose-item' : ''"
+          >
+            <Icon class="nav-icon" icon="material-symbols:archive-outline" width="18" height="18"/>
+            <span class="menu-name">{{ $t('archive') }}</span>
+          </el-menu-item>
+          <el-menu-item
+              class="nav-item"
               @click="router.push({ name: 'setting' })"
               index="setting"
               :class="route.meta.name === 'setting' ? 'choose-item' : ''"

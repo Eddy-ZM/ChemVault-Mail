@@ -1,5 +1,16 @@
 import SwiftUI
 
+private extension MailboxMode {
+    var overviewSystemImage: String {
+        switch self {
+        case .inbox: return "tray.full.fill"
+        case .starred: return "star.fill"
+        case .flagged: return "flag.fill"
+        case .archive: return "archivebox.fill"
+        }
+    }
+}
+
 struct MailListView: View {
     let mode: MailboxMode
 
@@ -191,8 +202,29 @@ struct MailListView: View {
         Button(email.starred ? "Unstar" : "Star") {
             Task { await store.toggleStar(email: email, apiClient: appEnvironment.apiClient) }
         }
+        Button(email.isFlagged ? "Clear Flag" : "Flag") {
+            Task { await store.toggleFlag(email: email, apiClient: appEnvironment.apiClient, mode: mode) }
+        }
+        Button(email.isArchived ? "Move to Inbox" : "Archive") {
+            Task { await store.toggleArchive(email: email, apiClient: appEnvironment.apiClient, mode: mode) }
+        }
+        Menu("Category") {
+            categoryActions(for: email)
+        }
         Button("Delete", role: .destructive) {
             Task { await store.delete(email: email, apiClient: appEnvironment.apiClient) }
+        }
+    }
+
+    @ViewBuilder
+    private func categoryActions(for email: ChemVaultEmail) -> some View {
+        ForEach(["Work", "Personal", "Finance", "Follow-up"], id: \.self) { category in
+            Button(category) {
+                Task { await store.setCategory(email: email, category: category, apiClient: appEnvironment.apiClient) }
+            }
+        }
+        Button("Clear Category") {
+            Task { await store.setCategory(email: email, category: "", apiClient: appEnvironment.apiClient) }
         }
     }
 
@@ -201,7 +233,10 @@ struct MailListView: View {
             email: email,
             markRead: { Task { await store.markRead(email: email, apiClient: appEnvironment.apiClient) } },
             delete: { Task { await store.delete(email: email, apiClient: appEnvironment.apiClient) } },
-            toggleStar: { Task { await store.toggleStar(email: email, apiClient: appEnvironment.apiClient) } }
+            toggleStar: { Task { await store.toggleStar(email: email, apiClient: appEnvironment.apiClient) } },
+            toggleFlag: { Task { await store.toggleFlag(email: email, apiClient: appEnvironment.apiClient, mode: mode) } },
+            toggleArchive: { Task { await store.toggleArchive(email: email, apiClient: appEnvironment.apiClient, mode: mode) } },
+            setCategory: { category in Task { await store.setCategory(email: email, category: category, apiClient: appEnvironment.apiClient) } }
         )
     }
 }
@@ -256,6 +291,19 @@ struct MailRowView: View {
                     if email.starred {
                         Label("Starred", systemImage: "star.fill")
                             .foregroundStyle(.yellow)
+                    }
+                    if email.isFlagged {
+                        Label("Flagged", systemImage: "flag.fill")
+                            .foregroundStyle(.red)
+                    }
+                    if let category = email.categoryLabel {
+                        Label(category, systemImage: "tag.fill")
+                            .foregroundStyle(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
+                            .lineLimit(1)
+                    }
+                    if email.isArchived {
+                        Label("Archived", systemImage: "archivebox.fill")
+                            .foregroundStyle(ChemVaultTheme.mutedText(for: colorScheme))
                     }
                     if email.attList?.isEmpty == false {
                         Label("Attachment", systemImage: "paperclip")
@@ -351,7 +399,7 @@ private struct MailboxOverviewCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                Image(systemName: mode == .inbox ? "tray.full.fill" : "star.fill")
+                Image(systemName: mode.overviewSystemImage)
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.white)
                     .frame(width: 42, height: 42)
@@ -455,7 +503,7 @@ private struct ChemVaultMailEmptyState: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: mode == .inbox ? "tray" : "star")
+            Image(systemName: mode.overviewSystemImage)
                 .font(.system(size: 46, weight: .semibold))
                 .foregroundStyle(ChemVaultLoadingConfiguration.primaryColor(for: colorScheme))
             Text(mode.title)

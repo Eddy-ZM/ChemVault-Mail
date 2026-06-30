@@ -77,6 +77,10 @@ struct AppShellView: View {
                 MailListView(mode: .inbox)
             case .starred:
                 MailListView(mode: .starred)
+            case .flagged:
+                MailListView(mode: .flagged)
+            case .archive:
+                MailListView(mode: .archive)
             case .accounts:
                 AccountsView()
             case .settings:

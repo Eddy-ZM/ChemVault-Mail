@@ -7,6 +7,20 @@
         <Icon class="icon" @click="changeStar" v-if="email.isStar" icon="fluent-color:star-16" width="20" height="20"/>
         <Icon class="icon" @click="changeStar" v-else icon="solar:star-line-duotone" width="18" height="18"/>
       </span>
+      <Icon class="icon flag-icon" @click="changeFlag" :icon="email.flagged ? 'mdi:flag' : 'mdi:flag-outline'" width="20" height="20"/>
+      <Icon class="icon" @click="changeArchive" :icon="email.archived ? 'material-symbols:unarchive-outline' : 'material-symbols:archive-outline'" width="20" height="20"/>
+      <el-dropdown trigger="click" @command="handleCategoryCommand">
+        <Icon class="icon" icon="mdi:tag-outline" width="20" height="20"/>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item v-for="category in categories" :key="category" :command="category">
+              {{ category }}
+            </el-dropdown-item>
+            <el-dropdown-item divided command="__custom__">{{ $t('customCategory') }}</el-dropdown-item>
+            <el-dropdown-item command="">{{ $t('clearCategory') }}</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
       <Icon class="icon" v-if="emailStore.contentData.showReply" v-perm="'email:send'"  @click="openReply" icon="la:reply" width="21" height="21" />
       <Icon class="icon" v-if="emailStore.contentData.showReply" v-perm="'email:send'"  @click="openForward" icon="iconoir:arrow-up-right" width="20" height="20" />
     </div>
@@ -28,6 +42,11 @@
               <div class="receive"><span class="source">{{$t('recipient')}}</span><span class="receive-email">{{  formateReceive(email.recipient) }}</span></div>
               <div class="date">
                 <div>{{ formatDetailDate(email.createTime) }}</div>
+              </div>
+              <div class="category-row" v-if="email.category || email.flagged || email.archived">
+                <span class="category-pill" v-if="email.category">{{ email.category }}</span>
+                <span class="flag-pill" v-if="email.flagged">{{ $t('flagged') }}</span>
+                <span class="archive-pill" v-if="email.archived">{{ $t('archived') }}</span>
               </div>
             </div>
             <el-alert v-if="email.status === 3" :closable="false" :title="toMessage(email.message)" class="email-msg" type="error" show-icon />
@@ -78,7 +97,7 @@ import ShadowHtml from '@/components/shadow-html/index.vue'
 import {reactive, ref, watch, onMounted, onUnmounted} from "vue";
 import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import {emailDelete, emailRead} from "@/request/email.js";
+import {emailArchive, emailCategories, emailCategory, emailDelete, emailFlag, emailRead} from "@/request/email.js";
 import {Icon} from "@iconify/vue";
 import {useEmailStore} from "@/store/email.js";
 import {useAccountStore} from "@/store/account.js";
@@ -101,6 +120,7 @@ const router = useRouter()
 const email = emailStore.contentData.email
 const showPreview = ref(false)
 const srcList = reactive([])
+const categories = ref(['Work', 'Personal', 'Finance', 'Follow-up'])
 
 const { t } = useI18n()
 watch(() => accountStore.currentAccountId, () => {
@@ -108,6 +128,12 @@ watch(() => accountStore.currentAccountId, () => {
 })
 
 onMounted(() => {
+  email.flagged = Number(email.flagged || 0)
+  email.archived = Number(email.archived || 0)
+  email.category = email.category || ''
+  emailCategories().then(data => {
+    categories.value = data || categories.value
+  })
   if (emailStore.contentData.showUnread && email.unread === EmailUnreadEnum.UNREAD) {
     email.unread = EmailUnreadEnum.READ;
     emailRead([email.emailId]);
@@ -179,6 +205,57 @@ function changeStar() {
   }
 }
 
+function changeFlag() {
+  const flagged = email.flagged ? 0 : 1;
+  const previous = email.flagged;
+  email.flagged = flagged;
+  emailFlag([email.emailId], flagged).then(() => {
+    emailStore.flagEvent = { emailIds: [email.emailId], flagged, time: Date.now() }
+  }).catch((e) => {
+    console.error(e)
+    email.flagged = previous;
+  })
+}
+
+function changeArchive() {
+  const archived = email.archived ? 0 : 1;
+  const previous = email.archived;
+  email.archived = archived;
+  emailArchive([email.emailId], archived).then(() => {
+    emailStore.archiveEvent = { emailIds: [email.emailId], archived, time: Date.now() }
+  }).catch((e) => {
+    console.error(e)
+    email.archived = previous;
+  })
+}
+
+function handleCategoryCommand(command) {
+  if (command === '__custom__') {
+    ElMessageBox.prompt(t('categoryPlaceholder'), t('customCategory'), {
+      confirmButtonText: t('confirm'),
+      cancelButtonText: t('cancel'),
+      inputValue: email.category || '',
+      inputPlaceholder: t('categoryPlaceholder')
+    }).then(({ value }) => setCategory(value || '')).catch(() => {})
+    return;
+  }
+  setCategory(command);
+}
+
+function setCategory(category) {
+  const previous = email.category;
+  email.category = category || '';
+  emailCategory([email.emailId], email.category).then(() => {
+    emailStore.categoryEvent = { emailIds: [email.emailId], category: email.category, time: Date.now() }
+    if (email.category && !categories.value.includes(email.category)) {
+      categories.value.push(email.category)
+    }
+  }).catch((e) => {
+    console.error(e)
+    email.category = previous;
+  })
+}
+
 const handleBack = () => {
   router.back()
 }
@@ -239,6 +316,9 @@ const handleDelete = () => {
   }
   .icon {
     cursor: pointer;
+  }
+  .flag-icon {
+    color: #dc2626;
   }
 }
 
@@ -363,6 +443,44 @@ const handleDelete = () => {
       .date {
         color: var(--regular-text-color);
         margin-bottom: 6px;
+      }
+
+      .category-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .category-pill,
+      .flag-pill,
+      .archive-pill {
+        display: inline-flex;
+        align-items: center;
+        max-width: 180px;
+        height: 22px;
+        padding: 0 8px;
+        border-radius: 999px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        line-height: 22px;
+      }
+
+      .category-pill {
+        color: var(--el-color-primary);
+        background: var(--el-color-primary-light-9);
+      }
+
+      .flag-pill {
+        color: #b91c1c;
+        background: rgba(220, 38, 38, 0.11);
+      }
+
+      .archive-pill {
+        color: var(--el-color-info);
+        background: var(--el-fill-color-light);
       }
 
       .email-msg {

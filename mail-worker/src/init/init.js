@@ -38,8 +38,35 @@ const dbInit = {
 		await this.v3_7DB(c);
 		await this.v3_8DB(c);
 		await this.v3_9DB(c);
+		await this.v4_0DB(c);
 		await settingService.refresh(c);
 		return c.text('success');
+	},
+
+	async v4_0DB(c) {
+		const emailColumns = [
+			`ALTER TABLE email ADD COLUMN flagged INTEGER NOT NULL DEFAULT 0;`,
+			`ALTER TABLE email ADD COLUMN category TEXT NOT NULL DEFAULT '';`,
+			`ALTER TABLE email ADD COLUMN archived INTEGER NOT NULL DEFAULT 0;`
+		];
+
+		for (const sql of emailColumns) {
+			try {
+				await c.env.db.prepare(sql).run();
+			} catch (e) {
+				console.warn(`跳过邮件整理字段：${e.message}`);
+			}
+		}
+
+		try {
+			await c.env.db.batch([
+				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_user_archive ON email(user_id, archived, email_id);`),
+				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_user_flagged ON email(user_id, flagged, email_id);`),
+				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_user_category ON email(user_id, category, email_id);`)
+			]);
+		} catch (e) {
+			console.warn(`跳过邮件整理索引：${e.message}`);
+		}
 	},
 
 	async v3_9DB(c) {
