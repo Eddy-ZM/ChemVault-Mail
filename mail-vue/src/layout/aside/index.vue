@@ -94,6 +94,14 @@
             <Icon class="nav-icon" icon="fluent:settings-48-regular" width="18" height="18"/>
             <span class="menu-name">{{ $t('settings') }}</span>
           </el-menu-item>
+          <el-menu-item
+              class="nav-item"
+              @click="openDocs"
+              index="docs"
+          >
+            <Icon class="nav-icon" icon="solar:document-text-line-duotone" width="18" height="18"/>
+            <span class="menu-name">{{ $t('document') }}</span>
+          </el-menu-item>
 
           <template v-if="hasManageAccess">
             <div class="sidebar-separator"></div>
@@ -226,6 +234,10 @@ function toggleSidebarPinned() {
   if (uiStore.sidebarPinned) {
     hoverExpanded.value = false;
   }
+}
+
+function openDocs() {
+  window.open('https://docs.chemvault.science/manual/mail/', '_blank', 'noopener,noreferrer');
 }
 
 function handleResize() {
