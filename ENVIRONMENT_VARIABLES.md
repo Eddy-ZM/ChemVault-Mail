@@ -19,8 +19,15 @@ Do not commit real keys, tokens, private keys, certificates or production `.env`
 | `MAIL_DOMAIN` | Backend only | Mail domain for the gateway. |
 | `MAILDIR_ROOT` | Backend only | Mail storage root path. |
 | `IMAP_HOST` | Backend only | IMAP host exposed to clients. |
+| `IMAP_PORT` | Backend only | IMAP port exposed to clients. Defaults to `993`. |
+| `IMAP_SECURITY` | Backend only | IMAP security label shown to clients. Defaults to `SSL/TLS`. |
 | `SMTP_HOST` | Backend only | SMTP host exposed to clients. |
 | `SMTP_PORT` | Backend only | SMTP port exposed to clients. |
+| `SMTP_SECURITY` | Backend only | SMTP security label shown to clients. Defaults to `STARTTLS`. |
+| `MAIL_CLIENT_AUTH_METHOD` | Backend only | Optional authentication label shown to mail clients. Defaults to `Normal password`. |
+| `IMAP_AUTH_METHOD` | Backend only | Optional IMAP-specific authentication label override. |
+| `SMTP_AUTH_METHOD` | Backend only | Optional SMTP-specific authentication label override. |
+| `MAIL_GATEWAY_URL` | Backend only | Internal URL for syncing App Password changes from the Worker to the mail gateway. |
 | `RESEND_API_KEY` | Backend only | Resend API key. Never commit a real value. |
 | `RESEND_WEBHOOK_SECRET` | Backend only | Webhook verification secret. Never commit a real value. |
 | `INTERNAL_MAIL_GATEWAY_TOKEN` | Backend only | Internal mail gateway token. Never commit a real value. |

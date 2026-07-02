@@ -4,6 +4,9 @@ import { ensureMailClientTables } from './mail-client-schema-service';
 
 const allowedScopes = ['imap', 'smtp'];
 const appPasswordAlphabet = 'abcdefghijkmnopqrstuvwxyz23456789';
+const defaultMailDomain = 'chemvault.science';
+const defaultAuthMethod = 'Normal password';
+const defaultCredentialPassword = 'App Password';
 
 export function generateAppPassword() {
 	const bytes = new Uint8Array(16);
@@ -50,6 +53,48 @@ export function buildGatewaySyncPayload({ id, emailAddress, plainAppPassword, sc
 		scopes: normalizeAppPasswordScopes(scopes),
 		revoked
 	};
+}
+
+export function buildMailClientConfig({ env = {}, user, appPasswords = [] }) {
+	const email = normalizeEmail(user?.email);
+	const mailDomain = firstNonBlank(env.MAIL_DOMAIN, domainFromEmail(email), defaultMailDomain);
+	const username = email || user?.email || '';
+
+	return {
+		email: username,
+		credentials: {
+			username,
+			password: defaultCredentialPassword,
+			authentication: firstNonBlank(env.MAIL_CLIENT_AUTH_METHOD, defaultAuthMethod)
+		},
+		incoming: buildMailClientEndpoint({
+			protocol: 'IMAP',
+			host: firstNonBlank(env.IMAP_HOST, `imap.${mailDomain}`),
+			port: env.IMAP_PORT,
+			defaultPort: 993,
+			security: firstNonBlank(env.IMAP_SECURITY, 'SSL/TLS'),
+			username,
+			authMethod: env.IMAP_AUTH_METHOD || env.MAIL_CLIENT_AUTH_METHOD
+		}),
+		outgoing: buildMailClientEndpoint({
+			protocol: 'SMTP',
+			host: firstNonBlank(env.SMTP_HOST, `smtp.${mailDomain}`),
+			port: env.SMTP_PORT,
+			defaultPort: 587,
+			security: firstNonBlank(env.SMTP_SECURITY, 'STARTTLS'),
+			username,
+			authMethod: env.SMTP_AUTH_METHOD || env.MAIL_CLIENT_AUTH_METHOD
+		}),
+		appPasswords
+	};
+}
+
+export function normalizeMailClientPort(value, fallback) {
+	const port = Number(value);
+	if (Number.isInteger(port) && port > 0 && port <= 65535) {
+		return port;
+	}
+	return fallback;
 }
 
 async function hashAppPassword(c, plainAppPassword) {
@@ -106,24 +151,11 @@ const appPasswordService = {
 	},
 
 	async config(c, user) {
-		return {
-			email: user.email,
-			incoming: {
-				protocol: 'IMAP',
-				host: c.env.IMAP_HOST || `imap.${c.env.MAIL_DOMAIN || 'chemvault.science'}`,
-				port: 993,
-				security: 'SSL/TLS',
-				username: user.email
-			},
-			outgoing: {
-				protocol: 'SMTP',
-				host: c.env.SMTP_HOST || `smtp.${c.env.MAIL_DOMAIN || 'chemvault.science'}`,
-				port: Number(c.env.SMTP_PORT || 587),
-				security: 'STARTTLS',
-				username: user.email
-			},
+		return buildMailClientConfig({
+			env: c.env,
+			user,
 			appPasswords: await this.list(c, user.userId)
-		};
+		});
 	},
 
 	async create(c, params, user) {
@@ -198,5 +230,39 @@ const appPasswordService = {
 		return toPublicAppPassword({ ...record, revoked_at: revokedAt });
 	}
 };
+
+function buildMailClientEndpoint({ protocol, host, port, defaultPort, security, username, authMethod }) {
+	return {
+		protocol,
+		host,
+		port: normalizeMailClientPort(port, defaultPort),
+		security,
+		username,
+		password: defaultCredentialPassword,
+		authentication: firstNonBlank(authMethod, defaultAuthMethod)
+	};
+}
+
+function normalizeEmail(value) {
+	return String(value || '').trim().toLowerCase();
+}
+
+function domainFromEmail(email) {
+	const atIndex = email.lastIndexOf('@');
+	if (atIndex < 0 || atIndex === email.length - 1) {
+		return '';
+	}
+	return email.slice(atIndex + 1);
+}
+
+function firstNonBlank(...values) {
+	for (const value of values) {
+		const normalized = String(value || '').trim();
+		if (normalized) {
+			return normalized;
+		}
+	}
+	return '';
+}
 
 export default appPasswordService;

@@ -45,6 +45,26 @@ Outgoing mail:
 | Username | Full email address, for example `user@chemvault.science` |
 | Password | App Password |
 
+## Worker Client Configuration
+
+The web settings page reads `/api/my/mail-client/config` and displays the values below. These variables are safe to commit when they only contain public hostnames, ports and labels.
+
+```toml
+[vars]
+MAIL_DOMAIN = "chemvault.science"
+IMAP_HOST = "imap.chemvault.science"
+IMAP_PORT = 993
+IMAP_SECURITY = "SSL/TLS"
+SMTP_HOST = "smtp.chemvault.science"
+SMTP_PORT = 587
+SMTP_SECURITY = "STARTTLS"
+#MAIL_CLIENT_AUTH_METHOD = "Normal password"
+#IMAP_AUTH_METHOD = "Normal password"
+#SMTP_AUTH_METHOD = "Normal password"
+```
+
+Keep secrets such as `APP_PASSWORD_HASH_SECRET`, `MAIL_GATEWAY_URL`, `INTERNAL_MAIL_GATEWAY_TOKEN`, and provider API keys outside committed config.
+
 ## Local Development
 
 Install dependencies:
@@ -76,6 +96,7 @@ MAIL_DOMAIN=chemvault.science \
 MAILDIR_ROOT="$PWD/data/vmail" \
 MAIL_GATEWAY_AUTH_STORE="$PWD/data/auth-store.json" \
 DOVECOT_USERS_FILE="$PWD/data/dovecot-users" \
+SMTP_PORT=2525 \
 INTERNAL_MAIL_GATEWAY_TOKEN="local-dev-token" \
 RESEND_API_KEY="replace-in-local-env-only" \
 MAIN_APP_INTERNAL_URL="http://localhost:8787" \
@@ -85,6 +106,13 @@ pnpm dev
 For local Worker to gateway sync, set Worker vars in your local dev environment:
 
 ```bash
+MAIL_DOMAIN=chemvault.science
+IMAP_HOST=localhost
+IMAP_PORT=993
+IMAP_SECURITY=SSL/TLS
+SMTP_HOST=localhost
+SMTP_PORT=2525
+SMTP_SECURITY=STARTTLS
 MAIL_GATEWAY_URL=http://localhost:8789
 INTERNAL_MAIL_GATEWAY_TOKEN=local-dev-token
 APP_PASSWORD_HASH_SECRET=local-only-random-string

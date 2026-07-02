@@ -36,6 +36,7 @@ const zh = {
     server: '服务器',
     port: '端口',
     security: '安全性',
+    authentication: '认证方式',
     appPasswordNamePlaceholder: '名称，例如 My Outlook on Mac',
     appPasswordNameRequired: '请输入 App Password 名称',
     generateAppPassword: '生成 App Password',

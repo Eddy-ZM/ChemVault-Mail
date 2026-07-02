@@ -49,19 +49,17 @@
       <div class="mail-client-config" v-if="mailClient.config">
         <div class="config-panel">
           <div class="config-title">{{$t('incomingMail')}}</div>
-          <div class="config-row"><span>{{$t('protocol')}}</span><strong>{{ mailClient.config.incoming.protocol }}</strong></div>
-          <div class="config-row"><span>{{$t('server')}}</span><strong>{{ mailClient.config.incoming.host }}</strong></div>
-          <div class="config-row"><span>{{$t('port')}}</span><strong>{{ mailClient.config.incoming.port }}</strong></div>
-          <div class="config-row"><span>{{$t('security')}}</span><strong>{{ mailClient.config.incoming.security }}</strong></div>
-          <div class="config-row"><span>{{$t('username')}}</span><strong>{{ mailClient.config.incoming.username }}</strong></div>
+          <div class="config-row" v-for="row in incomingConfigRows" :key="row.key">
+            <span>{{ row.label }}</span>
+            <strong>{{ row.value }}</strong>
+          </div>
         </div>
         <div class="config-panel">
           <div class="config-title">{{$t('outgoingMail')}}</div>
-          <div class="config-row"><span>{{$t('protocol')}}</span><strong>{{ mailClient.config.outgoing.protocol }}</strong></div>
-          <div class="config-row"><span>{{$t('server')}}</span><strong>{{ mailClient.config.outgoing.host }}</strong></div>
-          <div class="config-row"><span>{{$t('port')}}</span><strong>{{ mailClient.config.outgoing.port }}</strong></div>
-          <div class="config-row"><span>{{$t('security')}}</span><strong>{{ mailClient.config.outgoing.security }}</strong></div>
-          <div class="config-row"><span>{{$t('username')}}</span><strong>{{ mailClient.config.outgoing.username }}</strong></div>
+          <div class="config-row" v-for="row in outgoingConfigRows" :key="row.key">
+            <span>{{ row.label }}</span>
+            <strong>{{ row.value }}</strong>
+          </div>
         </div>
       </div>
       <div class="app-password-create">
@@ -130,7 +128,7 @@
   </div>
 </template>
 <script setup>
-import {reactive, ref, defineOptions, onMounted} from 'vue'
+import {computed, reactive, ref, defineOptions, onMounted} from 'vue'
 import {
   createMailClientAppPassword,
   mailClientConfig,
@@ -158,6 +156,8 @@ const mailClient = reactive({
   oneTimePassword: '',
   config: null,
 })
+const incomingConfigRows = computed(() => mailEndpointRows(mailClient.config?.incoming))
+const outgoingConfigRows = computed(() => mailEndpointRows(mailClient.config?.outgoing))
 const USER_SYSTEM_DEFAULT_URL = 'https://user.chemvault.science'
 
 defineOptions({
@@ -219,6 +219,22 @@ function copyOneTimePassword() {
     type: 'success',
     plain: true,
   })
+}
+
+function mailEndpointRows(endpoint) {
+  if (!endpoint) {
+    return []
+  }
+
+  return [
+    {key: 'protocol', label: t('protocol'), value: endpoint.protocol},
+    {key: 'server', label: t('server'), value: endpoint.host},
+    {key: 'port', label: t('port'), value: endpoint.port},
+    {key: 'security', label: t('security'), value: endpoint.security},
+    {key: 'username', label: t('username'), value: endpoint.username},
+    {key: 'password', label: t('password'), value: endpoint.password},
+    {key: 'authentication', label: t('authentication'), value: endpoint.authentication},
+  ].filter(row => row.value !== undefined && row.value !== null && String(row.value).trim() !== '')
 }
 
 function openUserSystemSettings() {

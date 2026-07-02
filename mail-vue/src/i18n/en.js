@@ -33,6 +33,7 @@ const en = {
     server: 'Server',
     port: 'Port',
     security: 'Security',
+    authentication: 'Authentication',
     appPasswordNamePlaceholder: 'Name, e.g. My Outlook on Mac',
     appPasswordNameRequired: 'Enter a name for this App Password',
     generateAppPassword: 'Generate App Password',
