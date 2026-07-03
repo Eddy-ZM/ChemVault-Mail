@@ -1,0 +1,13 @@
+{
+  "name": "chemvault-mail-system",
+  "private": true,
+  "license": "UNLICENSED",
+  "version": "0.1.0",
+  "scripts": {
+    "desktop:dev": "pnpm --dir mail-vue desktop:dev",
+    "desktop:build": "pnpm --dir mail-vue desktop:build",
+    "desktop:dist:win": "pnpm --dir mail-vue desktop:dist:win",
+    "desktop:publish:win": "pnpm --dir mail-vue desktop:publish:win",
+    "desktop:test:win": "pnpm --dir mail-vue desktop:test:win"
+  }
+}

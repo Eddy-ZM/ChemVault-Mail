@@ -25,6 +25,7 @@ dist
 
 mail-vue/node_modules
 mail-vue/dist
+mail-vue/release/
 ChemVaultMailApple/build
 .wrangler
 .venv
@@ -50,6 +51,7 @@ build/
 .env
 .env.*
 !.env.example
+!mail-vue/.env.desktop
 *.p8
 AuthKey_*.p8
 *.p12

@@ -1,0 +1,77 @@
+name: Build ChemVault Mail for Windows
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Windows installer
+    runs-on: windows-latest
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CSC_LINK: ${{ secrets.WINDOWS_CODESIGN_CERTIFICATE }}
+      CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: mail-vue/pnpm-lock.yaml
+
+      - name: Verify tag matches desktop version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $pkg = Get-Content -Raw mail-vue/package.json | ConvertFrom-Json
+          $expected = "v$($pkg.version)"
+          if ($env:GITHUB_REF_NAME -ne $expected) {
+            Write-Error "Tag $env:GITHUB_REF_NAME does not match mail-vue package version $expected."
+            exit 1
+          }
+
+      - name: Install frontend and desktop dependencies
+        working-directory: mail-vue
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Windows installer
+        working-directory: mail-vue
+        run: pnpm run desktop:dist:win
+
+      - name: Upload Windows installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chemvault-mail-windows
+          path: |
+            mail-vue/release/windows/*.exe
+            mail-vue/release/windows/*.blockmap
+            mail-vue/release/windows/latest.yml
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: |
+            mail-vue/release/windows/*.exe
+            mail-vue/release/windows/*.blockmap
+            mail-vue/release/windows/latest.yml

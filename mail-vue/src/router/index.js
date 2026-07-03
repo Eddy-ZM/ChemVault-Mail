@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import {createRouter, createWebHashHistory, createWebHistory} from 'vue-router'
 import NProgress from 'nprogress';
 import {useUiStore} from "@/store/ui.js";
 import {useSettingStore} from "@/store/setting.js";
@@ -82,6 +82,14 @@ const routes = [
         component: () => import('@/views/login/index.vue')
     },
     {
+        path: '/download/windows',
+        name: 'download-windows',
+        component: () => import('@/views/download/windows.vue'),
+        meta: {
+            public: true
+        }
+    },
+    {
         path: '/test',
         name: 'test',
         component: () => import('@/views/test/index.vue')
@@ -95,7 +103,9 @@ const routes = [
 
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: import.meta.env.VITE_DESKTOP === 'true'
+        ? createWebHashHistory(import.meta.env.BASE_URL)
+        : createWebHistory(import.meta.env.BASE_URL),
     routes
 })
 
@@ -125,7 +135,7 @@ router.beforeEach((to, from, next) => {
     const hasAccessSession = userStore.user?.authType === 'cloudflare-access';
     const hasSession = token || hasAccessSession;
 
-    if (!hasSession && to.name !== 'login') {
+    if (!hasSession && to.name !== 'login' && !to.meta.public) {
         return next({name: 'login'})
     }
 

@@ -40,4 +40,35 @@ Do not commit real keys, tokens, private keys, certificates or production `.env`
 | --- | --- | --- |
 | `VITE_USER_SYSTEM_URL` | Required for account management links | Base URL for ChemVault User System. Mail settings links users to `${VITE_USER_SYSTEM_URL}/settings/security` for password and account changes. |
 
+## Windows Desktop App
+
+These values are public build-time values for `mail-vue/.env.desktop`. They are bundled into the desktop app and must never contain secrets.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `VITE_BASE_URL` | Required | Public HTTPS ChemVault Mail API base URL used by the packaged desktop app. Default: `https://mail.chemvault.science/api`. |
+| `VITE_USER_SYSTEM_URL` | Required | Public ChemVault User System URL for account-management links. |
+| `VITE_STATIC_URL` | Required | Static asset base for the packaged Vite renderer. Desktop uses `./`. |
+| `VITE_DESKTOP` | Required for desktop build | Enables desktop-specific hash routing for the packaged renderer. |
+| `VITE_WINDOWS_DOWNLOAD_BASE_URL` | Optional | Public GitHub Release download base used by the `/download/windows` page. |
+| `VITE_WINDOWS_DOWNLOAD_URL` | Optional | Full public installer URL override for the `/download/windows` page. |
+| `VITE_WINDOWS_RELEASE_NOTES_URL` | Optional | Public release notes URL used by the `/download/windows` page. |
+
+Runtime desktop update override:
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `CHEMVAULT_DESKTOP_UPDATE_FEED_URL` | Optional for QA or self-hosted releases | Overrides the packaged GitHub updater feed with an electron-updater generic feed. The app accepts HTTPS URLs, plus `localhost` HTTP only for local QA. Do not put secrets in this URL. |
+| `CHEMVAULT_DESKTOP_DISABLE_AUTO_UPDATE` | Optional for local QA | Set to `1` to skip startup update checks. |
+
+## Windows Release / Signing Secrets
+
+These values are for GitHub Actions or a local release shell only. Do not commit them to `.env` files.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `GH_TOKEN` | Required only for local `desktop:publish:win` | GitHub token with release upload permission. GitHub Actions uses the built-in `GITHUB_TOKEN`. |
+| `WINDOWS_CODESIGN_CERTIFICATE` | Optional | GitHub Actions secret mapped to electron-builder `CSC_LINK` for future Windows code signing. |
+| `WINDOWS_CODESIGN_PASSWORD` | Optional | GitHub Actions secret mapped to electron-builder `CSC_KEY_PASSWORD`. |
+
 The native Apple app should compile without environment variables. Xcode Cloud signing and TestFlight distribution should use Xcode Cloud's built-in Apple account integration.

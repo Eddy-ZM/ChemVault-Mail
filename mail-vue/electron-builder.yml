@@ -1,0 +1,40 @@
+appId: science.chemvault.mail
+productName: ChemVault Mail
+copyright: Copyright (c) ChemVault
+asar: true
+npmRebuild: false
+
+directories:
+  buildResources: desktop
+  output: release/windows
+
+files:
+  - dist/**/*
+  - desktop/main.cjs
+  - desktop/preload.cjs
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: desktop/icon.ico
+  verifyUpdateCodeSignature: false
+
+nsis:
+  artifactName: ChemVault-Mail-Setup-${version}.${ext}
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: ChemVault Mail
+  uninstallDisplayName: ChemVault Mail
+  deleteAppDataOnUninstall: false
+
+publish:
+  provider: github
+  owner: Eddy-ZM
+  repo: ChemVault-Mail
+  releaseType: release
