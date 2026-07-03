@@ -46,6 +46,22 @@ function run(command, args, options = {}) {
   assert(result.status === 0, `${command} ${args.join(' ')} failed with exit code ${result.status}`);
 }
 
+function getWindowsKnownFolder(folderName) {
+  const result = spawnSync('powershell', [
+    '-NoProfile',
+    '-Command',
+    `[Environment]::GetFolderPath('${folderName}')`,
+  ], {
+    encoding: 'utf8',
+    windowsHide: true,
+  });
+
+  assert(result.status === 0, `Unable to resolve Windows known folder: ${folderName}`);
+  const folderPath = result.stdout.trim();
+  assert(folderPath, `Windows known folder is empty: ${folderName}`);
+  return folderPath;
+}
+
 function startApp(exePath, env = {}) {
   return spawn(exePath, [], {
     detached: false,
@@ -152,19 +168,25 @@ async function main() {
 
   const installedExe = path.join(installDir, 'ChemVault Mail.exe');
   const uninstaller = path.join(installDir, 'Uninstall ChemVault Mail.exe');
-  const desktopShortcut = path.join(os.homedir(), 'Desktop', 'ChemVault Mail.lnk');
-  const startMenuShortcut = path.join(process.env.APPDATA, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'ChemVault Mail.lnk');
+  const desktopShortcut = path.join(getWindowsKnownFolder('Desktop'), 'ChemVault Mail.lnk');
+  const startMenuShortcut = path.join(getWindowsKnownFolder('Programs'), 'ChemVault Mail.lnk');
 
   assert(fs.existsSync(installedExe), 'Installed app executable is missing');
   assert(fs.existsSync(uninstaller), 'Uninstaller is missing');
   assert(fs.existsSync(desktopShortcut), 'Desktop shortcut is missing');
   assert(fs.existsSync(startMenuShortcut), 'Start Menu shortcut is missing');
 
+  fs.rmSync(desktopShortcut, { force: true });
+  fs.rmSync(startMenuShortcut, { force: true });
+
   const app = startApp(installedExe, {
     CHEMVAULT_DESKTOP_DISABLE_AUTO_UPDATE: '1',
+    CHEMVAULT_DESKTOP_FORCE_SHORTCUT_REPAIR: '1',
   });
   await wait(8000);
   assert(app.exitCode === null, 'Installed app exited during launch smoke test');
+  assert(fs.existsSync(desktopShortcut), 'Desktop shortcut was not repaired on app launch');
+  assert(fs.existsSync(startMenuShortcut), 'Start Menu shortcut was not repaired on app launch');
   await stopProcess(app);
 
   await withHttpServer(releaseDir, async (feedUrl) => {

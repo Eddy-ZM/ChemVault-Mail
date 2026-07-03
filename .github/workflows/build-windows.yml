@@ -76,6 +76,10 @@ jobs:
 
             This installer is distributed outside Microsoft Store and is not Authenticode signed. Windows may show "Unknown publisher", SmartScreen may warn, and some enterprise security tools may block it.
 
+            Desktop installer behavior:
+            - Creates Start Menu and desktop shortcuts.
+            - The app repairs missing current-version shortcuts on launch.
+
             Do not disable SmartScreen or weaken system security settings to install it. Use only if you trust this GitHub Release source.
           files: |
             mail-vue/release/windows/*.exe

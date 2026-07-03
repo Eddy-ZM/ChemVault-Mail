@@ -9,6 +9,7 @@ const isDev = !app.isPackaged;
 const rendererDevUrl = process.env.ELECTRON_RENDERER_URL;
 const disableAutoUpdate = process.env.CHEMVAULT_DESKTOP_DISABLE_AUTO_UPDATE === '1';
 const updateFeedUrl = process.env.CHEMVAULT_DESKTOP_UPDATE_FEED_URL;
+const forceShortcutRepair = process.env.CHEMVAULT_DESKTOP_FORCE_SHORTCUT_REPAIR === '1';
 
 app.setName(APP_NAME);
 app.setAppUserModelId(APP_ID);
@@ -18,6 +19,78 @@ let updateDownloaded = false;
 let checkingForUpdate = false;
 
 const iconPath = () => path.join(__dirname, 'icon.ico');
+
+function shortcutStatePath() {
+  return path.join(app.getPath('userData'), 'windows-shortcuts.json');
+}
+
+function readShortcutState() {
+  try {
+    return JSON.parse(fs.readFileSync(shortcutStatePath(), 'utf8'));
+  } catch (error) {
+    return {};
+  }
+}
+
+function writeShortcutState(state) {
+  try {
+    fs.mkdirSync(path.dirname(shortcutStatePath()), { recursive: true });
+    fs.writeFileSync(shortcutStatePath(), JSON.stringify(state, null, 2));
+  } catch (error) {
+    log('warn', 'Unable to write Windows shortcut state', error);
+  }
+}
+
+function ensureWindowsShortcuts() {
+  if (process.platform !== 'win32' || !app.isPackaged) {
+    return;
+  }
+
+  const version = app.getVersion();
+  const state = readShortcutState();
+  if (state.version === version && !forceShortcutRepair) {
+    return;
+  }
+
+  const target = process.execPath;
+  const shortcutOptions = {
+    target,
+    cwd: path.dirname(target),
+    description: 'Open ChemVault Mail',
+    icon: target,
+    iconIndex: 0,
+    appUserModelId: APP_ID,
+  };
+  const shortcutPaths = [
+    path.join(app.getPath('desktop'), `${APP_NAME}.lnk`),
+    path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', `${APP_NAME}.lnk`),
+  ];
+
+  let allShortcutsReady = true;
+  for (const shortcutPath of shortcutPaths) {
+    try {
+      fs.mkdirSync(path.dirname(shortcutPath), { recursive: true });
+      const operation = fs.existsSync(shortcutPath) ? 'replace' : 'create';
+      const created = shell.writeShortcutLink(shortcutPath, operation, shortcutOptions);
+      if (!created) {
+        allShortcutsReady = false;
+        log('warn', `Unable to create Windows shortcut: ${shortcutPath}`);
+      } else {
+        log('info', `Ensured Windows shortcut: ${shortcutPath}`);
+      }
+    } catch (error) {
+      allShortcutsReady = false;
+      log('warn', `Failed to create Windows shortcut: ${shortcutPath}`, error);
+    }
+  }
+
+  if (allShortcutsReady) {
+    writeShortcutState({
+      version,
+      ensuredAt: new Date().toISOString(),
+    });
+  }
+}
 
 function log(level, ...messages) {
   const line = `[${new Date().toISOString()}] [${level}] ${messages.map(stringifyLogValue).join(' ')}\n`;
@@ -346,6 +419,7 @@ if (!gotSingleInstanceLock) {
   app.whenReady().then(() => {
     configureSecurity();
     configureUpdater();
+    ensureWindowsShortcuts();
     createMainWindow();
     setTimeout(() => {
       checkForUpdates();

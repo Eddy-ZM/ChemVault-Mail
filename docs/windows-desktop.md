@@ -47,11 +47,11 @@ npm run desktop:dist:win
 
 Output:
 
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.1.exe`
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.1.exe.blockmap`
+- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.2.exe`
+- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.2.exe.blockmap`
 - `mail-vue/release/windows/latest.yml`
 
-The installer supports Windows 10 and Windows 11, creates Start Menu and desktop shortcuts, and includes an uninstaller.
+The installer supports Windows 10 and Windows 11, creates Start Menu and desktop shortcuts, and includes an uninstaller. The packaged app also repairs the current-version desktop and Start Menu shortcuts on first launch for that version, which covers installer or updater edge cases where Windows does not leave shortcuts behind.
 
 Run the local Windows installer/update smoke test after building:
 

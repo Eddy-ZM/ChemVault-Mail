@@ -88,7 +88,7 @@ ChemVault Mail 提供 Windows 10 / Windows 11 桌面安装包，应用名称为 
 
 下载入口：`/download/windows`
 
-当前安装包命名规则：`ChemVault-Mail-Setup-0.1.1.exe`
+当前安装包命名规则：`ChemVault-Mail-Setup-0.1.2.exe`
 
 当前 Windows 安装包按 unsigned 方式发布，不依赖 Microsoft Store 或代码签名证书。Windows 会显示“未知发布者”，SmartScreen 或企业安全系统可能拦截；项目不会通过危险系统设置绕过 SmartScreen。
 
