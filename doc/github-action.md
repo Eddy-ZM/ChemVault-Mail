@@ -19,7 +19,7 @@
 | `JWT_SECRET`            |  ✅  | 用于生成和验证 JWT 的随机长字符串                     |
 | `CLOUDFLARE_ACCESS_TEAM_DOMAIN` |  ❌  | （可选）Cloudflare Access Team domain，例如 `your-team.cloudflareaccess.com` |
 | `CLOUDFLARE_ACCESS_AUD` |  ❌  | （可选）Cloudflare Access 应用的 AUD tag，用于校验 Access JWT |
-| `INIT_URL`              |  ❌  | （可选）部署后用于初始化数据库的 Worker URL（格式参考下述手动初始化）           |
+| `INIT_URL`              |  optional  | Optional Worker base URL for manual initialization. Do not include any secret in this value. |
 
 ---
 
@@ -36,5 +36,5 @@
 2. 复制到 GitHub Secrets 中的 `CLOUDFLARE_ACCOUNT_ID`
 
 **运行工作流**
-1. 然后在Action页面手动运行工作流，后续同步上游后会自动部署到 Cloudflare Workers。如未配置 `INIT_URL`，则需要手动访问 `https://你的项目域名/api/init/你的jwt_secret` 进行数据库初始化。
+1. Run the workflow from GitHub Actions. Manual database initialization must use `POST https://your-domain.example/api/init` with `Authorization: Bearer <JWT_SECRET>`. Do not put JWT_SECRET in the URL path or query string.
 2. 自动同步上游可使用bot或者手动点击Sync Upstream按钮。

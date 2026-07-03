@@ -4,11 +4,20 @@ import {emailConst} from "../const/entity-const";
 
 const dbInit = {
 	async init(c) {
+		if (c.req.method !== 'POST') {
+			return c.text('Initialization requires POST authorization.', 405);
+		}
 
-		const secret = c.req.param('secret');
+		const url = new URL(c.req.url);
+		if (url.searchParams.has('secret') || url.searchParams.has('token')) {
+			return c.text('URL credentials are not supported for initialization.', 400);
+		}
 
-		if (secret !== c.env.jwt_secret) {
-			return c.text('❌ JWT secret mismatch');
+		const authorization = c.req.header('authorization') || '';
+		const bearerSecret = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || '';
+
+		if (!bearerSecret || bearerSecret !== c.env.jwt_secret) {
+			return c.text('Initialization is not authorized.', 403);
 		}
 
 		await this.intDB(c);
