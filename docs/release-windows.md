@@ -9,13 +9,13 @@ The desktop app version is `mail-vue/package.json`.
 Current version:
 
 ```text
-0.1.0
+0.1.1
 ```
 
 Installer artifact:
 
 ```text
-ChemVault-Mail-Setup-0.1.0.exe
+ChemVault-Mail-Setup-0.1.1.exe
 ```
 
 For every release:
@@ -38,8 +38,8 @@ npm run desktop:dist:win
 Check these files:
 
 ```text
-mail-vue/release/windows/ChemVault-Mail-Setup-0.1.0.exe
-mail-vue/release/windows/ChemVault-Mail-Setup-0.1.0.exe.blockmap
+mail-vue/release/windows/ChemVault-Mail-Setup-0.1.1.exe
+mail-vue/release/windows/ChemVault-Mail-Setup-0.1.1.exe.blockmap
 mail-vue/release/windows/latest.yml
 ```
 
@@ -54,8 +54,8 @@ npm run desktop:test:win
 Create and push a tag:
 
 ```powershell
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 `.github/workflows/build-windows.yml` runs on `v*` tags. It:
@@ -119,9 +119,9 @@ For already installed apps, electron-updater does not downgrade by default. Publ
 
 ## Code Signing
 
-Unsigned installers are supported only for local developer testing. Public tag releases require a trusted Authenticode signature so Windows does not show "Unknown publisher".
+Current Windows installers are published unsigned. This avoids certificate cost and Microsoft Store review, but Windows can show "Unknown publisher", SmartScreen can warn, and enterprise security tools can block the installer.
 
-Add these GitHub repository secrets before pushing a release tag:
+Optional future signing uses these GitHub repository secrets:
 
 ```text
 WINDOWS_CODESIGN_CERTIFICATE
@@ -132,15 +132,13 @@ WINDOWS_CODESIGN_PASSWORD
 
 The certificate should be an EV/OV Windows code signing certificate usable by electron-builder. Never commit certificate files or passwords.
 
-Tag-triggered public releases now fail early if either secret is missing. After packaging, CI runs:
+When a certificate is available, run this after packaging:
 
 ```powershell
 npm run desktop:verify-signature:win
 ```
 
-The workflow uploads the installer, blockmap, and `latest.yml` only after the installer and packaged app executable both return `Valid` from `Get-AuthenticodeSignature`.
-
-The existing `v0.1.0` GitHub Release was produced before signing was enforced. Treat it as an unsigned bootstrap build; publish the next public build with a higher version after the signing certificate is configured.
+Unsigned releases return `NotSigned`; disclose that state in the release notes and do not provide SmartScreen bypass instructions.
 
 ## Manual Release Checklist
 
@@ -149,6 +147,6 @@ The existing `v0.1.0` GitHub Release was produced before signing was enforced. T
 - No backend secrets are present in desktop files or release artifacts.
 - `latest.yml` is uploaded with the installer.
 - Download page points at the intended GitHub Release channel.
-- Installer and packaged app executable return `Valid` from `npm run desktop:verify-signature:win`.
+- Release notes clearly state that the installer is unsigned and may show "Unknown publisher".
 - Login, inbox, read mail, compose, external links, update check, and uninstall are tested on Windows 10 or Windows 11.
 - `npm run desktop:test:win` passes on a clean installer build.

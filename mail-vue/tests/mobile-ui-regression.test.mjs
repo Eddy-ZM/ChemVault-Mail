@@ -192,8 +192,14 @@ assert.match(
 
 assert.match(
   loginView,
-  /src="\/mail\.png"/,
-  'logo wallpaper should use the existing mail logo asset'
+  /:src="mailLogoSrc"/,
+  'logo wallpaper should use the resolved mail logo asset'
+);
+
+assert.match(
+  loginView,
+  /const mailLogoSrc = publicAsset\('mail\.png'\);/,
+  'logo wallpaper should resolve through the public asset helper for desktop file loading'
 );
 
 assert.doesNotMatch(

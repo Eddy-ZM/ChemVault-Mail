@@ -233,6 +233,7 @@ import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
 import {AccountAllReceiveEnum} from "@/enums/account-enum.js";
 import {AVATAR_TYPE, resolveAccountAvatar} from "@/utils/account-avatar.js";
+import {publicAsset} from "@/utils/public-asset.js";
 
 const {t} = useI18n();
 const userStore = useUserStore();
@@ -280,7 +281,7 @@ const queryParams = {
 const mySelect = ref()
 const avatarPreview = computed(() => {
   if (avatarForm.avatarType === AVATAR_TYPE.LOGO) {
-    return {type: 'image', src: '/mail.png'};
+    return {type: 'image', src: publicAsset('mail.png')};
   }
 
   if (avatarForm.avatarType === AVATAR_TYPE.CUSTOM) {

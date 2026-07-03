@@ -20,7 +20,7 @@ win:
       arch:
         - x64
   icon: desktop/icon.ico
-  verifyUpdateCodeSignature: true
+  verifyUpdateCodeSignature: false
   signtoolOptions:
     signingHashAlgorithms:
       - sha256

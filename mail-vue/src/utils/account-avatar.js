@@ -1,4 +1,5 @@
 import {cvtR2Url} from "@/utils/convert.js";
+import {publicAsset} from "@/utils/public-asset.js";
 
 const AVATAR_TYPE = {
   INITIAL: 'initial',
@@ -16,7 +17,7 @@ export function resolveAccountAvatar(account) {
   const avatarType = account?.avatarType || AVATAR_TYPE.INITIAL;
 
   if (avatarType === AVATAR_TYPE.LOGO) {
-    return {type: 'image', src: '/mail.png'};
+    return {type: 'image', src: publicAsset('mail.png')};
   }
 
   if (avatarType === AVATAR_TYPE.CUSTOM && account?.avatar) {

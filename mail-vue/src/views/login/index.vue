@@ -1,7 +1,7 @@
 <template>
   <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''">
     <div id="background-wrap" v-if="!settingStore.settings.background" class="logo-wallpaper" aria-hidden="true">
-      <img class="logo-wallpaper-image" src="/mail.png" alt="">
+      <img class="logo-wallpaper-image" :src="mailLogoSrc" alt="">
     </div>
     <div v-else :style="background"></div>
     <Transition name="auth-stage">
@@ -70,7 +70,7 @@
           >{{ $t('loginBtn') }}
           </el-button>
           <el-button class="btn" v-if="settingStore.settings.linuxdoSwitch"  style="margin-top: 10px"  @click="linuxDoLogin">
-            <el-avatar src="/image/linuxdo.webp" :size="18" style="margin-right: 10px" />LinuxDo
+            <el-avatar :src="linuxDoLogoSrc" :size="18" style="margin-right: 10px" />LinuxDo
           </el-button>
         </div>
         <div v-show="canRegister && show !== 'login'">
@@ -121,7 +121,7 @@
           >{{ $t('regBtn') }}
           </el-button>
           <el-button v-if="settingStore.settings.linuxdoSwitch" class="btn" style="margin-top: 10px"  @click="linuxDoLogin">
-            <el-avatar src="/image/linuxdo.webp" :size="18" style="margin-right: 10px" />LinuxDo
+            <el-avatar :src="linuxDoLogoSrc" :size="18" style="margin-right: 10px" />LinuxDo
           </el-button>
         </div>
         <template v-if="canRegister">
@@ -188,6 +188,7 @@ import {permsToRouter} from "@/perm/perm.js";
 import {useI18n} from "vue-i18n";
 import {oauthBindUser, oauthLinuxDoLogin} from "@/request/ouath.js";
 import {chemVaultSsoAuthorizeUrlFromSearch, chemVaultSsoSourceFromSearch} from "@/utils/chemvault-sso.js";
+import {publicAsset} from "@/utils/public-asset.js";
 
 const {t, locale} = useI18n();
 const accountStore = useAccountStore();
@@ -199,6 +200,8 @@ const bindLoading = ref(false)
 const oauthLoading = ref(false);
 const showBindForm = ref(false);
 const show = ref('login')
+const mailLogoSrc = publicAsset('mail.png');
+const linuxDoLogoSrc = publicAsset('image/linuxdo.webp');
 const isDesktopApp =
   navigator.userAgent.includes("ChemVaultMail");
 const pendingSsoAuthorizeUrl = chemVaultSsoAuthorizeUrlFromSearch(window.location.search);

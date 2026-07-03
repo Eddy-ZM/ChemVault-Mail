@@ -47,8 +47,8 @@ npm run desktop:dist:win
 
 Output:
 
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.0.exe`
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.0.exe.blockmap`
+- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.1.exe`
+- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.1.exe.blockmap`
 - `mail-vue/release/windows/latest.yml`
 
 The installer supports Windows 10 and Windows 11, creates Start Menu and desktop shortcuts, and includes an uninstaller.
@@ -96,11 +96,11 @@ For QA or self-hosted releases, `CHEMVAULT_DESKTOP_UPDATE_FEED_URL` can point at
 
 ## Code Signing
 
-Local unsigned builds are allowed for developer testing only. Public Windows releases must be Authenticode signed with a trusted EV/OV code signing certificate. Without that signature, Windows can show "Unknown publisher" and SmartScreen or enterprise security tools can block the installer.
+Current public Windows releases are unsigned because EV/OV code signing certificates are expensive. Windows can show "Unknown publisher", SmartScreen can warn, and enterprise security tools can block the installer.
 
 Do not add registry edits, SmartScreen bypass instructions, or unsafe installer behavior to hide the warning.
 
-Signing uses electron-builder and GitHub Actions:
+The workflow still keeps optional signing inputs for a future certificate:
 
 - `CSC_LINK`: path, URL, or base64 certificate payload for the `.pfx` / `.p12` certificate
 - `CSC_KEY_PASSWORD`: certificate password
@@ -110,13 +110,13 @@ In GitHub Actions, configure these as repository secrets:
 - `WINDOWS_CODESIGN_CERTIFICATE`
 - `WINDOWS_CODESIGN_PASSWORD`
 
-Tag-triggered public releases fail if these secrets are missing. After building, the workflow runs:
+When a certificate becomes available, run this after building to verify both the installer and packaged app executable:
 
 ```powershell
 npm run desktop:verify-signature:win
 ```
 
-The release is uploaded only if both the installer and packaged app executable return a `Valid` Authenticode status.
+For unsigned releases this command returns `NotSigned`; that is expected and should be disclosed in release notes.
 
 ## Desktop Environment Values
 

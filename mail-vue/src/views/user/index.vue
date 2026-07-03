@@ -351,7 +351,7 @@
           <el-dropdown-item @click="openSetPwd(rightClickUser)">
             <template #default>
               <div class="right-dropdown-item">
-                <icon icon="fluent:fingerprint-20-filled" width="22" height="22" />
+                <Icon icon="fluent:fingerprint-20-filled" width="22" height="22" />
                 <span>{{t('changePassword')}}</span>
               </div>
             </template>
@@ -359,7 +359,7 @@
           <el-dropdown-item @click="openSetType(rightClickUser)">
             <template #default>
               <div class="right-dropdown-item">
-                <icon icon="fluent:lock-closed-16-regular" width="21" height="21" />
+                <Icon icon="fluent:lock-closed-16-regular" width="21" height="21" />
                 <span>{{ t('setRole') }}</span>
               </div>
             </template>
@@ -443,6 +443,7 @@ import {useUserStore} from "@/store/user.js";
 import {useI18n} from 'vue-i18n';
 import {hasPerm} from "@/perm/perm.js";
 import {AVATAR_TYPE, resolveAccountAvatar} from "@/utils/account-avatar.js";
+import {publicAsset} from "@/utils/public-asset.js";
 
 defineOptions({
   name: 'user'
@@ -543,7 +544,7 @@ const managedAvatarForm = reactive({
 })
 const managedAvatarPreview = computed(() => {
   if (managedAvatarForm.avatarType === AVATAR_TYPE.LOGO) {
-    return {type: 'image', src: '/mail.png'};
+    return {type: 'image', src: publicAsset('mail.png')};
   }
 
   if (managedAvatarForm.avatarType === AVATAR_TYPE.CUSTOM) {

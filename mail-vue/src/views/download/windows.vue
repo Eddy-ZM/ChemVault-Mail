@@ -1,7 +1,7 @@
 <template>
   <main class="windows-download">
     <section class="download-hero">
-      <img class="app-logo" src="/mail.png" alt="ChemVault Mail">
+      <img class="app-logo" :src="mailLogoSrc" alt="ChemVault Mail">
       <div class="hero-copy">
         <p class="eyebrow">{{ $t('windowsDesktopApp') }}</p>
         <h1>{{ $t('downloadForWindows') }}</h1>
@@ -36,7 +36,7 @@
       </div>
     </section>
 
-    <section class="notice" aria-label="Windows signing notice">
+    <section class="notice" aria-label="Unsigned installer notice">
       <h2>{{ $t('unsignedBuildNoticeTitle') }}</h2>
       <p>{{ $t('unsignedBuildNoticeBody') }}</p>
     </section>
@@ -44,12 +44,15 @@
 </template>
 
 <script setup>
+import {publicAsset} from "@/utils/public-asset.js";
+
 const appVersion = __CHEMVAULT_MAIL_VERSION__;
 const installerName = `ChemVault-Mail-Setup-${appVersion}.exe`;
 const defaultDownloadBaseUrl = `https://github.com/Eddy-ZM/ChemVault-Mail/releases/download/v${appVersion}`;
 const downloadBaseUrl = import.meta.env.VITE_WINDOWS_DOWNLOAD_BASE_URL || defaultDownloadBaseUrl;
 const releaseNotesUrl = import.meta.env.VITE_WINDOWS_RELEASE_NOTES_URL || `https://github.com/Eddy-ZM/ChemVault-Mail/releases/tag/v${appVersion}`;
 const downloadUrl = import.meta.env.VITE_WINDOWS_DOWNLOAD_URL || `${downloadBaseUrl}/${installerName}`;
+const mailLogoSrc = publicAsset('mail.png');
 </script>
 
 <style scoped lang="scss">

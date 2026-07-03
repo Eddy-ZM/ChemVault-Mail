@@ -68,7 +68,7 @@ These values are for GitHub Actions or a local release shell only. Do not commit
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `GH_TOKEN` | Required only for local `desktop:publish:win` | GitHub token with release upload permission. GitHub Actions uses the built-in `GITHUB_TOKEN`. |
-| `WINDOWS_CODESIGN_CERTIFICATE` | Required for public Windows tag releases | GitHub Actions secret mapped to electron-builder `CSC_LINK`. Use a trusted EV/OV Windows code signing certificate as a secure URL or base64 `.pfx` / `.p12` payload. |
-| `WINDOWS_CODESIGN_PASSWORD` | Required for public Windows tag releases | GitHub Actions secret mapped to electron-builder `CSC_KEY_PASSWORD`. |
+| `WINDOWS_CODESIGN_CERTIFICATE` | Optional | GitHub Actions secret mapped to electron-builder `CSC_LINK` if a future EV/OV Windows code signing certificate is purchased. |
+| `WINDOWS_CODESIGN_PASSWORD` | Optional | GitHub Actions secret mapped to electron-builder `CSC_KEY_PASSWORD`. |
 
 The native Apple app should compile without environment variables. Xcode Cloud signing and TestFlight distribution should use Xcode Cloud's built-in Apple account integration.
