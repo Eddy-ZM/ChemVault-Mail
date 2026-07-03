@@ -36,7 +36,7 @@
       </div>
     </section>
 
-    <section class="notice" aria-label="Unsigned installer notice">
+    <section class="notice" aria-label="Windows signing notice">
       <h2>{{ $t('unsignedBuildNoticeTitle') }}</h2>
       <p>{{ $t('unsignedBuildNoticeBody') }}</p>
     </section>

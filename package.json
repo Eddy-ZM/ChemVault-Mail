@@ -8,6 +8,7 @@
     "desktop:build": "pnpm --dir mail-vue desktop:build",
     "desktop:dist:win": "pnpm --dir mail-vue desktop:dist:win",
     "desktop:publish:win": "pnpm --dir mail-vue desktop:publish:win",
-    "desktop:test:win": "pnpm --dir mail-vue desktop:test:win"
+    "desktop:test:win": "pnpm --dir mail-vue desktop:test:win",
+    "desktop:verify-signature:win": "pnpm --dir mail-vue desktop:verify-signature:win"
   }
 }

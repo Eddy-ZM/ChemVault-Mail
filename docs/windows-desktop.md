@@ -96,11 +96,11 @@ For QA or self-hosted releases, `CHEMVAULT_DESKTOP_UPDATE_FEED_URL` can point at
 
 ## Code Signing
 
-Unsigned builds are allowed for now. Without a Windows code signing certificate, Windows SmartScreen may warn users before install or first launch.
+Local unsigned builds are allowed for developer testing only. Public Windows releases must be Authenticode signed with a trusted EV/OV code signing certificate. Without that signature, Windows can show "Unknown publisher" and SmartScreen or enterprise security tools can block the installer.
 
 Do not add registry edits, SmartScreen bypass instructions, or unsafe installer behavior to hide the warning.
 
-Future signing can use EV or OV code signing through electron-builder:
+Signing uses electron-builder and GitHub Actions:
 
 - `CSC_LINK`: path, URL, or base64 certificate payload for the `.pfx` / `.p12` certificate
 - `CSC_KEY_PASSWORD`: certificate password
@@ -109,6 +109,14 @@ In GitHub Actions, configure these as repository secrets:
 
 - `WINDOWS_CODESIGN_CERTIFICATE`
 - `WINDOWS_CODESIGN_PASSWORD`
+
+Tag-triggered public releases fail if these secrets are missing. After building, the workflow runs:
+
+```powershell
+npm run desktop:verify-signature:win
+```
+
+The release is uploaded only if both the installer and packaged app executable return a `Valid` Authenticode status.
 
 ## Desktop Environment Values
 

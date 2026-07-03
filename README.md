@@ -90,7 +90,7 @@ ChemVault Mail 提供 Windows 10 / Windows 11 桌面安装包，应用名称为 
 
 当前安装包命名规则：`ChemVault-Mail-Setup-0.1.0.exe`
 
-如果安装包尚未接入 Windows 代码签名证书，Windows SmartScreen 可能显示提醒。后续可接入 EV/OV code signing certificate；项目不会通过危险系统设置绕过 SmartScreen。
+公开发布的 Windows 安装包需要接入受信任的 EV/OV Authenticode 代码签名证书；否则 Windows 会显示“未知发布者”，SmartScreen 或企业安全系统可能拦截。项目不会通过危险系统设置绕过 SmartScreen，tag release 会在缺少签名证书时失败。
 
 Windows 桌面端开发、构建和发布说明见：
 

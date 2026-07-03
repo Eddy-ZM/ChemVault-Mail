@@ -119,16 +119,28 @@ For already installed apps, electron-updater does not downgrade by default. Publ
 
 ## Code Signing
 
-Unsigned installers are supported but can trigger Windows SmartScreen.
+Unsigned installers are supported only for local developer testing. Public tag releases require a trusted Authenticode signature so Windows does not show "Unknown publisher".
 
-To sign in GitHub Actions, add repository secrets:
+Add these GitHub repository secrets before pushing a release tag:
 
 ```text
 WINDOWS_CODESIGN_CERTIFICATE
 WINDOWS_CODESIGN_PASSWORD
 ```
 
-The certificate should be an EV/OV code signing certificate usable by electron-builder. Never commit certificate files or passwords.
+`WINDOWS_CODESIGN_CERTIFICATE` maps to electron-builder `CSC_LINK` and can be a secure URL, certificate path available to the runner, or base64 `.pfx` / `.p12` payload. `WINDOWS_CODESIGN_PASSWORD` maps to `CSC_KEY_PASSWORD`.
+
+The certificate should be an EV/OV Windows code signing certificate usable by electron-builder. Never commit certificate files or passwords.
+
+Tag-triggered public releases now fail early if either secret is missing. After packaging, CI runs:
+
+```powershell
+npm run desktop:verify-signature:win
+```
+
+The workflow uploads the installer, blockmap, and `latest.yml` only after the installer and packaged app executable both return `Valid` from `Get-AuthenticodeSignature`.
+
+The existing `v0.1.0` GitHub Release was produced before signing was enforced. Treat it as an unsigned bootstrap build; publish the next public build with a higher version after the signing certificate is configured.
 
 ## Manual Release Checklist
 
@@ -137,6 +149,6 @@ The certificate should be an EV/OV code signing certificate usable by electron-b
 - No backend secrets are present in desktop files or release artifacts.
 - `latest.yml` is uploaded with the installer.
 - Download page points at the intended GitHub Release channel.
-- Installer warning is documented if unsigned.
+- Installer and packaged app executable return `Valid` from `npm run desktop:verify-signature:win`.
 - Login, inbox, read mail, compose, external links, update check, and uninstall are tested on Windows 10 or Windows 11.
 - `npm run desktop:test:win` passes on a clean installer build.
