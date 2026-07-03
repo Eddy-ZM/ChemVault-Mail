@@ -3,11 +3,21 @@ import { simpleParser } from 'mailparser';
 import { SMTPServer } from 'smtp-server';
 import { writeMaildirMessage } from './maildir.js';
 import { assertEnvelopeAllowed, sendWithResend } from './smtp-policy.js';
-import { createLoginRateLimiter } from './rate-limit.js';
+import { createLoginRateLimiter, createWindowRateLimiter } from './rate-limit.js';
+import { normalizeMailLimits } from './mail-limits.js';
 
 export async function createSubmissionServer({ config, authStore, auditLogger }) {
 	const tlsOptions = await loadTlsOptions(config);
 	const limiter = createLoginRateLimiter();
+	const perMinuteLimiter = createWindowRateLimiter({
+		windowMs: 60 * 1000,
+		maxAttempts: config.maxEmailsPerMinutePerUser
+	});
+	const dailyLimiter = createWindowRateLimiter({
+		windowMs: 24 * 60 * 60 * 1000,
+		maxAttempts: config.dailySmtpLimit
+	});
+	const mailLimits = normalizeMailLimits(config);
 
 	return new SMTPServer({
 		secure: false,
@@ -68,10 +78,19 @@ export async function createSubmissionServer({ config, authStore, auditLogger })
 				const parsed = await simpleParser(raw);
 				const from = session.envelopeFrom || parsed.from?.value?.[0]?.address;
 				const to = session.envelopeTo || parsed.to?.value?.map(item => item.address) || [];
+				const sendKey = String(session.user || session.remoteAddress || 'unknown').toLowerCase();
+				if (!perMinuteLimiter.check(`minute:${sendKey}`)) {
+					throw Object.assign(new Error('Too many messages per minute'), { responseCode: 452 });
+				}
+				if (!dailyLimiter.check(`day:${sendKey}`)) {
+					throw Object.assign(new Error('Daily SMTP sending limit reached'), { responseCode: 452 });
+				}
 				assertEnvelopeAllowed({
 					authenticatedEmail: session.user,
 					from,
-					to
+					to,
+					attachments: parsed.attachments || [],
+					limits: mailLimits
 				});
 				await sendWithResend({
 					apiKey: config.resendApiKey,

@@ -1,6 +1,6 @@
 import orm from '../entity/orm';
 import email from '../entity/email';
-import { attConst, emailConst, isDel, settingConst } from '../const/entity-const';
+import { attConst, emailConst, isDel, settingConst, userConst } from '../const/entity-const';
 import { and, desc, eq, gt, inArray, lt, count, asc, sql, ne, or, like, lte, gte } from 'drizzle-orm';
 import { star } from '../entity/star';
 import settingService from './setting-service';
@@ -29,6 +29,15 @@ import {
 	normalizeCategory,
 	normalizeEmailIds
 } from './email-organization-service';
+
+const MAIL_SEND_LIMITS = {
+	maxRecipientsPerEmail: 20,
+	maxEmailsPerMinutePerUser: 5,
+	maxEmailsPerDayPerUser: 100,
+	maxAttachmentSizeBytes: 10 * 1024 * 1024,
+	maxAttachmentsPerEmail: 10,
+	blockedExtensions: ['.app', '.bat', '.cmd', '.cjs', '.dmg', '.exe', '.html', '.jar', '.js', '.mjs', '.php', '.py', '.sh']
+};
 
 const emailService = {
 
@@ -201,6 +210,10 @@ const emailService = {
 			attachments = [] //附件
 		} = params;
 
+		receiveEmail = normalizeRecipientList(receiveEmail);
+		attachments = normalizeAttachmentList(attachments);
+		enforceMailSendInputLimits({ receiveEmail, attachments });
+
 		const { resendTokens, r2Domain, send, domainList } = await settingService.query(c);
 
 		let { imageDataList, html } = await attService.toImageUrlHtml(c, content);
@@ -211,7 +224,11 @@ const emailService = {
 		}
 
 		const userRow = await userService.selectById(c, userId);
+		if (!userRow || userRow.status !== userConst.status.NORMAL) {
+			throw new BizError('User is not allowed to send email.', 403);
+		}
 		const roleRow = await roleService.selectById(c, userRow.type);
+		await enforceMailRateLimits(c, userId);
 
 		//判断接收方是不是全部为站内邮箱
 		const allInternal = receiveEmail.every(email => {
@@ -296,6 +313,7 @@ const emailService = {
 		}
 
 		let sendResult = {};
+		try {
 
 		//存在站外邮箱时，如果配置了 Cloudflare Email Service 就优先使用，否则使用 Resend
 		if (!allInternal) {
@@ -328,11 +346,15 @@ const emailService = {
 
 		}
 
+		} catch {
+			throw new BizError('Email provider could not send the message. Provider details suppressed.', 502);
+		}
+
 		const { data, error } = sendResult;
 
 
 		if (error) {
-			throw new BizError(error.message);
+			throw new BizError('Email provider could not send the message. Provider details suppressed.', 502);
 		}
 
 		imageDataList = imageDataList.map(item => ({...item, contentId: `<${item.contentId}>`}))
@@ -1096,5 +1118,66 @@ const emailService = {
 		return [...new Set([...defaultEmailCategories, ...savedCategories])];
 	}
 };
+
+function normalizeRecipientList(receiveEmail) {
+	const values = Array.isArray(receiveEmail) ? receiveEmail : String(receiveEmail || '').split(/[;,]/);
+	return [...new Set(values.map(item => String(item || '').trim().toLowerCase()).filter(Boolean))];
+}
+
+function normalizeAttachmentList(attachments) {
+	return Array.isArray(attachments) ? attachments : [];
+}
+
+function enforceMailSendInputLimits({ receiveEmail, attachments }) {
+	if (!receiveEmail.length) {
+		throw new BizError('At least one recipient is required.', 400);
+	}
+	if (receiveEmail.length > MAIL_SEND_LIMITS.maxRecipientsPerEmail) {
+		throw new BizError(`Too many recipients. Maximum is ${MAIL_SEND_LIMITS.maxRecipientsPerEmail}.`, 400);
+	}
+	if (attachments.length > MAIL_SEND_LIMITS.maxAttachmentsPerEmail) {
+		throw new BizError(`Too many attachments. Maximum is ${MAIL_SEND_LIMITS.maxAttachmentsPerEmail}.`, 400);
+	}
+	for (const attachment of attachments) {
+		const filename = String(attachment.filename || attachment.name || '').toLowerCase();
+		const size = estimateAttachmentSize(attachment);
+		if (size > MAIL_SEND_LIMITS.maxAttachmentSizeBytes) {
+			throw new BizError(`Attachment is too large. Maximum is ${MAIL_SEND_LIMITS.maxAttachmentSizeBytes} bytes.`, 400);
+		}
+		if (MAIL_SEND_LIMITS.blockedExtensions.some(extension => filename.endsWith(extension))) {
+			throw new BizError('Attachment file type is not allowed.', 400);
+		}
+	}
+}
+
+async function enforceMailRateLimits(c, userId) {
+	if (!c?.env?.kv?.get || !c?.env?.kv?.put) {
+		return;
+	}
+	await incrementKvWindow(c.env.kv, `mail:send:minute:${userId}:${dayjs().format('YYYY-MM-DDTHH:mm')}`, MAIL_SEND_LIMITS.maxEmailsPerMinutePerUser, 90);
+	await incrementKvWindow(c.env.kv, `mail:send:day:${userId}:${dayjs().format('YYYY-MM-DD')}`, MAIL_SEND_LIMITS.maxEmailsPerDayPerUser, 60 * 60 * 26);
+}
+
+async function incrementKvWindow(kv, key, limit, expirationTtl) {
+	const current = Number(await kv.get(key) || 0);
+	if (current >= limit) {
+		throw new BizError('Too many email sends. Please try again later.', 429);
+	}
+	await kv.put(key, String(current + 1), { expirationTtl });
+}
+
+function estimateAttachmentSize(attachment) {
+	if (!attachment) return 0;
+	if (Number.isFinite(Number(attachment.size))) return Number(attachment.size);
+	const content = attachment.content;
+	if (!content) return 0;
+	if (content instanceof ArrayBuffer) return content.byteLength;
+	if (content instanceof Uint8Array) return content.byteLength;
+	if (typeof content === 'string') {
+		const base64 = content.startsWith('data:') ? content.split(',')[1] || '' : content;
+		return Math.ceil(base64.replace(/\s+/g, '').length * 0.75);
+	}
+	return 0;
+}
 
 export default emailService;

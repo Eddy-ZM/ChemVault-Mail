@@ -1,12 +1,12 @@
-export function assertEnvelopeAllowed({ authenticatedEmail, from, to }) {
+import { assertMessageWithinLimits } from './mail-limits.js';
+
+export function assertEnvelopeAllowed({ authenticatedEmail, from, to, attachments = [], limits }) {
 	const normalizedUser = normalizeEmail(authenticatedEmail);
 	const normalizedFrom = normalizeEmail(from);
 	if (!normalizedUser || normalizedFrom !== normalizedUser) {
 		throw Object.assign(new Error('From address must belong to authenticated user'), { responseCode: 553 });
 	}
-	if (!Array.isArray(to) || to.length === 0) {
-		throw Object.assign(new Error('At least one recipient is required'), { responseCode: 554 });
-	}
+	assertMessageWithinLimits({ to, attachments, limits });
 	return true;
 }
 
@@ -32,8 +32,8 @@ export async function sendWithResend({ apiKey, message, fetchImpl = fetch }) {
 	});
 
 	if (!response.ok) {
-		const body = await response.text().catch(() => '');
-		throw Object.assign(new Error(`Resend send failed with ${response.status}: ${body}`), { responseCode: 451 });
+		await response.text().catch(() => '');
+		throw Object.assign(new Error(`Resend send failed with ${response.status}. Provider details suppressed.`), { responseCode: 451 });
 	}
 
 	return response.json().catch(() => ({}));

@@ -18,6 +18,10 @@ export function loadConfig(env = process.env) {
 		metadataStorePath: env.MAIL_GATEWAY_METADATA_STORE || path.join(process.cwd(), 'data', 'mail-metadata.jsonl'),
 		dovecotUsersFile: env.DOVECOT_USERS_FILE || path.join(process.cwd(), 'data', 'dovecot-users'),
 		dailySmtpLimit: Number(env.DAILY_SMTP_LIMIT || 100),
+		maxRecipientsPerEmail: Number(env.MAX_RECIPIENTS_PER_EMAIL || 20),
+		maxEmailsPerMinutePerUser: Number(env.MAX_EMAILS_PER_MINUTE_PER_USER || 5),
+		maxAttachmentSizeBytes: Number(env.MAX_ATTACHMENT_SIZE_BYTES || 10 * 1024 * 1024),
+		maxAttachmentsPerEmail: Number(env.MAX_ATTACHMENTS_PER_EMAIL || 10),
 		tlsKeyPath: env.SMTP_TLS_KEY_PATH || '',
 		tlsCertPath: env.SMTP_TLS_CERT_PATH || ''
 	};
