@@ -58,4 +58,4 @@ SMTP_SECURITY = "STARTTLS"
 #cloudflare_access_aud = ""		#可选，Cloudflare Access 应用 AUD tag
 
 [build]
-command = "pnpm --prefix ../mail-vue install --frozen-lockfile --prod=false && pnpm --prefix ../mail-vue run build"
+command = "pnpm --dir ../mail-vue install --frozen-lockfile --prod=false && pnpm --dir ../mail-vue run build"

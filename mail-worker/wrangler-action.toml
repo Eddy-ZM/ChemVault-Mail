@@ -50,4 +50,4 @@ cloudflare_access_team_domain = "${CLOUDFLARE_ACCESS_TEAM_DOMAIN}"
 cloudflare_access_aud = "${CLOUDFLARE_ACCESS_AUD}"
 
 [build]
-command = "pnpm --prefix ../mail-vue install --frozen-lockfile --prod=false && pnpm --prefix ../mail-vue run build"
+command = "pnpm --dir ../mail-vue install --frozen-lockfile --prod=false && pnpm --dir ../mail-vue run build"
