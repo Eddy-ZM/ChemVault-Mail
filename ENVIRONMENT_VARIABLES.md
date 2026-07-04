@@ -60,7 +60,6 @@ Runtime desktop update override:
 | --- | --- | --- |
 | `CHEMVAULT_DESKTOP_UPDATE_FEED_URL` | Optional for QA or self-hosted releases | Overrides the packaged GitHub updater feed with an electron-updater generic feed. The app accepts HTTPS URLs, plus `localhost` HTTP only for local QA. Do not put secrets in this URL. |
 | `CHEMVAULT_DESKTOP_DISABLE_AUTO_UPDATE` | Optional for local QA | Set to `1` to skip startup update checks. |
-| `CHEMVAULT_DESKTOP_FORCE_SHORTCUT_REPAIR` | Optional for local QA | Set to `1` to force Windows desktop and Start Menu shortcut repair during smoke tests. Do not use it as a normal production setting. |
 
 ## Windows Release / Signing Secrets
 

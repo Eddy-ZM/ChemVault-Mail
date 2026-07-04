@@ -77,8 +77,9 @@ jobs:
             This installer is distributed outside Microsoft Store and is not Authenticode signed. Windows may show "Unknown publisher", SmartScreen may warn, and some enterprise security tools may block it.
 
             Desktop installer behavior:
-            - Creates Start Menu and desktop shortcuts.
-            - The app repairs missing current-version shortcuts on launch.
+            - Keeps ChemVault Mail.exe in the selected installation directory.
+            - Creates a Start Menu shortcut.
+            - Lets the user choose whether to create a desktop shortcut.
 
             Do not disable SmartScreen or weaken system security settings to install it. Use only if you trust this GitHub Release source.
           files: |

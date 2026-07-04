@@ -32,7 +32,7 @@ nsis:
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
-  createDesktopShortcut: always
+  createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: ChemVault Mail
   uninstallDisplayName: ChemVault Mail

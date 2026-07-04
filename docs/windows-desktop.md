@@ -47,11 +47,11 @@ npm run desktop:dist:win
 
 Output:
 
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.2.exe`
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.2.exe.blockmap`
+- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.3.exe`
+- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.3.exe.blockmap`
 - `mail-vue/release/windows/latest.yml`
 
-The installer supports Windows 10 and Windows 11, creates Start Menu and desktop shortcuts, and includes an uninstaller. The packaged app also repairs the current-version desktop and Start Menu shortcuts on first launch for that version, which covers installer or updater edge cases where Windows does not leave shortcuts behind.
+The installer supports Windows 10 and Windows 11, includes an uninstaller, keeps `ChemVault Mail.exe` in the selected installation directory, creates a Start Menu shortcut, and lets the user choose whether to create a desktop shortcut. The app does not recreate desktop shortcuts after a user removes or declines them.
 
 Run the local Windows installer/update smoke test after building:
 
@@ -59,7 +59,7 @@ Run the local Windows installer/update smoke test after building:
 npm run desktop:test:win
 ```
 
-The smoke test installs the generated NSIS package, checks the app can launch, verifies desktop and Start Menu shortcuts, verifies same-version and newer-version `latest.yml` handling through a local update feed, verifies a failed update source does not close the app, and silently uninstalls the test install.
+The smoke test installs the generated NSIS package, checks the installation directory contains `ChemVault Mail.exe`, checks the app can launch, verifies the Start Menu shortcut, verifies the desktop shortcut is not force-recreated after removal, verifies same-version and newer-version `latest.yml` handling through a local update feed, verifies a failed update source does not close the app, and silently uninstalls the test install.
 
 ## Security Model
 

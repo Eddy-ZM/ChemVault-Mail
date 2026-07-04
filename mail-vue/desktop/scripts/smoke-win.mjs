@@ -173,20 +173,17 @@ async function main() {
 
   assert(fs.existsSync(installedExe), 'Installed app executable is missing');
   assert(fs.existsSync(uninstaller), 'Uninstaller is missing');
-  assert(fs.existsSync(desktopShortcut), 'Desktop shortcut is missing');
   assert(fs.existsSync(startMenuShortcut), 'Start Menu shortcut is missing');
 
   fs.rmSync(desktopShortcut, { force: true });
-  fs.rmSync(startMenuShortcut, { force: true });
 
   const app = startApp(installedExe, {
     CHEMVAULT_DESKTOP_DISABLE_AUTO_UPDATE: '1',
-    CHEMVAULT_DESKTOP_FORCE_SHORTCUT_REPAIR: '1',
   });
   await wait(8000);
   assert(app.exitCode === null, 'Installed app exited during launch smoke test');
-  assert(fs.existsSync(desktopShortcut), 'Desktop shortcut was not repaired on app launch');
-  assert(fs.existsSync(startMenuShortcut), 'Start Menu shortcut was not repaired on app launch');
+  assert(!fs.existsSync(desktopShortcut), 'Desktop shortcut was force-recreated after user removal');
+  assert(fs.existsSync(startMenuShortcut), 'Start Menu shortcut disappeared during launch smoke test');
   await stopProcess(app);
 
   await withHttpServer(releaseDir, async (feedUrl) => {

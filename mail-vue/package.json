@@ -4,7 +4,7 @@
   "description": "ChemVault Mail web and Windows desktop client.",
   "author": "ChemVault",
   "license": "UNLICENSED",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "main": "desktop/main.cjs",
   "scripts": {
