@@ -9,11 +9,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '../..');
 const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
 const appVersion = packageJson.version;
-const releaseDir = path.join(projectRoot, 'release', 'windows');
+const releaseRoot = path.join(projectRoot, 'release', 'windows');
+const releaseDir = path.join(releaseRoot, `v${appVersion}`);
 const installerPath = path.join(releaseDir, `ChemVault-Mail-Setup-${appVersion}.exe`);
 const blockmapPath = `${installerPath}.blockmap`;
 const latestPath = path.join(releaseDir, 'latest.yml');
-const unpackedExe = path.join(releaseDir, 'win-unpacked', 'ChemVault Mail.exe');
+const unpackedExe = path.join(releaseRoot, 'win-unpacked', 'ChemVault Mail.exe');
 const updaterLog = path.join(process.env.APPDATA || '', 'ChemVault Mail', 'logs', 'desktop-updater.log');
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -161,7 +162,7 @@ async function main() {
   assert(fs.existsSync(latestPath), `Missing latest.yml: ${latestPath}`);
   assert(fs.existsSync(unpackedExe), `Missing unpacked app: ${unpackedExe}`);
 
-  const installDir = path.join(releaseDir, 'test-install-smoke');
+  const installDir = path.join(releaseRoot, 'test-install-smoke');
   fs.rmSync(installDir, { recursive: true, force: true });
 
   run(installerPath, ['/S', `/D=${installDir}`]);
@@ -173,9 +174,11 @@ async function main() {
 
   assert(fs.existsSync(installedExe), 'Installed app executable is missing');
   assert(fs.existsSync(uninstaller), 'Uninstaller is missing');
+  assert(fs.existsSync(desktopShortcut), 'Desktop shortcut is missing');
   assert(fs.existsSync(startMenuShortcut), 'Start Menu shortcut is missing');
 
   fs.rmSync(desktopShortcut, { force: true });
+  fs.rmSync(startMenuShortcut, { force: true });
 
   const app = startApp(installedExe, {
     CHEMVAULT_DESKTOP_DISABLE_AUTO_UPDATE: '1',
@@ -183,7 +186,7 @@ async function main() {
   await wait(8000);
   assert(app.exitCode === null, 'Installed app exited during launch smoke test');
   assert(!fs.existsSync(desktopShortcut), 'Desktop shortcut was force-recreated after user removal');
-  assert(fs.existsSync(startMenuShortcut), 'Start Menu shortcut disappeared during launch smoke test');
+  assert(!fs.existsSync(startMenuShortcut), 'Start Menu shortcut was force-recreated after user removal');
   await stopProcess(app);
 
   await withHttpServer(releaseDir, async (feedUrl) => {

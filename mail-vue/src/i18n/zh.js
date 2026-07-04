@@ -248,6 +248,8 @@ const zh = {
     windowsSystemRequirements: 'Windows 10 / Windows 11',
     updateChannel: '更新渠道',
     githubReleases: 'GitHub Releases',
+    installerOptions: '安装选项',
+    installerOptionsSummary: '安装时可选择开始菜单和桌面快捷方式，并可在完成前查看详细安装动作。',
     unsignedBuildNoticeTitle: '未签名 Windows 安装包',
     unsignedBuildNoticeBody: '此安装包没有 Authenticode 代码签名。Windows 可能显示“未知发布者”，SmartScreen 可能提醒，部分受管理设备可能会阻止安装。',
     community: '交流',

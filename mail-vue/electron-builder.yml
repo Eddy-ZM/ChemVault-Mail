@@ -12,6 +12,7 @@ files:
   - dist/**/*
   - desktop/main.cjs
   - desktop/preload.cjs
+  - desktop/splash.html
   - package.json
 
 win:
@@ -28,12 +29,13 @@ win:
     timeStampServer: http://timestamp.digicert.com
 
 nsis:
+  include: installer.nsh
   artifactName: ChemVault-Mail-Setup-${version}.${ext}
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
-  createDesktopShortcut: true
-  createStartMenuShortcut: true
+  createDesktopShortcut: false
+  createStartMenuShortcut: false
   shortcutName: ChemVault Mail
   uninstallDisplayName: ChemVault Mail
   deleteAppDataOnUninstall: false

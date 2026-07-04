@@ -7,11 +7,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '../..');
 const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
 const appVersion = packageJson.version;
-const releaseDir = path.join(projectRoot, 'release', 'windows');
+const releaseRoot = path.join(projectRoot, 'release', 'windows');
+const releaseDir = path.join(releaseRoot, `v${appVersion}`);
 
 const filesToVerify = [
   path.join(releaseDir, `ChemVault-Mail-Setup-${appVersion}.exe`),
-  path.join(releaseDir, 'win-unpacked', 'ChemVault Mail.exe'),
+  path.join(releaseRoot, 'win-unpacked', 'ChemVault Mail.exe'),
 ];
 
 function fail(message) {

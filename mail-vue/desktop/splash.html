@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChemVault Mail</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #152031;
+        --muted: #526172;
+        --surface: rgba(255, 255, 255, 0.92);
+        --line: rgba(28, 42, 60, 0.12);
+        --blue: #2563eb;
+        --cyan: #0891b2;
+        --green: #16a34a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: transparent;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+      }
+
+      .shell {
+        position: relative;
+        width: 388px;
+        min-height: 252px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.9)),
+          var(--surface);
+        box-shadow:
+          0 24px 70px rgba(15, 23, 42, 0.18),
+          0 8px 22px rgba(37, 99, 235, 0.12);
+        padding: 30px 32px 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .logoWrap {
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+      }
+
+      .logoWrap img {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+      }
+
+      h1 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 22px;
+        font-weight: 720;
+        letter-spacing: 0;
+      }
+
+      .subtitle {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .stage {
+        position: relative;
+        height: 92px;
+        margin-top: 26px;
+      }
+
+      .bond,
+      .node,
+      .trace {
+        position: absolute;
+      }
+
+      .bond {
+        height: 2px;
+        border-radius: 99px;
+        background: linear-gradient(90deg, rgba(37, 99, 235, 0.18), rgba(8, 145, 178, 0.55));
+        transform-origin: left center;
+        animation: bondIn 1800ms ease-in-out infinite;
+      }
+
+      .bond.one {
+        width: 92px;
+        left: 70px;
+        top: 42px;
+        transform: rotate(-18deg);
+      }
+
+      .bond.two {
+        width: 84px;
+        left: 152px;
+        top: 35px;
+        transform: rotate(24deg);
+        animation-delay: 180ms;
+      }
+
+      .bond.three {
+        width: 102px;
+        left: 137px;
+        top: 58px;
+        transform: rotate(-7deg);
+        animation-delay: 360ms;
+      }
+
+      .node {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid var(--blue);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+        animation: nodePulse 1800ms ease-in-out infinite;
+      }
+
+      .node.a {
+        left: 62px;
+        top: 34px;
+      }
+
+      .node.b {
+        left: 148px;
+        top: 18px;
+        border-color: var(--cyan);
+        animation-delay: 180ms;
+      }
+
+      .node.c {
+        left: 222px;
+        top: 52px;
+        border-color: var(--green);
+        animation-delay: 360ms;
+      }
+
+      .node.d {
+        left: 134px;
+        top: 52px;
+        animation-delay: 540ms;
+      }
+
+      .trace {
+        width: 9px;
+        height: 9px;
+        left: 58px;
+        top: 38px;
+        border-radius: 50%;
+        background: var(--blue);
+        box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.08);
+        animation: traceMove 2100ms cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      }
+
+      .progress {
+        position: relative;
+        height: 4px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: rgba(15, 23, 42, 0.08);
+      }
+
+      .progress::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        width: 42%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--blue), var(--cyan), var(--green));
+        animation: progressSweep 1600ms ease-in-out infinite;
+      }
+
+      .status {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      @keyframes bondIn {
+        0%,
+        100% {
+          opacity: 0.36;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes nodePulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.16);
+        }
+      }
+
+      @keyframes traceMove {
+        0% {
+          transform: translate(0, 0);
+          background: var(--blue);
+        }
+        32% {
+          transform: translate(88px, -17px);
+          background: var(--cyan);
+        }
+        68% {
+          transform: translate(164px, 17px);
+          background: var(--green);
+        }
+        100% {
+          transform: translate(0, 0);
+          background: var(--blue);
+        }
+      }
+
+      @keyframes progressSweep {
+        0% {
+          transform: translateX(-105%);
+        }
+        55%,
+        100% {
+          transform: translateX(238%);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .bond,
+        .node,
+        .trace,
+        .progress::after {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell" aria-label="ChemVault Mail is starting">
+      <section class="brand">
+        <div class="logoWrap">
+          <img src="../dist/mail.png" alt="" />
+        </div>
+        <div>
+          <h1>ChemVault Mail</h1>
+          <div class="subtitle">Preparing your secure mailbox</div>
+        </div>
+      </section>
+
+      <section class="stage" aria-hidden="true">
+        <span class="bond one"></span>
+        <span class="bond two"></span>
+        <span class="bond three"></span>
+        <span class="node a"></span>
+        <span class="node b"></span>
+        <span class="node c"></span>
+        <span class="node d"></span>
+        <span class="trace"></span>
+      </section>
+
+      <div class="progress" aria-hidden="true"></div>
+      <div class="status">Loading interface and checking desktop services...</div>
+    </main>
+  </body>
+</html>

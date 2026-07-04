@@ -248,6 +248,8 @@ const en = {
     windowsSystemRequirements: 'Windows 10 / Windows 11',
     updateChannel: 'Update channel',
     githubReleases: 'GitHub Releases',
+    installerOptions: 'Installer options',
+    installerOptionsSummary: 'Choose Start Menu and Desktop shortcuts during setup, and review detailed install actions before completion.',
     unsignedBuildNoticeTitle: 'Unsigned Windows build',
     unsignedBuildNoticeBody: 'This installer is not Authenticode signed. Windows may show Unknown publisher, SmartScreen may warn, and some managed devices may block installation.',
     community: 'Community',

@@ -6,7 +6,7 @@ ChemVault Mail Windows desktop uses Electron plus electron-builder. The app pack
 
 - The existing desktop-ready surface is `mail-vue`, a Vue/Vite app.
 - Electron reuses the current frontend build with the smallest code change.
-- electron-builder produces a Windows NSIS installer with Start Menu shortcut, desktop shortcut, uninstall support, `latest.yml`, and blockmap files.
+- electron-builder produces a Windows NSIS installer with user-selectable Start Menu and Desktop shortcuts, uninstall support, `latest.yml`, and blockmap files.
 - electron-updater can consume GitHub Releases directly.
 
 Tauri was not chosen for this iteration because the repo does not already contain Rust/Tauri structure, and adding Rust/MSI/NSIS tooling would increase maintenance for no immediate benefit.
@@ -47,11 +47,13 @@ npm run desktop:dist:win
 
 Output:
 
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.3.exe`
-- `mail-vue/release/windows/ChemVault-Mail-Setup-0.1.3.exe.blockmap`
-- `mail-vue/release/windows/latest.yml`
+- `mail-vue/release/windows/v0.1.4/ChemVault-Mail-Setup-0.1.4.exe`
+- `mail-vue/release/windows/v0.1.4/ChemVault-Mail-Setup-0.1.4.exe.blockmap`
+- `mail-vue/release/windows/v0.1.4/latest.yml`
 
-The installer supports Windows 10 and Windows 11, includes an uninstaller, keeps `ChemVault Mail.exe` in the selected installation directory, creates a Start Menu shortcut, and lets the user choose whether to create a desktop shortcut. The app does not recreate desktop shortcuts after a user removes or declines them.
+The installer supports Windows 10 and Windows 11, includes an uninstaller, keeps `ChemVault Mail.exe` in the selected installation directory, and lets the user choose whether to add Start Menu and Desktop shortcuts. The installer shows detailed install output so users can review copied files, shortcuts, and registry entries. The app does not recreate Start Menu or Desktop shortcuts after a user removes or declines them.
+
+`win-unpacked` remains at `mail-vue/release/windows/win-unpacked` for smoke testing and unpacked QA. Versioned installer artifacts are archived under `mail-vue/release/windows/vX.Y.Z`.
 
 Run the local Windows installer/update smoke test after building:
 
@@ -59,7 +61,7 @@ Run the local Windows installer/update smoke test after building:
 npm run desktop:test:win
 ```
 
-The smoke test installs the generated NSIS package, checks the installation directory contains `ChemVault Mail.exe`, checks the app can launch, verifies the Start Menu shortcut, verifies the desktop shortcut is not force-recreated after removal, verifies same-version and newer-version `latest.yml` handling through a local update feed, verifies a failed update source does not close the app, and silently uninstalls the test install.
+The smoke test installs the generated NSIS package, checks the installation directory contains `ChemVault Mail.exe`, checks the app can launch, verifies the default Start Menu and Desktop shortcuts on a fresh silent install, verifies shortcuts are not force-recreated after removal, verifies same-version and newer-version `latest.yml` handling through a local update feed, verifies a failed update source does not close the app, and silently uninstalls the test install.
 
 ## Security Model
 
@@ -72,6 +74,7 @@ The Electron shell uses:
 - a Content Security Policy for the packaged renderer
 - external URL handling through the system browser
 - denied permission requests by default
+- a local startup splash screen with no remote code or third-party runtime dependency
 
 Do not add backend secrets to `mail-vue`, Electron preload, GitHub releases, or installer resources. The desktop app must only call public APIs or authenticated user APIs.
 

@@ -14,10 +14,60 @@ app.setName(APP_NAME);
 app.setAppUserModelId(APP_ID);
 
 let mainWindow;
+let splashWindow;
 let updateDownloaded = false;
 let checkingForUpdate = false;
 
 const iconPath = () => path.join(__dirname, 'icon.ico');
+
+function closeSplashWindow() {
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    splashWindow.close();
+  }
+  splashWindow = undefined;
+}
+
+function createSplashWindow() {
+  splashWindow = new BrowserWindow({
+    width: 420,
+    height: 300,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    fullscreenable: false,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: false,
+    skipTaskbar: true,
+    title: APP_NAME,
+    icon: iconPath(),
+    show: false,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+      devTools: false,
+    },
+  });
+
+  splashWindow.once('ready-to-show', () => {
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.show();
+    }
+  });
+
+  splashWindow.on('closed', () => {
+    splashWindow = undefined;
+  });
+
+  splashWindow.loadFile(path.join(__dirname, 'splash.html')).catch((error) => {
+    log('warn', 'Splash screen failed to load', error);
+    closeSplashWindow();
+  });
+}
 
 function log(level, ...messages) {
   const line = `[${new Date().toISOString()}] [${level}] ${messages.map(stringifyLogValue).join(' ')}\n`;
@@ -116,7 +166,14 @@ function createMainWindow() {
   });
 
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+    const showMainWindow = () => {
+      closeSplashWindow();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.show();
+      }
+    };
+
+    setTimeout(showMainWindow, isDev ? 250 : 900);
   });
 
   mainWindow.on('closed', () => {
@@ -139,6 +196,7 @@ function createMainWindow() {
 
   mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
     log('error', 'Renderer failed to load', { errorCode, errorDescription, validatedURL });
+    closeSplashWindow();
   });
 
   if (rendererDevUrl) {
@@ -346,6 +404,7 @@ if (!gotSingleInstanceLock) {
   app.whenReady().then(() => {
     configureSecurity();
     configureUpdater();
+    createSplashWindow();
     createMainWindow();
     setTimeout(() => {
       checkForUpdates();

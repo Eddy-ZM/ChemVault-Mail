@@ -59,9 +59,9 @@ jobs:
         with:
           name: chemvault-mail-windows
           path: |
-            mail-vue/release/windows/*.exe
-            mail-vue/release/windows/*.blockmap
-            mail-vue/release/windows/latest.yml
+            mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe
+            mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe.blockmap
+            mail-vue/release/windows/v*/latest.yml
           if-no-files-found: error
 
       - name: Publish GitHub Release
@@ -78,11 +78,13 @@ jobs:
 
             Desktop installer behavior:
             - Keeps ChemVault Mail.exe in the selected installation directory.
-            - Creates a Start Menu shortcut.
-            - Lets the user choose whether to create a desktop shortcut.
+            - Lets the user choose Start Menu and Desktop shortcuts during installation.
+            - Shows detailed install actions so copied files, shortcuts, and registry entries can be reviewed.
+            - Adds a native startup animation before the Vue interface appears.
+            - Archives release files under a versioned Windows folder.
 
             Do not disable SmartScreen or weaken system security settings to install it. Use only if you trust this GitHub Release source.
           files: |
-            mail-vue/release/windows/*.exe
-            mail-vue/release/windows/*.blockmap
-            mail-vue/release/windows/latest.yml
+            mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe
+            mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe.blockmap
+            mail-vue/release/windows/v*/latest.yml

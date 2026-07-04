@@ -34,6 +34,10 @@
         <span>{{ $t('updateChannel') }}</span>
         <strong>{{ $t('githubReleases') }}</strong>
       </div>
+      <div class="detail-row">
+        <span>{{ $t('installerOptions') }}</span>
+        <strong>{{ $t('installerOptionsSummary') }}</strong>
+      </div>
     </section>
 
     <section class="notice" aria-label="Unsigned installer notice">
