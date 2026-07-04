@@ -47,9 +47,9 @@ npm run desktop:dist:win
 
 Output:
 
-- `mail-vue/release/windows/v0.1.4/ChemVault-Mail-Setup-0.1.4.exe`
-- `mail-vue/release/windows/v0.1.4/ChemVault-Mail-Setup-0.1.4.exe.blockmap`
-- `mail-vue/release/windows/v0.1.4/latest.yml`
+- `mail-vue/release/windows/v0.1.5/ChemVault-Mail-Setup-0.1.5.exe`
+- `mail-vue/release/windows/v0.1.5/ChemVault-Mail-Setup-0.1.5.exe.blockmap`
+- `mail-vue/release/windows/v0.1.5/latest.yml`
 
 The installer supports Windows 10 and Windows 11, includes an uninstaller, keeps `ChemVault Mail.exe` in the selected installation directory, and lets the user choose whether to add Start Menu and Desktop shortcuts. The installer shows detailed install output so users can review copied files, shortcuts, and registry entries. The app does not recreate Start Menu or Desktop shortcuts after a user removes or declines them.
 
@@ -86,7 +86,7 @@ The app checks for updates after launch when packaged. Development builds skip a
 
 Update flow:
 
-1. Read update metadata from GitHub Releases.
+1. Read update metadata from `Chemaster-org/ChemVault-Mail` GitHub Releases.
 2. Compare the installed app version with `latest.yml`.
 3. Prompt the user when a newer version exists.
 4. Download only after the user confirms.

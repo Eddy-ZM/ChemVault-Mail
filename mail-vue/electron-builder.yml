@@ -42,6 +42,6 @@ nsis:
 
 publish:
   provider: github
-  owner: Eddy-ZM
+  owner: Chemaster-org
   repo: ChemVault-Mail
   releaseType: release

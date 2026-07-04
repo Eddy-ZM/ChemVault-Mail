@@ -411,7 +411,7 @@
               <div class="concerning-item">
                 <span>{{ $t('version') }} :</span>
                 <el-badge is-dot :hidden="!hasUpdate">
-                  <el-button @click="jump('https://github.com/Eddy-ZM/ChemVault-Mail/releases')">
+                  <el-button @click="jump('https://github.com/Chemaster-org/ChemVault-Mail/releases')">
                     {{ currentVersion }}
                     <template #icon>
                       <Icon icon="qlementine-icons:version-control-16" style="font-size: 20px" color="#1890FF"/>
@@ -422,7 +422,7 @@
               <div class="concerning-item">
                 <span>{{ $t('community') }} : </span>
                 <div class="community">
-                  <el-button @click="jump('https://github.com/Eddy-ZM/ChemVault-Mail')">
+                  <el-button @click="jump('https://github.com/Chemaster-org/ChemVault-Mail')">
                     Github
                     <template #icon>
                       <Icon icon="codicon:github-inverted" width="22" height="22"/>

@@ -1,6 +1,6 @@
 # Release Windows Desktop
 
-This project publishes ChemVault Mail for Windows outside Microsoft Store. Distribution and app updates use GitHub Releases.
+This project publishes ChemVault Mail for Windows outside Microsoft Store. Distribution and app updates use GitHub Releases from `Chemaster-org/ChemVault-Mail`.
 
 ## Version Rule
 
@@ -9,13 +9,13 @@ The desktop app version is `mail-vue/package.json`.
 Current version:
 
 ```text
-0.1.4
+0.1.5
 ```
 
 Installer artifact:
 
 ```text
-ChemVault-Mail-Setup-0.1.4.exe
+ChemVault-Mail-Setup-0.1.5.exe
 ```
 
 For every release:
@@ -38,9 +38,9 @@ npm run desktop:dist:win
 Check these files:
 
 ```text
-mail-vue/release/windows/v0.1.4/ChemVault-Mail-Setup-0.1.4.exe
-mail-vue/release/windows/v0.1.4/ChemVault-Mail-Setup-0.1.4.exe.blockmap
-mail-vue/release/windows/v0.1.4/latest.yml
+mail-vue/release/windows/v0.1.5/ChemVault-Mail-Setup-0.1.5.exe
+mail-vue/release/windows/v0.1.5/ChemVault-Mail-Setup-0.1.5.exe.blockmap
+mail-vue/release/windows/v0.1.5/latest.yml
 ```
 
 Then run the Windows smoke test:
@@ -51,14 +51,16 @@ npm run desktop:test:win
 
 ## Publish With GitHub Actions
 
-Create and push a tag:
+Keep the personal repository as a `main` mirror, then publish from the organization repository's `test` branch:
 
 ```powershell
-git tag v0.1.4
-git push origin v0.1.4
+git push origin main
+git push chemaster HEAD:test
+git tag v0.1.5
+git push chemaster v0.1.5
 ```
 
-`.github/workflows/build-windows.yml` runs on `v*` tags. It:
+`.github/workflows/build-windows.yml` runs on `v*` tags. Release creation is intentionally limited to `Chemaster-org`; tag builds in a personal fork can build artifacts but do not publish a GitHub Release. It:
 
 1. Uses `windows-latest`.
 2. Installs pnpm and Node.js.
@@ -99,14 +101,14 @@ Recommended update test:
 
 1. Build and install version `0.1.0`.
 2. Launch it once and confirm no update error blocks startup.
-3. Bump `mail-vue/package.json` and root `package.json` to `0.1.4`.
-4. Build and publish tag `v0.1.4`.
+3. Bump `mail-vue/package.json` and root `package.json` to `0.1.5`.
+4. Build and publish tag `v0.1.5` to `Chemaster-org/ChemVault-Mail`.
 5. Launch the installed `0.1.0` app.
-6. Confirm it detects `0.1.4`.
+6. Confirm it detects `0.1.5`.
 7. Choose download.
 8. Confirm the app stays usable during download.
 9. Choose "Restart and update".
-10. Confirm the app restarts as `0.1.4`.
+10. Confirm the app restarts as `0.1.5`.
 
 For a local manifest recognition test before publishing, run the packaged app with `CHEMVAULT_DESKTOP_UPDATE_FEED_URL` pointed at a local electron-updater generic feed that serves `latest.yml`. The app accepts local `http://localhost` feeds only for QA; production feed overrides must be HTTPS.
 
@@ -116,7 +118,7 @@ Update failures must leave the installed version usable. Inspect `desktop-update
 
 For new downloads, mark the previous stable GitHub Release as latest or update the download page URL.
 
-For already installed apps, electron-updater does not downgrade by default. Publish a higher patch version that reverts the bad change, for example `0.1.5` after `0.1.4`, and mark that release as latest.
+For already installed apps, electron-updater does not downgrade by default. Publish a higher patch version that reverts the bad change, for example `0.1.6` after `0.1.5`, and mark that release as latest.
 
 ## Code Signing
 
@@ -148,6 +150,7 @@ Unsigned releases return `NotSigned`; disclose that state in the release notes a
 - No backend secrets are present in desktop files or release artifacts.
 - `latest.yml` is uploaded with the installer.
 - Windows release files are archived under `mail-vue/release/windows/vX.Y.Z`.
+- GitHub Releases are published from `Chemaster-org/ChemVault-Mail`, not from the personal mirror.
 - Installer shortcut choices and detailed install output were checked.
 - Download page points at the intended GitHub Release channel.
 - Release notes clearly state that the installer is unsigned and may show "Unknown publisher".

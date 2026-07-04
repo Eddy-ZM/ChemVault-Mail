@@ -65,7 +65,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && github.repository_owner == 'Chemaster-org'
         uses: softprops/action-gh-release@v2
         with:
           draft: false
