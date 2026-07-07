@@ -317,6 +317,66 @@ struct EmailCategoryRequest: Encodable {
     var category: String
 }
 
+struct RoleSaveRequest: Encodable {
+    var roleId: Int?
+    var name: String
+    var description: String
+    var banEmail: [String]
+    var availDomain: [String]
+    var sendType: String
+    var sendCount: Int
+    var accountCount: Int
+    var sort: Int
+    var permIds: [Int]
+}
+
+struct RoleIdRequest: Encodable {
+    var roleId: Int
+}
+
+struct RegistrationKeyAddRequest: Encodable {
+    var code: String
+    var roleId: Int
+    var count: Int
+    var expireTime: String
+}
+
+struct AllEmailBatchDeleteRequest {
+    var sendName: String
+    var sendEmail: String
+    var toEmail: String
+    var subject: String
+    var startTime: String
+    var endTime: String
+    var type: String
+
+    var queryItems: [URLQueryItem] {
+        [
+            URLQueryItem(name: "sendName", value: sendName),
+            URLQueryItem(name: "sendEmail", value: sendEmail),
+            URLQueryItem(name: "toEmail", value: toEmail),
+            URLQueryItem(name: "subject", value: subject),
+            URLQueryItem(name: "startTime", value: startTime),
+            URLQueryItem(name: "endTime", value: endTime),
+            URLQueryItem(name: "type", value: type)
+        ]
+    }
+}
+
+struct SystemSettingsUpdateRequest: Encodable {
+    var title: String
+    var register: Int
+    var receive: Int
+    var send: Int
+    var manyEmail: Int
+    var addEmail: Int
+    var autoRefresh: Int
+    var minEmailPrefix: Int
+    var blackSubject: String
+    var blackContent: String
+    var blackFrom: String
+}
+
 struct AccountAddRequest: Encodable {
     var email: String
     var token: String?
@@ -375,6 +435,26 @@ struct RegistrationKey: Codable, Identifiable, Hashable {
     var id: Int { regKeyId }
 }
 
+struct RegistrationKeyHistoryRow: Codable, Identifiable, Hashable {
+    var email: String
+    var createTime: String?
+
+    var id: String { "\(email)-\(createTime ?? "")" }
+}
+
+struct ChemVaultPermNode: Codable, Identifiable, Hashable {
+    var permId: Int
+    var name: String
+    var permKey: String?
+    var pid: Int?
+    var type: Int?
+    var sort: Int?
+    var children: [ChemVaultPermNode]?
+
+    var id: Int { permId }
+    var childNodes: [ChemVaultPermNode] { children ?? [] }
+}
+
 struct ChemVaultSetting: Codable, Hashable {
     var register: Int?
     var receive: Int?
@@ -396,6 +476,7 @@ struct ChemVaultSetting: Codable, Hashable {
     var blackSubject: String?
     var blackContent: String?
     var blackFrom: String?
+    var cloudflareAccessExternalRoleId: Int?
 }
 
 extension ChemVaultSetting {
@@ -504,9 +585,36 @@ enum JSONValue: Codable, Hashable, CustomStringConvertible {
         return nil
     }
 
+    var stringArrayValue: [String] {
+        switch self {
+        case .array(let values):
+            return values
+                .map(\.description)
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+        case .string(let value):
+            return value
+                .split(separator: ",")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+        default:
+            return []
+        }
+    }
+
     var objectValue: [String: JSONValue]? {
         if case .object(let value) = self { return value }
         return nil
+    }
+}
+
+extension ChemVaultRole {
+    var banEmailList: [String] {
+        banEmail?.stringArrayValue ?? []
+    }
+
+    var availDomainList: [String] {
+        availDomain?.stringArrayValue ?? []
     }
 }
 

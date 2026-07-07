@@ -63,6 +63,10 @@ final class APIClient {
         let _: EmptyResponse = try await put("/setting/set", body: GlobalAPIBaseURLRequest(appleApiBaseURL: baseURL))
     }
 
+    func updateSystemSettings(_ request: SystemSettingsUpdateRequest) async throws {
+        let _: EmptyResponse = try await put("/setting/set", body: request)
+    }
+
     func setAdminUserStatus(userId: Int, status: Int) async throws {
         let _: EmptyResponse = try await put("/user/setStatus", body: AdminUserStatusRequest(userId: userId, status: status))
     }
@@ -92,6 +96,60 @@ final class APIClient {
     func restoreAdminUser(userId: Int, restoreRelatedData: Bool = false) async throws {
         let type = restoreRelatedData ? 1 : 0
         let _: EmptyResponse = try await put("/user/restore", body: AdminUserRestoreRequest(userId: userId, type: type))
+    }
+
+    func adminRoles() async throws -> [ChemVaultRole] {
+        try await get("/role/list")
+    }
+
+    func adminRolePermissionTree() async throws -> [ChemVaultPermNode] {
+        try await get("/role/tree")
+    }
+
+    func addAdminRole(_ request: RoleSaveRequest) async throws -> ChemVaultRole {
+        try await post("/role/add", body: request)
+    }
+
+    func updateAdminRole(_ request: RoleSaveRequest) async throws {
+        let _: EmptyResponse = try await put("/role/set", body: request)
+    }
+
+    func deleteAdminRole(roleId: Int) async throws {
+        let _: EmptyResponse = try await delete("/role/delete", query: [URLQueryItem(name: "roleId", value: String(roleId))])
+    }
+
+    func setDefaultAdminRole(roleId: Int) async throws {
+        let _: EmptyResponse = try await put("/role/setDefault", body: RoleIdRequest(roleId: roleId))
+    }
+
+    func setCloudflareAccessRole(roleId: Int) async throws {
+        let _: EmptyResponse = try await put("/role/setCloudflareAccess", body: RoleIdRequest(roleId: roleId))
+    }
+
+    func adminRegistrationKeys(code: String? = nil) async throws -> [RegistrationKey] {
+        var query: [URLQueryItem] = []
+        if let code = code?.nilIfBlank {
+            query.append(URLQueryItem(name: "code", value: code))
+        }
+        return try await get("/regKey/list", query: query)
+    }
+
+    func addRegistrationKey(_ request: RegistrationKeyAddRequest) async throws {
+        let _: EmptyResponse = try await post("/regKey/add", body: request)
+    }
+
+    func deleteRegistrationKeys(_ keyIds: [Int]) async throws {
+        guard !keyIds.isEmpty else { return }
+        let joined = keyIds.map(String.init).joined(separator: ",")
+        let _: EmptyResponse = try await delete("/regKey/delete", query: [URLQueryItem(name: "regKeyIds", value: joined)])
+    }
+
+    func clearUnusedRegistrationKeys() async throws {
+        let _: EmptyResponse = try await delete("/regKey/clearNotUse")
+    }
+
+    func registrationKeyHistory(regKeyId: Int) async throws -> [RegistrationKeyHistoryRow] {
+        try await get("/regKey/history", query: [URLQueryItem(name: "regKeyId", value: String(regKeyId))])
     }
 
     func accounts(size: Int = 30, lastAccountId: Int = 0, lastSort: Int = 9_999_999_999) async throws -> [ChemVaultAccount] {
@@ -199,6 +257,20 @@ final class APIClient {
     func deleteEmails(_ emailIds: [Int]) async throws {
         let joined = emailIds.map(String.init).joined(separator: ",")
         let _: EmptyResponse = try await delete("/email/delete", query: [URLQueryItem(name: "emailIds", value: joined)])
+    }
+
+    func adminAllEmailList(query: [URLQueryItem]) async throws -> MailListResponse {
+        try await get("/allEmail/list", query: query)
+    }
+
+    func deleteAdminEmails(_ emailIds: [Int]) async throws {
+        guard !emailIds.isEmpty else { return }
+        let joined = emailIds.map(String.init).joined(separator: ",")
+        let _: EmptyResponse = try await delete("/allEmail/delete", query: [URLQueryItem(name: "emailIds", value: joined)])
+    }
+
+    func batchDeleteAdminEmails(_ request: AllEmailBatchDeleteRequest) async throws {
+        let _: EmptyResponse = try await delete("/allEmail/batchDelete", query: request.queryItems)
     }
 
     func addStar(emailId: Int) async throws {
