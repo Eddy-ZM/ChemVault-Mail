@@ -12,24 +12,25 @@
 		"start": "wrangler dev"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.16.20",
-		"@vitest/runner": "^4.1.9",
-		"@vitest/snapshot": "^4.1.9",
-		"vitest": "~4.1.9",
-		"wrangler": "^4.105.0"
+		"@cloudflare/vitest-pool-workers": "^0.18.4",
+		"@vitest/runner": "^4.1.10",
+		"@vitest/snapshot": "^4.1.10",
+		"vite": "6.4.3",
+		"vitest": "~4.1.10",
+		"wrangler": "^4.110.0"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.882.0",
-		"@cloudflare/vite-plugin": "1.6.0",
-		"dayjs": "^1.11.13",
-		"drizzle-orm": "^0.42.0",
-		"hono": "4.12.16",
-		"i18next": "^25.3.2",
-		"linkedom": "^0.18.10",
-		"postal-mime": "^2.4.3",
-		"resend": "^6.4.1",
-		"ua-parser-js": "^2.0.3",
-		"uuid": "^11.1.0"
+		"@aws-sdk/client-s3": "^3.1084.0",
+		"@cloudflare/vite-plugin": "1.44.0",
+		"dayjs": "^1.11.21",
+		"drizzle-orm": "^0.45.2",
+		"hono": "4.12.28",
+		"i18next": "^26.3.6",
+		"linkedom": "^0.18.13",
+		"postal-mime": "^2.7.5",
+		"resend": "^6.17.2",
+		"ua-parser-js": "^2.0.10",
+		"uuid": "^14.0.1"
 	},
 	"packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1"
 }
