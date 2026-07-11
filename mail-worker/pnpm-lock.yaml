@@ -4,13 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  vite@<=6.4.1: ^6.4.2
-  vite@<=6.4.2: ^6.4.3
-  vite@>=6.0.0 <=6.3.5: ^6.3.6
-  vite@>=6.0.0 <=6.4.0: ^6.4.1
-  vite@>=6.0.0 <=6.4.1: ^6.4.2
-
 importers:
 
   .:
@@ -159,7 +152,7 @@ packages:
     resolution: {integrity: sha512-8wGGunqRcs34o4GRq0Rurp7GZg30xtLJeRGUU81a49r9zQRjlp3xIlsWr3nFlSCso4eE3cjZfiKC/2y116M4TQ==}
     hasBin: true
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^6.1.0 || ^7.0.0 || ^8.0.0
       wrangler: ^4.110.0
 
   '@cloudflare/vitest-pool-workers@0.18.4':
@@ -881,7 +874,7 @@ packages:
     resolution: {integrity: sha512-v0xaezt+DKEmKfaxg133ldzADrwLGd7Ze1MfQQTYfvs8OqZIwbxyxaYURivwV7sWy5fqn3rH5uOrSp07bp44Ow==}
     peerDependencies:
       msw: ^2.4.9
-      vite: ^6.4.2
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       msw:
         optional: true
@@ -1341,7 +1334,7 @@ packages:
       '@vitest/ui': 4.1.10
       happy-dom: '*'
       jsdom: '*'
-      vite: ^6.4.2
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
