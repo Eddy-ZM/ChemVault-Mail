@@ -125,7 +125,7 @@ describe('Cloudflare Access auth helpers', () => {
 			'all-email:delete'
 		]);
 		expect(normalizeExternalAccessPermKeys(['all-email:query', 'email:send'])).toEqual(['all-email:query', 'email:send']);
-		expect(normalizeExternalAccessPermKeys('')).toEqual(EXTERNAL_ACCESS_PERM_KEYS);
+		expect(normalizeExternalAccessPermKeys('')).toEqual([]);
 	});
 
 	it('keeps ChemVault Files permissions selected on the external Access role', () => {

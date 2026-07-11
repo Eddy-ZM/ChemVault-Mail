@@ -6,7 +6,7 @@ export const ACCESS_AUTH_TYPE = {
 export const ACCESS_JWT_HEADER = 'Cf-Access-Jwt-Assertion';
 export const ACCESS_EMAIL_HEADER = 'Cf-Access-Authenticated-User-Email';
 export const EXTERNAL_ACCESS_USER_ID = 0;
-export const EXTERNAL_ACCESS_PERM_KEYS = ['all-email:query'];
+export const EXTERNAL_ACCESS_PERM_KEYS = [];
 export const EXTERNAL_ACCESS_ALLOWED_PERM_KEYS = [
 	'email:delete',
 	'email:send',

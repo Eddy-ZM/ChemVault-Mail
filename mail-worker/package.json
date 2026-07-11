@@ -5,6 +5,7 @@
 	"license": "UNLICENSED",
 	"scripts": {
 		"dev": "wrangler dev --config wrangler-dev.toml",
+		"pretest": "pnpm --dir ../mail-vue run build",
 		"test": "vitest run",
 		"deploy:test": "wrangler deploy --config wrangler-test.toml",
 		"deploy": "wrangler deploy",

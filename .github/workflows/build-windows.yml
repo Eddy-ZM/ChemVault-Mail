@@ -54,6 +54,16 @@ jobs:
         working-directory: mail-vue
         run: pnpm run desktop:dist:win
 
+      - name: Create checksum and release record
+        shell: pwsh
+        run: |
+          $asset = Get-ChildItem -Path mail-vue/release/windows -Recurse -Filter 'ChemVault-Mail-Setup-*.exe' | Select-Object -First 1
+          if (-not $asset) { throw 'Windows installer was not produced.' }
+          $version = (Get-Content -Raw mail-vue/package.json | ConvertFrom-Json).version
+          $tag = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { "v$version" }
+          $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$tag/$($asset.Name)"
+          node scripts/create-release-record.mjs --file $asset.FullName --app chemvault-mail --platform Windows --type exe --version $version --url $url --output mail-vue/release/windows/release-manifest.json
+
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
@@ -62,10 +72,12 @@ jobs:
             mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe
             mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe.blockmap
             mail-vue/release/windows/v*/latest.yml
+            mail-vue/release/windows/**/*.sha256
+            mail-vue/release/windows/release-manifest.json
           if-no-files-found: error
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') && github.repository_owner == 'Chemaster-org'
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           draft: false
@@ -88,3 +100,5 @@ jobs:
             mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe
             mail-vue/release/windows/v*/ChemVault-Mail-Setup-*.exe.blockmap
             mail-vue/release/windows/v*/latest.yml
+            mail-vue/release/windows/**/*.sha256
+            mail-vue/release/windows/release-manifest.json

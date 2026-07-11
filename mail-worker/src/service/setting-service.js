@@ -43,7 +43,7 @@ const settingCompatibilityColumns = [
 	},
 	{
 		name: 'cloudflare_access_external_perms',
-		sql: `ALTER TABLE setting ADD COLUMN cloudflare_access_external_perms TEXT NOT NULL DEFAULT 'all-email:query';`
+		sql: `ALTER TABLE setting ADD COLUMN cloudflare_access_external_perms TEXT NOT NULL DEFAULT '';`
 	},
 	{
 		name: 'cloudflare_access_external_role_id',
@@ -70,6 +70,12 @@ async function ensureSettingCompatibilityColumns(c) {
 			}
 		}
 	}
+	await c.env.db.prepare(
+		`UPDATE setting
+		 SET cloudflare_access_external_perms = ''
+		 WHERE cloudflare_access_external_role_id = 0
+		   AND trim(cloudflare_access_external_perms) = 'all-email:query'`
+	).run();
 }
 
 const settingService = {

@@ -130,7 +130,8 @@ describe('native app API setting', () => {
 
 		expect(prepare).toHaveBeenCalledWith('PRAGMA table_info(setting)');
 		expect(prepare).toHaveBeenCalledWith(expect.stringContaining('cloudflare_access_external_role_id'));
-		expect(alterRun).toHaveBeenCalledTimes(1);
+		expect(prepare).toHaveBeenCalledWith(expect.stringContaining("cloudflare_access_external_perms = ''"));
+		expect(alterRun).toHaveBeenCalledTimes(2);
 		expect(set).toHaveBeenCalledWith(expect.objectContaining({
 			cloudflareAccessExternalRoleId: 12
 		}));

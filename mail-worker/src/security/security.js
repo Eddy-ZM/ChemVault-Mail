@@ -28,6 +28,7 @@ const exclude = [
 	'/internal/mail-client/inbound',
 	'/internal/mail-client/audit',
 	'/internal/user-center/password-login',
+	'/internal/lifecycle',
 	'/webhooks',
 	'/init',
 	'/public/genToken',

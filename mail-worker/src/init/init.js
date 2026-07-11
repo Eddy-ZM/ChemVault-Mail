@@ -15,8 +15,13 @@ const dbInit = {
 
 		const authorization = c.req.header('authorization') || '';
 		const bearerSecret = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || '';
+		const initSecret = c.env.init_secret;
 
-		if (!bearerSecret || bearerSecret !== c.env.jwt_secret) {
+		if (!initSecret) {
+			return c.text('Initialization is not configured.', 503);
+		}
+
+		if (!bearerSecret || bearerSecret !== initSecret) {
 			return c.text('Initialization is not authorized.', 403);
 		}
 

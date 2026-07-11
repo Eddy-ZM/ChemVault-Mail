@@ -1150,8 +1150,13 @@ function enforceMailSendInputLimits({ receiveEmail, attachments }) {
 	}
 }
 
-async function enforceMailRateLimits(c, userId) {
+export async function enforceMailRateLimits(c, userId) {
 	if (!c?.env?.kv?.get || !c?.env?.kv?.put) {
+		const failClosed = String(c?.env?.MAIL_RATE_LIMIT_FAIL_CLOSED || '').toLowerCase() === 'true'
+			|| String(c?.env?.ENVIRONMENT || '').toLowerCase() === 'production';
+		if (failClosed) {
+			throw new BizError('Email sending is temporarily unavailable because rate limiting is not configured.', 503);
+		}
 		return;
 	}
 	await incrementKvWindow(c.env.kv, `mail:send:minute:${userId}:${dayjs().format('YYYY-MM-DDTHH:mm')}`, MAIL_SEND_LIMITS.maxEmailsPerMinutePerUser, 90);

@@ -19,6 +19,7 @@ jobs:
       DOMAIN: ${{ secrets.DOMAIN || vars.DOMAIN }}
       ADMIN: ${{ secrets.ADMIN || vars.ADMIN }}
       JWT_SECRET: ${{ secrets.JWT_SECRET || vars.JWT_SECRET }}
+      INIT_SECRET: ${{ secrets.INIT_SECRET }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || vars.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
       D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID || vars.D1_DATABASE_ID }}
@@ -74,7 +75,16 @@ jobs:
             echo "❌ JWT_SECRET variable is empty or contains invalid characters (?, %, #, /, \\)."
             exit 1
           fi
+          if [ -z "$INIT_SECRET" ]; then
+            echo "❌ INIT_SECRET secret is empty. Configure a dedicated database initialization credential."
+            exit 1
+          fi
+          if [ "$INIT_SECRET" = "$JWT_SECRET" ]; then
+            echo "❌ INIT_SECRET must be different from JWT_SECRET."
+            exit 1
+          fi
           echo "::add-mask::$JWT_SECRET"
+          echo "::add-mask::$INIT_SECRET"
           if [ -n "$LINUXDO_CLIENT_SECRET" ]; then
             echo "::add-mask::$LINUXDO_CLIENT_SECRET"
           fi
@@ -255,6 +265,7 @@ jobs:
         run: |
           CONFIG_FILE="wrangler-action.toml"
           printf '%s' "$JWT_SECRET" | pnpm wrangler secret put jwt_secret -c "$CONFIG_FILE"
+          printf '%s' "$INIT_SECRET" | pnpm wrangler secret put init_secret -c "$CONFIG_FILE"
           if [ -n "$LINUXDO_CLIENT_ID" ] && [ -n "$LINUXDO_CLIENT_SECRET" ]; then
             printf '%s' "$LINUXDO_CLIENT_SECRET" | pnpm wrangler secret put linuxdo_client_secret -c "$CONFIG_FILE"
           fi
@@ -274,7 +285,7 @@ jobs:
           fi
 
           HTTP_CODE=$(curl -sL -w "%{http_code}" -o response.txt -X POST "$WORKER_URL/api/init" \
-            -H "Authorization: Bearer $JWT_SECRET")
+            -H "Authorization: Bearer $INIT_SECRET")
           RESPONSE_BODY=$(cat response.txt)
 
           if [ "$RESPONSE_BODY" = "success" ]; then

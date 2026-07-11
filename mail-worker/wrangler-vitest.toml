@@ -27,4 +27,6 @@ analysis_cache = false
 orm_log = false
 domain = ["example.com"]
 admin = "admin@example.com"
+init_secret = "vitest-database-init-secret"
+lifecycle_service_secret = "vitest-lifecycle-service-secret"
 jwt_secret = "b7f29a1d-18e2-4d3b-941f-f6b2c97c02fd"

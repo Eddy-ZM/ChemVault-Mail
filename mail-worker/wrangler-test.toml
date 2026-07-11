@@ -39,6 +39,8 @@ analysis_cache = false			#是否开启分析数据缓存
 orm_log = false			#是否sql日志
 domain = ["example.com"]				#邮件域名可可配置多个 示例: ["example1.com","example2.com"]
 admin = "admin@example.com"				#管理员的邮箱	示例: admin@example.com
+init_secret = "test-database-init-secret"			#仅用于测试数据库初始化，不得与 jwt_secret 相同
+lifecycle_service_secret = "test-lifecycle-service-secret"
 jwt_secret = "b7f29a1d-18e2-4d3b-941f-f6b2c97c02fd"			#jwt令牌的密钥,随便填一串字符串
 
 [build]

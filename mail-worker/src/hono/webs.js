@@ -23,4 +23,5 @@ import '../api/oauth-api'
 import '../api/app-api'
 import '../api/sso-api'
 import '../api/mail-client-api'
+import '../api/lifecycle-api'
 export default app;
