@@ -24,3 +24,6 @@
 - Provider delivery, DNS reputation, and complaint routing require deployed canaries/provider-console evidence.
 - Windows signing and Apple archive/TestFlight verification remain platform release gates.
 - Deployment credentials and provider behavior still require guarded production canaries beyond the static workflow policy check.
+## Commercial quota checks
+
+The worker suite verifies canonical email-based entitlement lookup, service-secret forwarding, production fail-closed behavior, atomic plan-limit enforcement, and rollback of a failed-delivery reservation.

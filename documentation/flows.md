@@ -8,3 +8,6 @@
 | All-mail administration | Explicit privileged role | Verify `all-email:query` or `all-email:delete`, perform audited operation | Admin UI presence is not authority; default external Access role has none |
 | First deployment/init | Release workflow with dedicated init secret | Deploy Worker, store secrets, call `/api/init`, verify exact success | Wrangler or canary failure fails the job; JWT secret cannot initialize DB |
 | Lifecycle delete/export | User Center service | Dedicated credential processes mailbox data idempotently | Missing authority denied; partial failure stays retryable |
+## Subscription-aware sending
+
+Before delivery, Mail validates the local session, sender ownership, role permissions, provider availability, and the canonical subscription entitlement. It then atomically reserves the recipient count for the current UTC day. Enforced overages return an upgrade-required response; shadow mode records the projected overage without blocking. Provider failure rolls the reservation back.

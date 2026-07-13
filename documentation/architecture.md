@@ -25,3 +25,6 @@ There is no scheduled work owned by this repository. Delivery/initialization aut
 - [Tests](tests.md)
 - [Email delivery](emails.md)
 - [Automation](automation.md)
+## Subscription enforcement
+
+Authenticated Mail users are mapped to the canonical User Center identity by email through the main billing API. Mail never treats its local numeric user ID as a subscription identity. The main API returns the current plan, while Mail owns an atomic D1 daily-recipient counter and combines this commercial quota with existing role and abuse controls. External provider failures release the reserved commercial quota.

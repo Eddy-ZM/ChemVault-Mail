@@ -36,6 +36,10 @@ crons = ["*/30 * * * *", "0 16 * * *"]
 
 
 [vars]
+ENVIRONMENT = "production"
+BILLING_API_ORIGIN = "https://chemvault.science"
+BILLING_ENFORCEMENT_MODE = "shadow"
+MAIL_RATE_LIMIT_FAIL_CLOSED = "true"
 ai_model = "${AI_MODEL}"
 analysis_cache = "${ANALYSIS_CACHE}"
 #orm_log = false

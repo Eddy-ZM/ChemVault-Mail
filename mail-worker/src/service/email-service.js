@@ -29,11 +29,12 @@ import {
 	normalizeCategory,
 	normalizeEmailIds
 } from './email-organization-service';
+import { enforceMailBillingQuota, releaseMailBillingReservation } from './billing-service';
 
 const MAIL_SEND_LIMITS = {
 	maxRecipientsPerEmail: 20,
 	maxEmailsPerMinutePerUser: 5,
-	maxEmailsPerDayPerUser: 100,
+	maxEmailsPerDayPerUser: 5000,
 	maxAttachmentSizeBytes: 10 * 1024 * 1024,
 	maxAttachmentsPerEmail: 10,
 	blockedExtensions: ['.app', '.bat', '.cmd', '.cjs', '.dmg', '.exe', '.html', '.jar', '.js', '.mjs', '.php', '.py', '.sh']
@@ -312,6 +313,12 @@ const emailService = {
 
 		}
 
+		const billing = await enforceMailBillingQuota(c, {
+			email: userRow.email,
+			recipientCount: receiveEmail.length,
+			isAdmin: c.env.admin === userRow.email
+		});
+
 		let sendResult = {};
 		try {
 
@@ -347,6 +354,7 @@ const emailService = {
 		}
 
 		} catch {
+			await releaseMailBillingReservation(c, billing.reservation).catch(() => {});
 			throw new BizError('Email provider could not send the message. Provider details suppressed.', 502);
 		}
 
@@ -354,6 +362,7 @@ const emailService = {
 
 
 		if (error) {
+			await releaseMailBillingReservation(c, billing.reservation).catch(() => {});
 			throw new BizError('Email provider could not send the message. Provider details suppressed.', 502);
 		}
 

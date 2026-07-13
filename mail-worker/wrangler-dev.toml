@@ -36,6 +36,9 @@ run_worker_first = true
 
 
 [vars]
+ENVIRONMENT = "development"
+BILLING_API_ORIGIN = "http://localhost:8788"
+BILLING_ENFORCEMENT_MODE = "shadow"
 ai_model = ""
 analysis_cache = false
 orm_log = false

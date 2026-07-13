@@ -44,6 +44,10 @@ SMTP_HOST = "smtp.chemvault.science"
 SMTP_PORT = 587
 SMTP_SECURITY = "STARTTLS"
 MAIL_RATE_LIMIT_FAIL_CLOSED = "true"
+ENVIRONMENT = "production"
+BILLING_API_ORIGIN = "https://chemvault.science"
+# Keep shadow until BILLING_SERVICE_SECRET is installed in Mail, main, and User Center.
+BILLING_ENFORCEMENT_MODE = "shadow"
 #MAIL_CLIENT_AUTH_METHOD = "Normal password"
 #ai_model = ""			#ai模型,不填默认使用@cf/meta/llama-3.1-8b-instruct
 #analysis_cache = false			#是否开启分析数据缓存
@@ -57,6 +61,7 @@ MAIL_RATE_LIMIT_FAIL_CLOSED = "true"
 #chemvault_user_sync_url = "https://user.chemvault.science/api/integrations/mail/users/sync"	#Mail新增用户后同步到User Center
 #user_system_sync_secret = ""	#Secret; must match User Center MAIL_SYSTEM_SYNC_SECRET. Prefer wrangler secret put.
 #lifecycle_service_secret = ""	#Dedicated cross-service lifecycle secret. Configure with wrangler secret put lifecycle_service_secret.
+#billing_service_secret = ""	#Shared billing identity/entitlement secret. Configure with wrangler secret put billing_service_secret.
 #cloudflare_access_team_domain = ""	#可选，Cloudflare Access Team domain 示例: your-team.cloudflareaccess.com
 #cloudflare_access_aud = ""		#可选，Cloudflare Access 应用 AUD tag
 

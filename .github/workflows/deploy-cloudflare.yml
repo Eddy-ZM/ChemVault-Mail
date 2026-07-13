@@ -23,6 +23,7 @@ jobs:
       ADMIN: ${{ secrets.ADMIN || vars.ADMIN }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       INIT_SECRET: ${{ secrets.INIT_SECRET }}
+      BILLING_SERVICE_SECRET: ${{ secrets.BILLING_SERVICE_SECRET }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
       D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID || vars.D1_DATABASE_ID }}
@@ -88,6 +89,9 @@ jobs:
           fi
           echo "::add-mask::$JWT_SECRET"
           echo "::add-mask::$INIT_SECRET"
+          if [ -n "$BILLING_SERVICE_SECRET" ]; then
+            echo "::add-mask::$BILLING_SERVICE_SECRET"
+          fi
           if [ -n "$LINUXDO_CLIENT_SECRET" ]; then
             echo "::add-mask::$LINUXDO_CLIENT_SECRET"
           fi
@@ -269,6 +273,9 @@ jobs:
           CONFIG_FILE="wrangler-action.toml"
           printf '%s' "$JWT_SECRET" | pnpm wrangler secret put jwt_secret -c "$CONFIG_FILE"
           printf '%s' "$INIT_SECRET" | pnpm wrangler secret put init_secret -c "$CONFIG_FILE"
+          if [ -n "$BILLING_SERVICE_SECRET" ]; then
+            printf '%s' "$BILLING_SERVICE_SECRET" | pnpm wrangler secret put billing_service_secret -c "$CONFIG_FILE"
+          fi
           if [ -n "$LINUXDO_CLIENT_ID" ] && [ -n "$LINUXDO_CLIENT_SECRET" ]; then
             printf '%s' "$LINUXDO_CLIENT_SECRET" | pnpm wrangler secret put linuxdo_client_secret -c "$CONFIG_FILE"
           fi

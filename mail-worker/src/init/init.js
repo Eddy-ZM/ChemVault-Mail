@@ -1,6 +1,7 @@
 import settingService from '../service/setting-service';
 import emailUtils from '../utils/email-utils';
 import {emailConst} from "../const/entity-const";
+import { ensureBillingUsageTable } from '../service/billing-service';
 
 const dbInit = {
 	async init(c) {
@@ -53,8 +54,13 @@ const dbInit = {
 		await this.v3_8DB(c);
 		await this.v3_9DB(c);
 		await this.v4_0DB(c);
+		await this.v4_1DB(c);
 		await settingService.refresh(c);
 		return c.text('success');
+	},
+
+	async v4_1DB(c) {
+		await ensureBillingUsageTable(c.env.db);
 	},
 
 	async v4_0DB(c) {
