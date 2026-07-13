@@ -25,4 +25,16 @@ jobs:
             mail-worker/pnpm-lock.yaml
       - run: pnpm --dir mail-vue install --frozen-lockfile
       - run: pnpm --dir mail-worker install --frozen-lockfile
-      - run: pnpm --dir mail-worker test -- --hookTimeout 30000
+      - run: pnpm --dir mail-vue build
+      - run: pnpm --dir mail-worker exec vitest run --hookTimeout 60000
+      - name: Verify deployment secret and audit policy
+        shell: bash
+        run: |
+          if grep -Eq '(JWT_SECRET|INIT_SECRET|CLOUDFLARE_API_TOKEN|LINUXDO_CLIENT_SECRET):.*vars\.' .github/workflows/deploy-cloudflare.yml; then
+            echo "Sensitive deployment values must come from GitHub Secrets, never Repository Variables."
+            exit 1
+          fi
+          if grep -q 'delete-workflow-runs' .github/workflows/deploy-cloudflare.yml; then
+            echo "Deployment history must be retained for auditability."
+            exit 1
+          fi
