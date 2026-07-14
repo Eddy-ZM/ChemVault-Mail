@@ -1,0 +1,327 @@
+@font-face {
+    font-family: "CV Inter";
+    src: url("/fonts/inter-400.ttf") format("truetype");
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "CV Inter";
+    src: url("/fonts/inter-600.ttf") format("truetype");
+    font-weight: 600 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "CV Newsreader";
+    src: url("/fonts/newsreader-500.ttf") format("truetype");
+    font-weight: 500 700;
+    font-display: swap;
+}
+
+:root {
+    --el-color-primary: #155eef;
+    --el-color-primary-dark-2: #0f4fd6;
+    --el-color-primary-light-3: #5f8cf5;
+    --el-color-primary-light-5: #8eacf8;
+    --el-color-primary-light-7: #bfd0fb;
+    --el-color-primary-light-9: #e8efff;
+    --el-bg-color: #f4f1e9;
+    --el-bg-color-page: #f4f1e9;
+    --el-fill-color-blank: #fffdf8;
+    --el-border-color: #d8d2c7;
+    --el-border-color-light: #e2ddd3;
+    --el-border-color-lighter: #ece8df;
+    --el-text-color-primary: #10203a;
+    --el-text-color-regular: #445168;
+    --el-text-color-secondary: #647084;
+    --extra-light-fill: #fffdf8;
+    --light-ill: #ece8df;
+    --light-border: #d8d2c7;
+    --aside-backgound: #07111f;
+    --dark-border: #b9b2a6;
+    --base-fill: #f4f1e9;
+    --regular-text-color: #647084;
+    --light-border-color: #ded8cd;
+    --aside-right-border: none;
+    --choose-account-background: rgba(21, 94, 239, 0.22);
+    --email-hover-background: #ece8df;
+    --base-border-color: #d8d2c7;
+    --secondary-text-color: #647084;
+    --premium-shadow: 0 18px 42px rgba(7, 17, 31, 0.08);
+    --premium-shadow-hover: 0 22px 48px rgba(7, 17, 31, 0.12);
+    --premium-surface: rgba(255, 253, 248, 0.92);
+    --premium-surface-border: rgba(16, 32, 58, 0.14);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+    font-family: "CV Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body,
+#app {
+    background: #f4f1e9;
+}
+
+.sidebar-shell,
+.sidebar-inner,
+.sidebar-menu,
+.sidebar-menu.el-menu {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    background: #07111f !important;
+    box-shadow: none !important;
+}
+
+.sidebar-shell :is(.org-name, .menu-name, .account-name) {
+    color: #f7f4ec !important;
+}
+
+.sidebar-shell :is(.nav-icon, .account-email, .account-toggle, .manage-title) {
+    color: #91a1b2 !important;
+}
+
+.sidebar-shell .nav-item {
+    border-radius: 8px !important;
+    color: #b7c5d1 !important;
+}
+
+.sidebar-shell .nav-item:hover,
+.sidebar-shell .choose-item {
+    background: rgba(255, 255, 255, 0.07) !important;
+    color: #ffffff !important;
+}
+
+.sidebar-shell .choose-item {
+    background: rgba(21, 94, 239, 0.22) !important;
+}
+
+.sidebar-shell .account-card,
+.sidebar-shell .org-switch,
+.sidebar-shell .sidebar-pin {
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.header {
+    min-height: 74px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(7, 17, 31, 0.97) !important;
+    color: #f7f4ec !important;
+    box-shadow: none !important;
+}
+
+.header .breadcrumb-item,
+.header .icon-item,
+.header .avatar,
+.header .writer-box {
+    color: #f7f4ec !important;
+}
+
+.header .icon-item,
+.header .avatar,
+.header .writer-box {
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+}
+
+.main-view,
+.main-box-show,
+.main-box-hide,
+.email-layout,
+.content {
+    background: #f4f1e9 !important;
+}
+
+:is(.el-card, .el-dialog, .el-drawer, .el-table, .email-item, .settings-card) {
+    border-color: #d8d2c7 !important;
+    border-radius: 10px !important;
+    background: #fffdf8 !important;
+    box-shadow: none !important;
+}
+
+:is(.el-input__wrapper, .el-textarea__inner, .el-select__wrapper) {
+    border-radius: 8px !important;
+    background: #fffdf8 !important;
+    box-shadow: 0 0 0 1px #d8d2c7 inset !important;
+}
+
+:is(h1, h2, h3, .page-title, .title) {
+    font-family: "CV Newsreader", Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+}
+
+.el-button--primary {
+    --el-button-bg-color: #155eef;
+    --el-button-border-color: #155eef;
+    --el-button-hover-bg-color: #0f4fd6;
+    --el-button-hover-border-color: #0f4fd6;
+}
+
+.dark {
+    --aside-backgound: #07111f;
+    --el-bg-color: #0b1b2d;
+    --el-bg-color-page: #07111f;
+    --el-fill-color-blank: #102238;
+}
+
+/* Login surface: a product-specific gateway using the shared exhibition frame. */
+#login-box {
+    min-height: 100dvh !important;
+    background: #07111f !important;
+    color: #10203a;
+}
+
+#login-box #background-wrap,
+#login-box .logo-wallpaper {
+    background: #07111f !important;
+}
+
+#login-box .logo-wallpaper-image {
+    top: 50% !important;
+    left: 28% !important;
+    width: clamp(132px, 13vw, 184px) !important;
+    max-height: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    opacity: 0.96 !important;
+    filter: none !important;
+}
+
+#login-box .form-wrapper {
+    right: 0 !important;
+    width: min(560px, 44vw) !important;
+    min-width: 440px;
+    padding: 32px !important;
+    box-sizing: border-box;
+}
+
+#login-box .form-wrapper .container {
+    width: 100% !important;
+    max-width: 460px;
+    height: auto !important;
+    min-height: 560px;
+    margin: 0 !important;
+    padding: 54px 50px !important;
+    border: 1px solid #d8d2c7 !important;
+    border-radius: 10px !important;
+    background: #fffdf8 !important;
+    box-shadow: none !important;
+    box-sizing: border-box;
+}
+
+#login-box .form-wrapper .container .form-title {
+    color: #10203a !important;
+    font-family: "CV Newsreader", Georgia, serif !important;
+    font-size: clamp(2.6rem, 4vw, 4rem) !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.025em;
+    line-height: 0.95;
+    text-align: left !important;
+}
+
+#login-box .form-wrapper .container .form-desc {
+    margin-top: 14px !important;
+    margin-bottom: 30px !important;
+    color: #647084 !important;
+    font-size: 0.94rem;
+    line-height: 1.6;
+}
+
+#login-box .form-wrapper .container .el-input {
+    height: 46px !important;
+    margin-bottom: 16px !important;
+}
+
+#login-box .form-wrapper .container .el-input__inner {
+    height: 44px !important;
+}
+
+#login-box .form-wrapper .container .el-input__wrapper,
+#login-box .form-wrapper .container .el-input-group__append {
+    border-color: #d8d2c7 !important;
+    background: #fffdf8 !important;
+    box-shadow: 0 0 0 1px #d8d2c7 inset !important;
+}
+
+#login-box .form-wrapper .container .btn {
+    min-height: 46px !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+}
+
+#login-box .form-wrapper .container .switch {
+    min-height: 44px;
+    color: #647084;
+    line-height: 44px;
+}
+
+#login-box :is(a, button, input, [role="button"]):focus-visible {
+    outline: 3px solid rgba(21, 94, 239, 0.42) !important;
+    outline-offset: 3px;
+}
+
+#login-box .auth-overlay {
+    background: rgba(7, 17, 31, 0.82) !important;
+}
+
+#login-box .auth-panel {
+    border-color: #d8d2c7 !important;
+    border-radius: 10px !important;
+    background: #fffdf8 !important;
+    box-shadow: none !important;
+}
+
+#login-box .auth-visual {
+    background: #ece8df !important;
+}
+
+#login-box .auth-progress span {
+    background: #155eef !important;
+}
+
+.premium-shell,
+.main-container,
+.layout-container {
+    background: #f4f1e9 !important;
+}
+
+@media (max-width: 767px) {
+    #login-box .logo-wallpaper-image {
+        top: 18% !important;
+        left: 50% !important;
+        width: 96px !important;
+        opacity: 0.9 !important;
+    }
+
+    #login-box .form-wrapper {
+        width: 100% !important;
+        min-width: 0;
+        padding: 104px 18px 18px !important;
+    }
+
+    #login-box .form-wrapper .container {
+        min-height: 0;
+        max-width: 480px;
+        padding: 36px 24px !important;
+    }
+
+    #login-box .form-wrapper .container .form-title {
+        font-size: clamp(2.5rem, 13vw, 3.5rem) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #login-box *,
+    #login-box *::before,
+    #login-box *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+    }
+}

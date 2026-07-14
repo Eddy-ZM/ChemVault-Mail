@@ -1242,7 +1242,7 @@ function loadData() {
   }
 
   .loading-show {
-    transition: all 200ms ease 200ms;
+    transition: opacity 200ms ease 200ms;
     opacity: 1;
   }
 
@@ -1296,7 +1296,7 @@ function loadData() {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      transition: all 300ms;
+      transition: max-width 300ms;
       line-height: 12px;
       max-width: 300px;
       min-width: 0;

@@ -137,7 +137,7 @@ button, input, select, textarea {
     --base-border-color: #DCDFE6;
     --secondary-text-color: #909399;
     --message-block-color: rgba(0, 0, 0, 0);
-    --loading-hide-transition: all 200ms;
+    --loading-hide-transition: opacity 200ms;
     --motion-smooth: cubic-bezier(0.22, 1, 0.36, 1);
     --motion-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
     --motion-duration-fast: 160ms;

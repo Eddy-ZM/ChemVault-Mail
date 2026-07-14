@@ -281,18 +281,18 @@ const handleResize = () => {
     background: #000000;
     opacity: 0.6;
     z-index: 10;
-    transition: all 300ms;
+    transition: opacity 300ms;
   }
 }
 
 .block-hide {
   position: fixed;
   pointer-events: none;
-  transition: all 300ms;
+  transition: opacity 300ms;
 }
 
 .show {
-  transition: all 100ms;
+  transition: transform 100ms, opacity 100ms;
   @media (max-width: 767px) {
     position: fixed;
     z-index: 100;
@@ -301,7 +301,7 @@ const handleResize = () => {
 }
 
 .hide {
-  transition: all 100ms;
+  transition: transform 100ms, opacity 100ms;
   position: fixed;
   transform: translateX(-100%);
   opacity: 0;

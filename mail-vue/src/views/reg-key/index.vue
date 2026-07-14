@@ -411,7 +411,7 @@ function openAdd() {
       background: var(--el-bg-color);
       border-radius: 8px;
       border: 1px solid var(--el-border-color);
-      transition: all 200ms;
+      transition: border-color 200ms, background-color 200ms, box-shadow 200ms, transform 200ms;
       padding: 15px;
 
       .code-info {
@@ -497,7 +497,7 @@ function openAdd() {
 }
 
 .loading-show {
-  transition: all 200ms ease 200ms;
+  transition: opacity 200ms ease 200ms;
   opacity: 1;
 }
 

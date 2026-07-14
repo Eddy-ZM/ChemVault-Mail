@@ -1487,7 +1487,7 @@ function adjustWidth() {
 }
 
 .loading-show {
-  transition: all 200ms ease 200ms;
+  transition: opacity 200ms ease 200ms;
   opacity: 1;
 }
 
