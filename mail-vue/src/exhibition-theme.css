@@ -325,3 +325,7 @@ body,
         transition-duration: 0.001ms !important;
     }
 }
+
+#login-box :is(a, button, input, [role="button"], .el-input, .el-input__wrapper, .el-input-group__append, .el-button) {
+    min-height: 44px;
+}
