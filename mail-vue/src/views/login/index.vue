@@ -227,10 +227,18 @@ const authTitle = computed(() => {
 });
 const authDesc = computed(() => locale.value === 'zh' ? authExperience.value.zhSessionDescription : authExperience.value.sessionDescription);
 const canRegister = computed(() => Number(settingStore.settings.register) === 0);
+const isLocalReleasePreview = import.meta.env.VITE_APP_ENV === 'release'
+    && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
 
 watch(canRegister, (enabled) => {
   if (!enabled && show.value !== 'login') {
     show.value = 'login';
+  }
+})
+
+watch(() => settingStore.domainList, (list) => {
+  if (!suffix.value && list.length > 0) {
+    suffix.value = list[0]
   }
 })
 
@@ -253,9 +261,9 @@ const registerForm = reactive({
   confirmPassword: '',
   code: null
 })
-const domainList = settingStore.domainList;
+const domainList = computed(() => settingStore.domainList);
 const registerLoading = ref(false)
-suffix.value = domainList[0]
+suffix.value = settingStore.domainList[0] || '@chemvault.science'
 const verifyShow = ref(false)
 let verifyToken = ''
 let turnstileId = null
@@ -499,15 +507,22 @@ function cleanLinuxDoCallbackUrl() {
 }
 
 function refreshWebsiteConfig() {
-  websiteConfig().then(setting => {
+  if (isLocalReleasePreview) {
+    return
+  }
+  websiteConfig({noMsg: true}).then(setting => {
     settingStore.settings = setting
-    settingStore.domainList = setting.domainList
-    if (!suffix.value && setting.domainList.length > 0) {
-      suffix.value = setting.domainList[0]
+    settingStore.domainList = Array.isArray(setting.domainList) && setting.domainList.length > 0
+        ? setting.domainList
+        : ['@chemvault.science']
+    if (!suffix.value && settingStore.domainList.length > 0) {
+      suffix.value = settingStore.domainList[0]
     }
     document.title = setting.title
   }).catch(e => {
-    console.error(e)
+    if (import.meta.env.DEV) {
+      console.warn('ChemVault Mail config unavailable on login screen.', e)
+    }
   })
 }
 
