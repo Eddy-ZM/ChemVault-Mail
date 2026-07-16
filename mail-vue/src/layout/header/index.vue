@@ -68,13 +68,13 @@
               {{ formatName(userStore.user.email) }}
             </div>
             <div class="user-name">
-              {{ userStore.user.name }}
+              {{ userStore.user.name || userStore.user.email || 'ChemVault' }}
             </div>
             <div class="detail-email" @click="copyEmail(userStore.user.email)">
               {{ userStore.user.email }}
             </div>
             <div class="detail-user-type">
-              <el-tag>{{ userStore.user.role.name }}</el-tag>
+              <el-tag>{{ userRole.name }}</el-tag>
             </div>
             <div class="action-info">
               <div class="quota-row">
@@ -132,7 +132,14 @@ const userInfoShow = ref(false)
 const userinfoRef = ref({})
 
 const accountCount = computed(() => {
-  return userStore.user.role.accountCount
+  return userRole.value.accountCount
+})
+
+const userRole = computed(() => userStore.user?.role || {
+  name: t('unauthorized'),
+  accountCount: 0,
+  sendType: 'ban',
+  sendCount: 0
 })
 
 const sendType = computed(() => {
@@ -145,23 +152,23 @@ const sendType = computed(() => {
     return t('unauthorized')
   }
 
-  if (userStore.user.role.sendType === 'ban') {
+  if (userRole.value.sendType === 'ban') {
     return t('sendBanned')
   }
 
-  if (userStore.user.role.sendType === 'internal') {
+  if (userRole.value.sendType === 'internal') {
     return t('sendInternal')
   }
 
-  if (!userStore.user.role.sendCount) {
+  if (!userRole.value.sendCount) {
     return t('unlimited')
   }
 
-  if (userStore.user.role.sendType === 'day') {
+  if (userRole.value.sendType === 'day') {
     return t('daily')
   }
 
-  if (userStore.user.role.sendType === 'count') {
+  if (userRole.value.sendType === 'count') {
     return t('total')
   }
 })
@@ -173,15 +180,15 @@ const sendCount = computed(() => {
     return null
   }
 
-  if (userStore.user.role.sendType === 'ban') {
+  if (userRole.value.sendType === 'ban') {
     return null
   }
 
-  if (userStore.user.role.sendType === 'internal') {
+  if (userRole.value.sendType === 'internal') {
     return null
   }
 
-  if (!userStore.user.role.sendCount) {
+  if (!userRole.value.sendCount) {
     return null
   }
 
@@ -189,7 +196,7 @@ const sendCount = computed(() => {
     return null
   }
 
-  return userStore.user.sendCount + '/' + userStore.user.role.sendCount
+  return (userStore.user.sendCount || 0) + '/' + userRole.value.sendCount
 })
 
 function userInfoHide(e) {
@@ -293,7 +300,7 @@ function clickLogout() {
 }
 
 function formatName(email) {
-  return email[0]?.toUpperCase() || ''
+  return email?.[0]?.toUpperCase() || 'C'
 }
 
 </script>
@@ -455,19 +462,24 @@ function formatName(email) {
   display: grid;
   height: 100%;
   gap: 10px;
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: minmax(0, max-content) 44px minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
 }
 
 .header.not-send {
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
 }
 
 .writer-box {
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 5px;
+  width: 44px;
+  height: 44px;
+  margin-left: 0;
+  justify-self: start;
 
   .writer {
     width: 34px;
@@ -521,6 +533,7 @@ function formatName(email) {
   align-items: center;
   height: 100%;
   min-width: 0;
+  overflow: hidden;
 }
 
 .breadcrumb-item {
@@ -535,7 +548,10 @@ function formatName(email) {
 .toolbar {
   display: flex;
   justify-content: end;
+  align-items: center;
   gap: 15px;
+  min-width: 0;
+  overflow: hidden;
   @media (max-width: 767px) {
     gap: 10px;
   }

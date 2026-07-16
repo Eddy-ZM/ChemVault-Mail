@@ -192,6 +192,7 @@ function getEmailList(emailId, size) {
 }
 
 .category-filter {
-  width: 150px;
+  width: clamp(120px, 18vw, 150px);
+  flex: 0 0 auto;
 }
 </style>

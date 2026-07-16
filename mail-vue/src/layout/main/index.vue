@@ -314,8 +314,9 @@ const handleResize = () => {
 
 .main-box-show {
   display: grid;
-  grid-template-columns: 260px  1fr;
+  grid-template-columns: 260px minmax(0, 1fr);
   height: calc(100% - 60px);
+  min-width: 0;
   @media (max-width: 767px) {
     grid-template-columns: 1fr;
   }
@@ -323,13 +324,16 @@ const handleResize = () => {
 
 .main-box-hide {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   height: calc(100% - 60px);
+  min-width: 0;
 }
 
 
 .main-view {
   background: var(--el-bg-color);
+  min-width: 0;
+  overflow: hidden;
 }
 
 

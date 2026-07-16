@@ -78,8 +78,8 @@
                   <el-dropdown-menu>
                     <el-dropdown-item v-if="hasPerm('account:set-avatar')" @click="openSetAvatar(item)">{{ $t('setAvatar') }}</el-dropdown-item>
                     <el-dropdown-item v-if="hasPerm('email:send')" @click="openSetName(item)">{{ $t('rename') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId" @click="setAsTop(item, index)">{{ $t('pin') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')"
+                    <el-dropdown-item v-if="item.accountId !== currentUserAccountId" @click="setAsTop(item, index)">{{ $t('pin') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="item.accountId !== currentUserAccountId && hasPerm('account:delete')"
                                       @click="remove(item)">{{ $t('delete') }}
                     </el-dropdown-item>
                   </el-dropdown-menu>
@@ -295,6 +295,7 @@ const avatarPreview = computed(() => {
 
   return {type: 'initial', text: resolveAccountAvatar(avatarAccount.value).text};
 })
+const currentUserAccountId = computed(() => userStore.user?.account?.accountId || 0)
 
 if (hasPerm('account:query')) {
   getAccountList()
@@ -365,7 +366,7 @@ function setName() {
     account.name = name
     setNameShow.value = false
 
-    if (account.accountId === userStore.user.account.accountId) {
+    if (account.accountId === currentUserAccountId.value) {
       userStore.user.name = name
     }
 
@@ -503,8 +504,8 @@ function setAllReceive(account) {
 function showNullSetting(item) {
   const canSetAvatar = hasPerm('account:set-avatar')
   const canRename = hasPerm('email:send')
-  const canPin = item.accountId !== userStore.user.account.accountId
-  const canDelete = item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')
+  const canPin = item.accountId !== currentUserAccountId.value
+  const canDelete = item.accountId !== currentUserAccountId.value && hasPerm('account:delete')
   return !canSetAvatar && !canRename && !canPin && !canDelete
 }
 

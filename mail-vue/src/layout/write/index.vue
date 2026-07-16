@@ -510,7 +510,7 @@ function formatImage(content) {
 function open() {
   if (!accountStore.currentAccount.email) {
     form.sendEmail = userStore.user.email;
-    form.accountId = userStore.user.account.accountId;
+    form.accountId = userStore.user.account?.accountId || accountStore.currentAccountId || 0;
     form.name = userStore.user.name;
   } else {
     form.sendEmail = accountStore.currentAccount.email;
