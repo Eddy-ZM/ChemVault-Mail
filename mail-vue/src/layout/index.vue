@@ -119,6 +119,8 @@ onBeforeUnmount(() => {
 }
 
 .el-header {
+  --el-header-height: 56px;
+  height: 56px;
   background: var(--premium-surface);
   border-bottom: solid 1px var(--el-border-color);
   box-shadow: var(--premium-inset);

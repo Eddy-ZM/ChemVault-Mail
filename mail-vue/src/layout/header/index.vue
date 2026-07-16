@@ -461,9 +461,10 @@ function formatName(email) {
   font-size: 12px;
   display: grid;
   height: 100%;
-  gap: 10px;
-  grid-template-columns: minmax(0, max-content) 44px minmax(0, 1fr);
+  gap: 12px;
+  grid-template-columns: minmax(0, max-content) 42px minmax(0, 1fr);
   align-items: center;
+  padding: 0 18px 0 0;
   min-width: 0;
 }
 
@@ -476,8 +477,8 @@ function formatName(email) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   margin-left: 0;
   justify-self: start;
 
@@ -531,6 +532,7 @@ function formatName(email) {
 .header-btn {
   display: inline-flex;
   align-items: center;
+  gap: 10px;
   height: 100%;
   min-width: 0;
   overflow: hidden;
@@ -549,7 +551,7 @@ function formatName(email) {
   display: flex;
   justify-content: end;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   min-width: 0;
   overflow: hidden;
   @media (max-width: 767px) {
@@ -558,9 +560,9 @@ function formatName(email) {
 
   .icon-item {
     align-self: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -577,7 +579,7 @@ function formatName(email) {
 
   .notice {
     font-size: 22px;
-    margin-right: 4px;
+    margin-right: 0;
   }
 
   .dark-icon {
@@ -619,7 +621,7 @@ function formatName(email) {
     .setting-icon {
       position: relative;
       top: 0;
-      margin-right: 10px;
+      margin-right: 0;
       bottom: 10px;
     }
   }

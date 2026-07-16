@@ -265,7 +265,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .sidebar-shell {
-  width: 49px;
+  width: 56px;
   height: 100%;
   overflow: hidden;
   border-right: 1px solid var(--el-border-color-lighter);
@@ -306,8 +306,8 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 36px;
   align-items: center;
-  height: 54px;
-  padding: 8px;
+  height: 56px;
+  padding: 10px;
   border-bottom: 1px solid var(--el-border-color-lighter);
 }
 
