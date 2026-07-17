@@ -22,17 +22,18 @@
             v-if="params.timeSort === 0" width="28" height="28"/>
       <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else
             width="28" height="28"/>
-      <el-select
-          v-model="params.category"
-          class="category-filter"
-          style="width: 224px; min-width: 180px;"
-          clearable
-          :placeholder="$t('allCategories')"
-          @change="changeCategory"
-      >
-        <el-option :label="$t('allCategories')" value=""/>
-        <el-option v-for="category in categories" :key="category" :label="category" :value="category"/>
-      </el-select>
+      <div class="category-filter-shell">
+        <el-select
+            v-model="params.category"
+            class="category-filter"
+            clearable
+            :placeholder="$t('allCategories')"
+            @change="changeCategory"
+        >
+          <el-option :label="$t('allCategories')" value=""/>
+          <el-option v-for="category in categories" :key="category" :label="category" :value="category"/>
+        </el-select>
+      </div>
     </template>
 
   </emailScroll>
@@ -197,13 +198,22 @@ function getEmailList(emailId, size) {
   line-height: 1;
 }
 
-.category-filter {
+.category-filter-shell {
+  display: inline-flex;
+  align-items: center;
   flex: 0 0 224px;
   width: 224px !important;
   min-width: 180px;
+  height: 36px;
+}
+
+.category-filter {
+  width: 100% !important;
+  min-width: 0;
 }
 
 .category-filter :deep(.el-select__wrapper) {
+  width: 100%;
   min-height: 36px;
   border-radius: 10px;
 }
@@ -211,6 +221,7 @@ function getEmailList(emailId, size) {
 .category-filter :deep(.el-select__placeholder) {
   display: inline-flex;
   min-width: 4em;
+  max-width: none;
   overflow: visible;
 }
 </style>
