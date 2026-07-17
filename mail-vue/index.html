@@ -32,43 +32,126 @@
   }
   #loading-first {
     position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    inset: 0;
+    display: grid;
+    place-items: center;
     z-index: 500;
-    background: var(--el-bg-color);
+    background:
+      radial-gradient(circle at 50% 38%, rgba(47, 111, 235, 0.16), transparent 34%),
+      linear-gradient(145deg, #f8fbff 0%, #eef4fb 54%, #f7fafc 100%);
+    color: #102033;
+    transition: opacity 220ms ease, visibility 220ms ease;
+  }
+
+  .dark #loading-first {
+    background:
+      radial-gradient(circle at 50% 38%, rgba(63, 131, 248, 0.22), transparent 34%),
+      linear-gradient(145deg, #05090e 0%, #0b111c 54%, #060a10 100%);
+    color: #f7f9fc;
   }
 
   .loading-hide {
     pointer-events: none;
     opacity: 0;
+    visibility: hidden;
   }
 
-  .loading-icon {
-    display: inline-flex;
-    flex-direction: column;
+  .loading-panel {
+    display: grid;
     align-items: center;
-    justify-content: center;
-    gap: 2px;
+    justify-items: center;
+    gap: 16px;
+    min-width: 260px;
+    padding: 30px 34px 28px;
+    border: 1px solid rgba(47, 111, 235, 0.12);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow:
+      0 34px 90px rgba(15, 23, 42, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
   }
 
-  .loading-image {
-    width: 70px;
-    height: 70px;
-    object-fit: contain;
+  .dark .loading-panel {
+    border-color: rgba(255, 255, 255, 0.11);
+    background: rgba(8, 14, 22, 0.68);
+    box-shadow:
+      0 34px 100px rgba(0, 0, 0, 0.44),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .loading-eyebrow {
+    color: rgba(16, 32, 51, 0.62);
+    font: 600 12px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .dark .loading-eyebrow {
+    color: rgba(247, 249, 252, 0.76);
+  }
+
+  .loading-mark {
+    position: relative;
+    width: 86px;
+    height: 86px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(47, 111, 235, 0.14);
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(47, 111, 235, 0.14), transparent 58%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.36));
+  }
+
+  .dark .loading-mark {
+    border-color: rgba(120, 173, 255, 0.18);
+    background:
+      radial-gradient(circle at 50% 45%, rgba(63, 131, 248, 0.24), transparent 58%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  }
+
+  .loading-mark::before {
+    content: "";
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border: 3px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 13px;
+    clip-path: polygon(12% 0, 100% 0, 100% 24%, 40% 24%, 40% 76%, 100% 76%, 100% 100%, 12% 100%, 0 88%, 0 12%);
+    opacity: 0.9;
+  }
+
+  .loading-orbit {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: #2f6feb;
+    border-right-color: rgba(19, 168, 168, 0.7);
+    animation: loading-orbit 1.1s linear infinite;
+  }
+
+  .loading-title {
+    color: rgba(16, 32, 51, 0.82);
+    font: 500 14px/1.2 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0.01em;
+  }
+
+  .dark .loading-title {
+    color: rgba(247, 249, 252, 0.88);
   }
 
   .loading-progress {
     position: relative;
-    width: 64px;
-    height: 4px;
+    width: 170px;
+    height: 3px;
     overflow: hidden;
     border-radius: 999px;
-    background: rgba(64, 158, 255, 0.18);
+    background: rgba(47, 111, 235, 0.12);
   }
 
   .loading-progress::before {
@@ -79,60 +162,42 @@
     width: 100%;
     height: 100%;
     border-radius: inherit;
-    background: #409EFF;
-    transform: scaleX(0);
-    transform-origin: left center;
-    animation: loading-progress-grow 2.4s linear forwards;
+    background: linear-gradient(90deg, #2f6feb, #13a8a8);
+    transform: translateX(-110%);
+    animation: loading-progress-flow 1.2s ease-in-out infinite;
   }
 
-  .loading-progress::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    width: 24px;
-    height: 100%;
-    border-radius: inherit;
-    background: rgba(64, 158, 255, 0.45);
-    filter: blur(4px);
-    transform: translateX(-24px);
-    animation: loading-progress-peg 2.4s linear forwards;
+  @keyframes loading-orbit {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
-  .loading-complete .loading-progress::before {
-    animation: none;
-    transform: scaleX(1);
-    transition: transform 200ms linear;
-  }
-
-  .loading-complete .loading-progress::after {
-    animation: none;
-    transform: translateX(60px);
-    transition: transform 200ms linear;
-  }
-
-  @keyframes loading-progress-grow {
+  @keyframes loading-progress-flow {
     0% {
-      transform: scaleX(0);
+      transform: translateX(-110%);
     }
     100% {
-      transform: scaleX(1);
+      transform: translateX(235%);
     }
   }
 
-  @keyframes loading-progress-peg {
-    0% {
-      transform: translateX(-24px);
-    }
-    100% {
-      transform: translateX(60px);
+  @media (prefers-reduced-motion: reduce) {
+    .loading-orbit,
+    .loading-progress::before {
+      animation: none;
     }
   }
 </style>
 </head>
 <body>
-<div id="loading-first" >
-  <div class="loading-icon">
-    <img class="loading-image" src="/mail.png" alt="ChemVault Mail">
+<div id="loading-first" role="status" aria-label="Loading ChemVault Mail">
+  <div class="loading-panel">
+    <div class="loading-eyebrow">ChemVault Mail</div>
+    <div class="loading-mark" aria-hidden="true">
+      <span class="loading-orbit"></span>
+    </div>
+    <div class="loading-title">Preparing mailbox</div>
     <div class="loading-progress" aria-hidden="true"></div>
   </div>
 </div>
