@@ -119,8 +119,9 @@ onBeforeUnmount(() => {
 }
 
 .el-header {
-  --el-header-height: 56px;
-  height: 56px;
+  --el-header-height: var(--mail-header-height, 74px);
+  height: var(--mail-header-height, 74px);
+  min-height: var(--mail-header-height, 74px);
   background: var(--premium-surface);
   border-bottom: solid 1px var(--el-border-color);
   box-shadow: var(--premium-inset);

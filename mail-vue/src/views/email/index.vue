@@ -186,13 +186,24 @@ function getEmailList(emailId, size) {
 }
 
 </script>
-<style>
+<style scoped>
 .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
+  line-height: 1;
 }
 
 .category-filter {
-  width: clamp(120px, 18vw, 150px);
+  width: clamp(150px, 18vw, 224px);
   flex: 0 0 auto;
+}
+
+.category-filter :deep(.el-select__wrapper) {
+  min-height: 36px;
+  border-radius: 10px;
 }
 </style>

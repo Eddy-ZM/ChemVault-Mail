@@ -306,8 +306,8 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 36px;
   align-items: center;
-  height: 56px;
-  padding: 10px;
+  height: var(--mail-header-height, 74px);
+  padding: 19px 10px;
   border-bottom: 1px solid var(--el-border-color-lighter);
 }
 

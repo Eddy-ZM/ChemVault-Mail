@@ -108,7 +108,8 @@ body,
 }
 
 .header {
-    min-height: 74px !important;
+    min-height: var(--mail-header-height, 74px) !important;
+    height: var(--mail-header-height, 74px) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
     background: rgba(7, 17, 31, 0.97) !important;
     color: #f7f4ec !important;

@@ -153,6 +153,8 @@ button, input, select, textarea {
     --vt-y: 50%;
     --vt-duration: 520ms;
     --vt-easing: var(--motion-smooth);
+    --mail-header-height: 74px;
+    --mail-toolbar-height: 52px;
 }
 
 .dark {

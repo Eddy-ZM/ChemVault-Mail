@@ -1616,8 +1616,8 @@ function loadData() {
   align-items: center;
   gap: 10px;
   min-width: 0;
-  min-height: 48px;
-  padding: 6px 18px;
+  min-height: var(--mail-toolbar-height, 52px);
+  padding: 8px 18px;
   box-shadow: var(--header-actions-border);
 
   > :deep(.el-checkbox) {
@@ -1650,6 +1650,23 @@ function loadData() {
     > * {
       flex: 0 0 auto;
     }
+
+    > :deep(.el-tooltip__trigger),
+    > :deep(.el-dropdown),
+    > :deep(.el-select),
+    > :deep(.el-input),
+    > .icon {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+    }
+
+    :deep(.el-select__wrapper),
+    :deep(.el-input__wrapper) {
+      min-height: 36px;
+      align-items: center;
+      border-radius: 10px;
+    }
   }
 
   .header-right {
@@ -1669,11 +1686,13 @@ function loadData() {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 8px;
     font-size: 18px;
     cursor: pointer;
+    line-height: 1;
+    vertical-align: middle;
     transition:
         background-color var(--motion-duration-base) var(--motion-smooth),
         color var(--motion-duration-base) var(--motion-smooth);

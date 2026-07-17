@@ -460,7 +460,8 @@ function formatName(email) {
   text-align: right;
   font-size: 12px;
   display: grid;
-  height: 100%;
+  height: var(--mail-header-height, 74px);
+  min-height: var(--mail-header-height, 74px);
   gap: 12px;
   grid-template-columns: minmax(0, max-content) 42px minmax(0, 1fr);
   align-items: center;
@@ -533,7 +534,7 @@ function formatName(email) {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  height: 100%;
+  height: var(--mail-header-height, 74px);
   min-width: 0;
   overflow: hidden;
 }
