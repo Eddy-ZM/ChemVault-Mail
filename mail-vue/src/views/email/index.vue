@@ -25,9 +25,9 @@
       <el-select
           v-model="params.category"
           class="category-filter"
+          style="width: 224px; min-width: 180px;"
           clearable
           :placeholder="$t('allCategories')"
-          size="small"
           @change="changeCategory"
       >
         <el-option :label="$t('allCategories')" value=""/>
@@ -198,12 +198,19 @@ function getEmailList(emailId, size) {
 }
 
 .category-filter {
-  width: clamp(150px, 18vw, 224px);
-  flex: 0 0 auto;
+  flex: 0 0 224px;
+  width: 224px !important;
+  min-width: 180px;
 }
 
 .category-filter :deep(.el-select__wrapper) {
   min-height: 36px;
   border-radius: 10px;
+}
+
+.category-filter :deep(.el-select__placeholder) {
+  display: inline-flex;
+  min-width: 4em;
+  overflow: visible;
 }
 </style>
