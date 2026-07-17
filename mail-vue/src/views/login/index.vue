@@ -8,6 +8,7 @@
       <div v-if="authenticating" class="auth-overlay" :data-auth-source="authExperience.key" role="status" aria-live="polite">
         <div class="auth-panel">
           <div class="auth-visual" :class="`auth-visual--${authExperience.visual}`" aria-hidden="true">
+            <div class="auth-orbit"></div>
             <div class="auth-ring"></div>
             <svg v-if="authExperience.visual === 'files'" class="auth-folder" viewBox="0 0 36 36" aria-hidden="true">
               <path d="M5.5 13A3.5 3.5 0 0 1 9 9.5h6.3l3.1 3H27A3.5 3.5 0 0 1 30.5 16v9A3.5 3.5 0 0 1 27 28.5H9A3.5 3.5 0 0 1 5.5 25V13Z" fill="currentColor" opacity=".16" />
@@ -15,12 +16,7 @@
               <path d="M13 21h10M13 24h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
             </svg>
             <Icon v-else class="auth-mail" :icon="authExperience.icon" width="36" height="36" />
-            <Icon class="auth-key" icon="solar:key-minimalistic-bold-duotone" width="24" height="24" />
-            <div class="auth-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
+            <span class="auth-scan-line"></span>
           </div>
           <div class="auth-copy">
             <span class="auth-title">{{ authTitle }}</span>
@@ -724,87 +720,120 @@ function submitRegister() {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(241, 247, 252, 0.66);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background:
+      radial-gradient(circle at 42% 34%, rgba(63, 131, 248, 0.14), transparent 34%),
+      rgba(244, 248, 252, 0.78);
+  backdrop-filter: blur(20px) saturate(1.08);
+  -webkit-backdrop-filter: blur(20px) saturate(1.08);
 }
 
 :global(.dark) .auth-overlay {
-  background: rgba(10, 12, 14, 0.68);
+  background:
+      radial-gradient(circle at 44% 32%, rgba(63, 131, 248, 0.22), transparent 34%),
+      rgba(5, 9, 14, 0.82);
 }
 
 .auth-panel {
-  width: min(360px, calc(100vw - 40px));
-  padding: 24px;
-  border: 1px solid rgba(24, 144, 255, 0.18);
-  border-radius: 8px;
+  width: min(344px, calc(100vw - 40px));
+  padding: 28px 28px 24px;
+  border: 1px solid rgba(51, 72, 103, 0.12);
+  border-radius: 28px;
   background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 252, 255, 0.86)),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 251, 255, 0.9)),
       var(--el-bg-color);
   box-shadow:
-      0 24px 70px rgba(24, 87, 140, 0.18),
+      0 32px 90px rgba(15, 23, 42, 0.16),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 :global(.dark) .auth-panel {
-  border-color: rgba(102, 177, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.12);
   background:
-      linear-gradient(180deg, rgba(31, 34, 38, 0.94), rgba(18, 20, 23, 0.88)),
+      linear-gradient(180deg, rgba(18, 25, 36, 0.94), rgba(8, 13, 21, 0.9)),
       var(--el-bg-color);
   box-shadow:
-      0 24px 70px rgba(0, 0, 0, 0.42),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      0 32px 90px rgba(0, 0, 0, 0.46),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .auth-visual {
   position: relative;
   display: grid;
   place-items: center;
-  height: 116px;
+  width: 128px;
+  height: 128px;
+  margin: 0 auto;
   overflow: hidden;
-  border-radius: 8px;
-  background-image:
-      linear-gradient(rgba(24, 144, 255, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(24, 144, 255, 0.08) 1px, transparent 1px);
-  background-size: 22px 22px;
+  border: 1px solid rgba(63, 131, 248, 0.12);
+  border-radius: 36px;
+  background:
+      radial-gradient(circle at 50% 44%, rgba(63, 131, 248, 0.12), transparent 55%),
+      linear-gradient(180deg, rgba(247, 250, 255, 0.82), rgba(235, 242, 252, 0.58));
 }
 
 :global(.dark) .auth-visual {
-  background-image:
-      linear-gradient(rgba(102, 177, 255, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(102, 177, 255, 0.08) 1px, transparent 1px);
+  border-color: rgba(120, 173, 255, 0.18);
+  background:
+      radial-gradient(circle at 50% 44%, rgba(63, 131, 248, 0.24), transparent 58%),
+      linear-gradient(180deg, rgba(21, 31, 47, 0.92), rgba(12, 18, 29, 0.82));
+}
+
+.auth-orbit {
+  position: absolute;
+  width: 94px;
+  height: 94px;
+  border-radius: 50%;
+  border: 1px solid rgba(63, 131, 248, 0.18);
+}
+
+.auth-orbit::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  border-top-color: #3f83f8;
+  border-right-color: rgba(19, 168, 168, 0.72);
+  animation: auth-orbit 1.3s linear infinite;
 }
 
 .auth-ring {
-  width: 74px;
-  height: 74px;
-  border: 1px solid rgba(24, 144, 255, 0.26);
-  border-radius: 50%;
-  animation: auth-ring-pulse 1.8s var(--motion-smooth) infinite;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 252, 0.86));
+  box-shadow:
+      0 18px 38px rgba(37, 99, 235, 0.18),
+      inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+:global(.dark) .auth-ring {
+  background:
+      linear-gradient(135deg, rgba(36, 49, 68, 0.98), rgba(18, 25, 38, 0.92));
+  box-shadow:
+      0 18px 38px rgba(0, 0, 0, 0.38),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .auth-mail {
   position: absolute;
-  color: var(--el-color-primary);
-  filter: drop-shadow(0 10px 18px rgba(24, 144, 255, 0.22));
-  animation: auth-mail-flight 2.2s var(--motion-smooth) infinite;
+  color: #2f6feb;
+  filter: drop-shadow(0 10px 18px rgba(47, 111, 235, 0.18));
 }
 
 .auth-folder {
   position: absolute;
   width: 36px;
   height: 36px;
-  color: #0071e3;
-  filter: drop-shadow(0 10px 18px rgba(0, 113, 227, 0.22));
-  animation: auth-folder-scan 2.2s var(--motion-smooth) infinite;
+  color: #2f6feb;
+  filter: drop-shadow(0 10px 18px rgba(47, 111, 235, 0.18));
 }
 
 .auth-overlay[data-auth-source="files"] .auth-ring {
-  border-color: rgba(0, 113, 227, 0.26);
-}
-
-.auth-overlay[data-auth-source="files"] .auth-dots span {
-  background: #0071e3;
+  box-shadow:
+      0 18px 38px rgba(0, 113, 227, 0.18),
+      inset 0 0 0 1px rgba(0, 113, 227, 0.08);
 }
 
 .auth-overlay[data-auth-source="files"] .auth-progress {
@@ -815,48 +844,26 @@ function submitRegister() {
   background: linear-gradient(90deg, #0071e3, #13a8a8);
 }
 
-.auth-key {
+.auth-scan-line {
   position: absolute;
-  right: calc(50% - 44px);
-  top: 44px;
-  color: #13a8a8;
-  animation: auth-key-unlock 2.2s var(--motion-smooth) infinite;
-}
-
-.auth-dots {
-  position: absolute;
-  bottom: 14px;
-  display: flex;
-  gap: 6px;
-}
-
-.auth-dots span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--el-color-primary);
-  opacity: 0.35;
-  animation: auth-dot-step 1.2s ease-in-out infinite;
-}
-
-.auth-dots span:nth-child(2) {
-  animation-delay: 120ms;
-}
-
-.auth-dots span:nth-child(3) {
-  animation-delay: 240ms;
+  left: 22px;
+  right: 22px;
+  bottom: 28px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(19, 168, 168, 0.74), transparent);
+  animation: auth-scan 1.7s var(--motion-smooth) infinite;
 }
 
 .auth-copy {
   display: grid;
   gap: 4px;
-  margin-top: 18px;
+  margin-top: 20px;
   text-align: center;
 }
 
 .auth-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 750;
   line-height: 1.35;
   color: var(--el-text-color-primary);
 }
@@ -869,11 +876,11 @@ function submitRegister() {
 
 .auth-progress {
   position: relative;
-  height: 4px;
-  margin-top: 18px;
+  height: 3px;
+  margin-top: 22px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(24, 144, 255, 0.14);
+  background: rgba(47, 111, 235, 0.12);
 }
 
 .auth-progress span {
@@ -881,85 +888,25 @@ function submitRegister() {
   inset: 0 auto 0 0;
   width: 42%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--el-color-primary), #13a8a8);
-  animation: auth-progress 1.35s ease-in-out infinite;
+  background: linear-gradient(90deg, #2f6feb, #13a8a8);
+  animation: auth-progress 1.45s ease-in-out infinite;
 }
 
-@keyframes auth-mail-flight {
-  0% {
-    opacity: 0;
-    transform: translate3d(-110px, 4px, 0) scale(0.78) rotate(-10deg);
-  }
-  22% {
-    opacity: 1;
-  }
-  52% {
-    transform: translate3d(0, -2px, 0) scale(1) rotate(0deg);
-  }
-  78% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(110px, -4px, 0) scale(0.82) rotate(10deg);
+@keyframes auth-orbit {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@keyframes auth-folder-scan {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 12px, 0) scale(0.86);
-  }
-  22% {
-    opacity: 1;
-  }
-  52% {
-    transform: translate3d(0, -2px, 0) scale(1);
-  }
-  78% {
-    opacity: 1;
-    transform: translate3d(0, -2px, 0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(0, -12px, 0) scale(0.9);
-  }
-}
-
-@keyframes auth-key-unlock {
-  0%, 42% {
-    opacity: 0;
-    transform: translate3d(0, 6px, 0) rotate(-18deg) scale(0.82);
-  }
-  58%, 82% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(0, -4px, 0) rotate(8deg) scale(0.88);
-  }
-}
-
-@keyframes auth-ring-pulse {
+@keyframes auth-scan {
   0%, 100% {
-    transform: scale(0.9);
-    opacity: 0.5;
+    opacity: 0;
+    transform: translateY(-16px) scaleX(0.7);
   }
+
   50% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-}
-
-@keyframes auth-dot-step {
-  0%, 100% {
-    opacity: 0.28;
-    transform: translateY(0);
-  }
-  45% {
-    opacity: 1;
-    transform: translateY(-3px);
+    opacity: 0.85;
+    transform: translateY(16px) scaleX(1);
   }
 }
 
@@ -976,11 +923,8 @@ function submitRegister() {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth-ring,
-  .auth-mail,
-  .auth-folder,
-  .auth-key,
-  .auth-dots span,
+  .auth-orbit::after,
+  .auth-scan-line,
   .auth-progress span {
     animation-duration: 1ms;
     animation-iteration-count: 1;
